@@ -1,7 +1,7 @@
 import { Canvas, useFrame,useLoader, useThree } from "@react-three/fiber"
 import { useRef, useState } from "react"
 import * as THREE from "three"
-import { OrbitControls, useGLTF } from "@react-three/drei"
+import { OrbitControls } from "@react-three/drei"
 import pano from './components/assets/pano.jpg'
 
 type cubeProps = {
@@ -18,10 +18,6 @@ type sphereProps = {
     widthSegments?: number;
     heightSegments?: number;
     textureUrl?: string
-}
-
-const Models  = {
-    arrow: '/carArrow.glb',
 }
 
 export default function Panorma() {
@@ -102,30 +98,7 @@ export default function Panorma() {
             </mesh>
         )
     }
-
-
-    const BoxTexture = ({position, color, size}: cubeProps) =>{
-        return(
-            <mesh position={position}>
-                <boxGeometry args={size}/>
-                <meshStandardMaterial color={color} />
-            </mesh>
-        )
-    }
-
-    function Model() {
-    const gltf = useGLTF('/assets/carArrow.glb') as any;
-
-    return (
-        <primitive
-            object={gltf.scene}
-            position={[0, 0, 0]}
-            scale={[1, 1, 1]}
-            rotation={[0, 0, 0]}
-        />
-    );
-}
-
+   
     function CameraLogger() {
         const { camera } = useThree();
 
@@ -144,7 +117,7 @@ export default function Panorma() {
 return (
         <Canvas 
             style={{width: '100vw', height: '100vh' }} 
-            camera={{position: [0,0,50], 
+            camera={{position: [0,0,0], 
             fov: 75, 
             near: 0.1, 
             far: 2000}}
@@ -164,9 +137,8 @@ return (
             <ambientLight intensity={1} />
             {/* Geometry  */}
             {/* <Cube position={[0, 0, 0]} color="orange" size={[9,9,9]} /> */}
-            <SphereWithTexture radius={50} textureUrl={pano}/>
+            <SphereWithTexture radius={500} textureUrl={pano}/>
             {/* <BoxTexture position={[50,50,50]} color={"red"} size={[20,20,20]} />      */}
-            <Model />
         </Canvas>
     )
 }
