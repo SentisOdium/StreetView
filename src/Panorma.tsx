@@ -22,24 +22,24 @@ type sphereProps = {
 
 export default function Panorma() {
 
-    // const Cube  = ({position, color, size}:cubeProps) => {
-    //     const ref = useRef<THREE.Mesh>(null);
+    const Cube  = ({position, color, size}:cubeProps) => {
+        const ref = useRef<THREE.Mesh>(null);
 
         
-    //     useFrame((state, delta) =>{
-    //         if (ref.current) {
-    //         // ref.current.rotation.x += delta * 0.2;
-    //             //ref.current.rotation.y += delta * 0.2;
-    //             //ref.current.position.y = Math.sin(state.clock.elapsedTime) * 2;
-    //         }
-    //     })
-    //     return(
-    //         <mesh ref={ref} position={position}>
-    //             <boxGeometry args={size}/>
-    //             <meshStandardMaterial color={color} />
-    //         </mesh>
-    //     )
-    // }
+        useFrame((state, delta) =>{
+            if (ref.current) {
+            // ref.current.rotation.x += delta * 0.2;
+                //ref.current.rotation.y += delta * 0.2;
+                //ref.current.position.y = Math.sin(state.clock.elapsedTime) * 2;
+            }
+        })
+        return(
+            <mesh ref={ref} position={position}>
+                <boxGeometry args={size}/>
+                <meshStandardMaterial color={color} />
+            </mesh>
+        )
+    }
 
     const SphereWithTexture = ({ position = [0,0,0], radius, widthSegments = 64, heightSegments = 64, textureUrl }: sphereProps) => {
         const textureLoader = useLoader(THREE.TextureLoader, textureUrl || pano );
@@ -61,8 +61,8 @@ export default function Panorma() {
             const deltaX = e.clientX - prevPosX;
             const deltaY = e.clientY - prevPosY;
 
-            ref.current.rotation.y += deltaX * 0.005;
-            ref.current.rotation.x += deltaY * 0.005;
+            ref.current.rotation.y += deltaX * 0.001;
+            ref.current.rotation.x += deltaY * 0.001;
 
             // Clamp X rotation
             ref.current.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, ref.current.rotation.x));
@@ -127,18 +127,20 @@ return (
             {/* 3D content goes here */}
             
             {/* Helpers*/}
-            {/* <gridHelper args={[100, 100, `white`, `gray`]} /> */}
             <axesHelper args={[1000]} />
             <CameraLogger />
+
             {/* Controls*/}
             <OrbitControls enableZoom={true} enablePan={true}  />
+
             {/* Lighting */}
             <directionalLight position={[0,0,0]}/>
             <ambientLight intensity={1} />
+
             {/* Geometry  */}
-            {/* <Cube position={[0, 0, 0]} color="orange" size={[9,9,9]} /> */}
             <SphereWithTexture radius={500} textureUrl={pano}/>
-            {/* <BoxTexture position={[50,50,50]} color={"red"} size={[20,20,20]} />      */}
+            <Cube position={[50,50,50]} color={"red"} size={[20,20,20]} />     
+            
         </Canvas>
     )
 }
