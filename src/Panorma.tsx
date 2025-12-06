@@ -1,8 +1,20 @@
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+
+//Split files Accordingly
+
 import { Canvas, useFrame,useLoader, useThree } from "@react-three/fiber"
 import { useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "@react-three/drei"
+
 import pano from './components/assets/pano.jpg'
+import q1 from './components/assets/q1 (2).jpg'
+import q2 from './components/assets/q2 (2).jpg'
+import q3 from './components/assets/q3 (1).jpg'
 
 type cubeProps = {
     position?: [number, number, number],
@@ -18,6 +30,14 @@ type sphereProps = {
     widthSegments?: number;
     heightSegments?: number;
     textureUrl?: string
+}
+
+type hotspotProps = {
+    position?: [number, number, number],
+    size?: [number, number, number],
+    color?: string,
+    textureUrl?: string,
+    onclick?: () => void
 }
 
 export default function Panorma() {
@@ -41,8 +61,9 @@ export default function Panorma() {
         )
     }
 
+    const [currentPano, setCurrentPano] = useState<string>(pano);
     const SphereWithTexture = ({ position = [0,0,0], radius, widthSegments = 64, heightSegments = 64, textureUrl }: sphereProps) => {
-        const textureLoader = useLoader(THREE.TextureLoader, textureUrl || pano );
+        const textureLoader = useLoader(THREE.TextureLoader, textureUrl!);
         
         const ref = useRef<THREE.Mesh>(null);
         
@@ -61,8 +82,8 @@ export default function Panorma() {
             const deltaX = e.clientX - prevPosX;
             const deltaY = e.clientY - prevPosY;
 
-            ref.current.rotation.y += deltaX * 0.001;
-            ref.current.rotation.x += deltaY * 0.001;
+            ref.current.rotation.y += deltaX * 0.00001;
+            ref.current.rotation.x += deltaY * 0.00001;
 
             // Clamp X rotation
             ref.current.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, ref.current.rotation.x));
@@ -99,6 +120,15 @@ export default function Panorma() {
         )
     }
    
+    const Hotspot = ({position, size, onclick, color}:hotspotProps) => {
+        return (
+            <mesh position={position} onClick={onclick}>
+                <boxGeometry args={size}/>
+                <meshBasicMaterial  color={color} />
+            </mesh>
+        )
+    }
+    
     function CameraLogger() {
         const { camera } = useThree();
 
@@ -117,30 +147,53 @@ export default function Panorma() {
 return (
         <Canvas 
             style={{width: '100vw', height: '100vh' }} 
-            camera={{position: [0,0,0], 
+            camera={{position: [0.2,0,0], 
             fov: 75, 
             near: 0.1, 
             far: 2000}}
             frameloop="demand"
-            >
+        >
 
             {/* 3D content goes here */}
-            
             {/* Helpers*/}
-            <axesHelper args={[1000]} />
+            {/* <axesHelper args={[1000]} /> */}
             <CameraLogger />
-
             {/* Controls*/}
-            <OrbitControls enableZoom={true} enablePan={true}  />
-
+            <OrbitControls enableZoom={true} enablePan={true}  enableRotate={true}/>
             {/* Lighting */}
             <directionalLight position={[0,0,0]}/>
             <ambientLight intensity={1} />
 
+
+
             {/* Geometry  */}
-            <SphereWithTexture radius={500} textureUrl={pano}/>
-            <Cube position={[50,50,50]} color={"red"} size={[20,20,20]} />     
-            
+            <SphereWithTexture radius={500} textureUrl={currentPano} />
+            <Hotspot 
+                position={[200, -200, -300]} 
+                size={[20,20,20]}
+                onclick={() => setCurrentPano(q1)} 
+                color="yellow"
+            />
+
+            {/* <Hotspot 
+                position={[-300, 50, 100]} 
+                size={[20,20,20]}
+                onclick={() => setCurrentPano(q2)} 
+                color="yellow"
+            />
+
+            <Hotspot 
+                position={[100, -50, 400]} 
+                size={[20,20,20]}
+                onclick={() => setCurrentPano(q3)} 
+                color="yellow"
+            /> */}
+            <Hotspot 
+                position={[70, -50, 400]} 
+                size={[20,20,20]}
+                onclick={() => setCurrentPano(pano)} 
+                color="red"
+            />
         </Canvas>
     )
 }

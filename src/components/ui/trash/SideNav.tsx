@@ -1,3 +1,12 @@
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+//REFRACTOR THIS FILE LATER
+
+//Split files Accordingly
+
+
 import { LuChevronFirst } from "react-icons/lu";
 import { createContext, useContext, useState } from "react";
 import { BsChevronBarDown } from "react-icons/bs";
