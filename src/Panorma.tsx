@@ -15,6 +15,7 @@ import pano from './components/assets/pano.jpg'
 import q1 from './components/assets/q1 (2).jpg'
 import q2 from './components/assets/q2 (2).jpg'
 import q3 from './components/assets/q3 (1).jpg'
+import { InfoSprite } from "./components/ui/InforSprite"
 
 type cubeProps = {
     position?: [number, number, number],
@@ -194,6 +195,18 @@ return (
                 onclick={() => setCurrentPano(pano)} 
                 color="red"
             />
+
+            {currentPano === pano && (
+            <InfoSprite
+                position={[180, -50, -260]}
+                title="Room 301 – Computer Lab"
+                description={`• 40 Workstations
+            • Used for Programming Classes
+            • Air-conditioned
+            • Faculty-in-Charge: Prof. Dela Cruz`}
+            />
+            )}
+
         </Canvas>
     )
 }
