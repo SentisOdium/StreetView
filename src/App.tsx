@@ -12,7 +12,7 @@ export default function App() {
       <div className="absolute z-50">
         <SideNav>
           <SidebarDropdown text="First Floor" icon={<PiStairsDuotone size={24} className="mr-3" />} >
-            <SidebarItem text="Room 101" icon={<MdOutlineMeetingRoom className="mr-0.5"/>} />
+            <SidebarItem text="Room 200" icon={<MdOutlineMeetingRoom className="mr-0.5"/>} />
             <SidebarItem text="Room 102" icon={<MdOutlineMeetingRoom className="mr-0.5"/>}/> 
           </SidebarDropdown>
 
