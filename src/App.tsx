@@ -7,12 +7,12 @@ import { MdOutlineMeetingRoom } from "react-icons/md";
 
 export default function App() {
   return (
-    <div className="relative flex h-screen w-screen">
+    <div className="relative  h-screen w-screen grid grid-cols-1 sm:grid-cols-2">
       {/* Sidebar overlaying */}
-      <div className="absolute z-50">
+      <div className="absolute  z-50">
         <SideNav>
           <SidebarDropdown text="First Floor" icon={<PiStairsDuotone size={24} className="mr-3" />} >
-            <SidebarItem text="Room 200" icon={<MdOutlineMeetingRoom className="mr-0.5"/>} />
+            <SidebarItem text="Room 101" icon={<MdOutlineMeetingRoom className="mr-0.5"/>} />
             <SidebarItem text="Room 102" icon={<MdOutlineMeetingRoom className="mr-0.5"/>}/> 
           </SidebarDropdown>
 
@@ -29,7 +29,7 @@ export default function App() {
       </div>
 
       {/* Main area */}
-      <div className="flex-1 relative">
+      <div className="relative">
         <Panorma />
       </div>
     </div>

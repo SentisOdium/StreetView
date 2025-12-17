@@ -144,11 +144,12 @@ export default function Panorma() {
         return null;
     }
 
+    const maxRadius = 60;
 
 return (
         <Canvas 
             style={{width: '100vw', height: '100vh' }} 
-            camera={{position: [0.2,0,0], 
+            camera={{position: [0.3,0,0], 
             fov: 75, 
             near: 0.1, 
             far: 2000}}
@@ -160,45 +161,54 @@ return (
             {/* <axesHelper args={[1000]} /> */}
             <CameraLogger />
             {/* Controls*/}
-            <OrbitControls enableZoom={true} enablePan={true}  enableRotate={true}/>
+            <OrbitControls 
+                enableZoom={true} 
+                enablePan={true}  
+                enableRotate={true} 
+                zoomSpeed={2}
+                maxDistance={55}/>
+
             {/* Lighting */}
-            <directionalLight position={[0,0,0]}/>
-            <ambientLight intensity={1} />
+            <directionalLight 
+                position={[0,0,0]}/>
+
+            <ambientLight 
+                intensity={1} />
 
 
 
             {/* Geometry  */}
-            <SphereWithTexture radius={500} textureUrl={currentPano} />
+            <SphereWithTexture radius={maxRadius} textureUrl={currentPano} />
             <Hotspot 
-                position={[200, -200, -300]} 
-                size={[20,20,20]}
+                position={[32, -0, -45]} 
+                size={[2,2,2]}
                 onclick={() => setCurrentPano(q1)} 
                 color="yellow"
             />
 
-            {/* <Hotspot 
-                position={[-300, 50, 100]} 
-                size={[20,20,20]}
+            <Hotspot 
+                position={[52, 5, 20]} 
+                size={[2,2,2]}
                 onclick={() => setCurrentPano(q2)} 
-                color="yellow"
+                color="green"
             />
 
             <Hotspot 
-                position={[100, -50, 400]} 
-                size={[20,20,20]}
+                position={[-20, 5, 55]} 
+                size={[5,5,5]}
                 onclick={() => setCurrentPano(q3)} 
-                color="yellow"
-            /> */}
+                color="orange"
+            />
             <Hotspot 
-                position={[70, -50, 400]} 
-                size={[20,20,20]}
+                position={[30, -30, 40]} 
+                size={[5,5,5]}
                 onclick={() => setCurrentPano(pano)} 
                 color="red"
             />
 
             {currentPano === pano && (
             <InfoSprite
-                position={[180, -50, -260]}
+                position={[10, 5, -50]}
                 title="Room 301 – Computer Lab"
                 description={`• 40 Workstations
             • Used for Programming Classes

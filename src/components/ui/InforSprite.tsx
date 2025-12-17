@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { useRef, useState, useMemo } from "react"
 import { useFrame } from "@react-three/fiber"
+import { Gltf } from "@react-three/drei"
 
 type InfoSpriteProps = {
   position: [number, number, number]
@@ -16,7 +17,7 @@ export function InfoSprite({
 
   const spriteRef = useRef<THREE.Sprite>(null)
   const [visible, setVisible] = useState(false)
-
+  
   const texture = useMemo(() => {
     const canvas = document.createElement("canvas")
     canvas.width = 2048
@@ -49,17 +50,12 @@ export function InfoSprite({
   }, [title, description])
 
   // Always face camera
-  useFrame(({ camera }) => {
-    if (spriteRef.current) {
-      spriteRef.current.quaternion.copy(camera.quaternion)
-    }
-  })
-
+  
   return (
     <group position={position}>
       {/* Clickable Info Point */}
       <mesh onClick={() => setVisible(!visible)}>
-        <sphereGeometry args={[15, 32, 32]} /> 
+        <sphereGeometry args={[2, 32, 32]} /> 
         <meshBasicMaterial color="cyan" />
       </mesh>
 
@@ -67,8 +63,8 @@ export function InfoSprite({
       {visible && (
         <sprite
           ref={spriteRef}
-          scale={[180, 90, 1]}  
-          position={[0, 60, 0]}
+          scale={[50, 30, 1]}  
+          position={[0, 0, 0]}
         >
           <spriteMaterial
             map={texture}

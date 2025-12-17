@@ -34,7 +34,7 @@ export default function SideNav({ children }: SideNavProps) {
     const [expanded, setExpanded] = useState(true);
 
     return (
-        <aside className="h-screen">
+        <aside className="h-screen ">
             <nav className="h-full flex flex-col bg-white border-r shadow-sm">
                 {/* Header */}
                 <div className="p-6 pb-2 flex justify-between items-center">
