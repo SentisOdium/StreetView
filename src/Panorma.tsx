@@ -92,7 +92,7 @@ export default function Panorma() {
             setPrevPosX(e.clientX);
             setPrevPosY(e.clientY);
         };
-        
+
 
         const handlePointerUp = () => {
             setIsDragging(false);
