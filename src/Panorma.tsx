@@ -11,17 +11,13 @@ import { useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "@react-three/drei"
 
-import pano from './components/assets/pano.jpg'
-import q1 from './components/assets/q1 (2).jpg'
-import q2 from './components/assets/q2 (2).jpg'
-import q3 from './components/assets/q3 (1).jpg'
+import pano from './components/assets/dump/pano.jpg'
+import q1 from './components/assets/dump/q1 (2).jpg'
+import q2 from './components/assets/dump/q2 (2).jpg'
+import q3 from './components/assets/dump/q3 (1).jpg'
+
 import { InfoSprite } from "./components/ui/InforSprite"
 
-type cubeProps = {
-    position?: [number, number, number],
-    color?: string
-    size?: [number, number, number]
-}
 
 type sphereProps = {
     position?: [number, number, number],
@@ -43,26 +39,9 @@ type hotspotProps = {
 
 export default function Panorma() {
 
-    const Cube  = ({position, color, size}:cubeProps) => {
-        const ref = useRef<THREE.Mesh>(null);
-
-        
-        useFrame((state, delta) =>{
-            if (ref.current) {
-            // ref.current.rotation.x += delta * 0.2;
-                //ref.current.rotation.y += delta * 0.2;
-                //ref.current.position.y = Math.sin(state.clock.elapsedTime) * 2;
-            }
-        })
-        return(
-            <mesh ref={ref} position={position}>
-                <boxGeometry args={size}/>
-                <meshStandardMaterial color={color} />
-            </mesh>
-        )
-    }
 
     const [currentPano, setCurrentPano] = useState<string>(pano);
+    
     const SphereWithTexture = ({ position = [0,0,0], radius, widthSegments = 64, heightSegments = 64, textureUrl }: sphereProps) => {
         const textureLoader = useLoader(THREE.TextureLoader, textureUrl!);
         
@@ -99,13 +78,13 @@ export default function Panorma() {
             
         }
 
-        // useFrame((state, delta) =>{
-        //     if (ref.current) {
-        //        //ref.current.rotation.x += delta * 0.2;
-        //         ref.current.rotation.y += delta * 0.1;
-        //         //ref.current.position.y = Math.sin(state.clock.elapsedTime) * 2;
-        //     }
-        // })
+        useFrame((state, delta) =>{
+            if (ref.current) {
+               //ref.current.rotation.x += delta * 0.2;
+                ref.current.rotation.y += delta * 0.1;
+                //ref.current.position.y = Math.sin(state.clock.elapsedTime) * 2;
+            }
+        })
         
         return (
             <mesh 
@@ -153,7 +132,7 @@ return (
             fov: 75, 
             near: 0.1, 
             far: 2000}}
-            frameloop="demand"
+            // frameloop="demand"
         >
 
             {/* 3D content goes here */}
