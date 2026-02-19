@@ -1,21 +1,9 @@
-import axios, { isAxiosError } from "axios";
-import { useEffect, useState } from "react";
-
-type Node = {
-    id: number;
-    node_name: string;
-}
-
-type ApiResponse = {
-    success: boolean;
-    message: string;
-    data: {
-        list: Node[];
-    };
-};
-
+//should this be placed in api folder or hooks?
+import { fetchNodeList } from "../api/fetchNodeList";
+import type { NodeList } from "../api/types/types_api";
+import { useState, useEffect } from "react";
 export default  function useAutoCompleteFetch(){
-    const [list, setList] = useState<Node[]>([]);
+    const [list, setList] = useState<NodeList[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] =  useState<string | null>(null);
 
@@ -24,16 +12,12 @@ export default  function useAutoCompleteFetch(){
             setLoading(true);
 
             try {
-                const response = await axios.get<ApiResponse>(
-                "http://localhost:5000/api/list" //change to deployed url
-                );
-                setList(response.data.data.list);
+                const data = await fetchNodeList();
+                setList(data);  
             } catch (err: unknown) {
                 console.error("Failed to fetch list:", err);
                 
-                if(isAxiosError(err)){
-                    setError(err.response?.data.message || err.message);
-                } else if (err instanceof Error){
+                if (err instanceof Error){
                     setError(err.message)
                 }else{
                     setError("Unknown Error Occured")
