@@ -1,15 +1,23 @@
 import { useState, useMemo } from "react"
-import Modal from "./modal"
 import useAutoCompleteFetch from "../../hooks/useAutocomplete";
+import useLoadingError from "../../hooks/useLoadingError";
+import useShowModal from "../../hooks/useShowModal";
+
+import EmptySearchUi from "../reusableUI/emptySearchUi";
+import Modal from "../reusableUI/modal"
+
 import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import type { SearchUiProps } from "./types/sidePanelProps";
-import EmptySearchUi from "./emptySearchUi";
+import ClearIcon from '@mui/icons-material/Clear';
 
-export default function SearchUi({setCurrentNode}: SearchUiProps) {
-    const [showModal, setShowModal] = useState(false);
+import type { SearchUiProps } from "./types/sidePanelProps";
+
+export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiProps) {
     const [search, setSearch] = useState(""); 
-    const { list, error, loading} = useAutoCompleteFetch()
+    const {showModal, setShowModal} = useShowModal();
+    const { list } = useAutoCompleteFetch()
+    const { error, loading } = useLoadingError();
+
     const filteredList = useMemo(() => {
             return list.filter(node => 
             node.node_name.toLowerCase().includes(search.toLowerCase())
@@ -24,47 +32,44 @@ export default function SearchUi({setCurrentNode}: SearchUiProps) {
 
         // Select first filtered node
         setCurrentNode(filteredList[0].id);
-
+        setCurrentNodeName(filteredList[0].node_name);
         // Update search history using functional update
 
-
-        // Clear input after updating history
-        setSearch("");
     };
 
     if (loading) return <div>Loading...</div>; //refix to proper loading and error UI later
     if (error) return <div>Error: {error}</div>;
  
     return(
-    <div className="p-3">
+    <div className="ml-14.75">
         <div 
-            className = {`w-90 pt-1 pb-1 m-4 px-3 flex items-center justify-between 
+            className = {`w-90 pt-1 pb-1 m-4 px-4 flex items-center justify-between bg-white shadow-xl h-12
                             ${showModal?  
-                                "border-t border-l border-r rounded-t-xl rounded-b-none" : 
-                                " border rounded-xl shadow-lg"}`
+                                " rounded-t-2xl rounded-b-none" : 
+                                "  rounded-4xl shadow-lg"}`
                         } 
             onClick={() => setShowModal(true)}>
                 <input 
                     type="text" 
-                    className="flex-1 outline-none placeholder:italic"
+                    className="w-full flex-1 outline-none placeholder:italic"
                     placeholder="Enter your Destination"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} 
                     onKeyDown={handleKeyDown}
                 />
-                
-                <div className="flex space-x-2 ml-2">
-                    <span onClick={() => setSearch(search)}><SearchIcon sx={{ color: '#800000' }}/></span>
-                    {!search ?(
-                      <span onClick={() => alert('test')}><DirectionsIcon sx={{ color: '#800000' }}/></span>  
-                    ):(<span><DirectionsIcon /></span> )}
-                </div>  
-        </div>
-        
+
+            <div className="flex space-x-2 ml-2">
+                <span onClick={() => setSearch(search)}><SearchIcon sx={{ color: '#800000' }}/></span>
+                {!search ?(
+                    <span onClick={() => alert('test')} className="hover:bg-gray-100 rounded"><DirectionsIcon sx={{ color: '#800000' }}/></span>  
+                ):(<span onClick={() => setSearch("")} className="hover:bg-gray-100 rounded"><ClearIcon sx={{ color: '#800000'}} /></span> )}
+            </div>  
+        </div>       
+
         <Modal 
             isVisible={showModal} 
             onClose={() => setShowModal(false)}
-            design="mt-16 ml-7 w-90">
+            design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl">
                 {search.length === 0 && <div className="text-gray-500 italic"><EmptySearchUi/></div>}
                 {loading && <div>Loading...</div>}  {/*change to proper loading and error UI */}
                 {error && <div>Error: {error}</div>}
@@ -76,7 +81,9 @@ export default function SearchUi({setCurrentNode}: SearchUiProps) {
                                 key={node.id}
                                 onClick={()=> {
                                     setCurrentNode(node.id);
-                                    setSearch("");
+                                    setCurrentNodeName(node.node_name);
+                                    setSearch(node.node_name);
+                                    setShowModal(false);
                                 }}
                                 className="hover:bg-gray-100 p-2 rounded-xl"
                                 > 

@@ -20,7 +20,7 @@ const Modal = ({ children, onClose, isVisible, design }: ModalProps) => {
             onClick={handleClose}>
 
                 <div 
-                    className={`bg-white  border rounded-b-xl  p-4 shadow-lg flex flex-col ${design}`}
+                    className={`bg-white   rounded-b-xl  p-4 shadow-lg flex flex-col ${design}`}
                     onClick={(e) => e.stopPropagation()}>
                         {children}
                 </div>  

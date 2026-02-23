@@ -4,7 +4,7 @@ export default function App() {
     <div className="relative  h-screen w-screen ">
 
       <HomePage/>
-      
+        
      
     </div>
   );

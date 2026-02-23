@@ -1,7 +1,6 @@
 import axios, { isAxiosError } from "axios";
 import type { NodeList, NodeListResponse } from "./types/types_api";
-
-const BaseUrl = import.meta.env.VITE_API_BASE_URL;
+import { BaseUrl } from "../objects/baseUrl";
 
 export const fetchNodeList =  async (): Promise<NodeList[]> => {
     try {
