@@ -43,12 +43,12 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
     return(
     <div className="ml-14.75">
         <div 
-            className = {`w-90 pt-1 pb-1 m-4 px-4 flex items-center justify-between bg-white shadow-xl h-12
+            className = {`w-90 pt-1 pb-1 z-20 m-4 px-4 flex items-center justify-between bg-white  h-12
                             ${showModal?  
-                                " rounded-t-2xl rounded-b-none" : 
-                                "  rounded-4xl shadow-lg"}`
+                                " rounded-t-2xl  rounded-b-none" : 
+                                "  rounded-4xl shadow-xl"}`
                         } 
-            onClick={() => setShowModal(true)}>
+            >
                 <input 
                     type="text" 
                     className="w-full flex-1 outline-none placeholder:italic"
@@ -56,6 +56,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} 
                     onKeyDown={handleKeyDown}
+                    onClick={() => setShowModal(true)}
                 />
 
             <div className="flex space-x-2 ml-2">
@@ -69,7 +70,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
         <Modal 
             isVisible={showModal} 
             onClose={() => setShowModal(false)}
-            design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl">
+            design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown">
                 {search.length === 0 && <div className="text-gray-500 italic"><EmptySearchUi/></div>}
                 {loading && <div>Loading...</div>}  {/*change to proper loading and error UI */}
                 {error && <div>Error: {error}</div>}
@@ -85,7 +86,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
                                     setSearch(node.node_name);
                                     setShowModal(false);
                                 }}
-                                className="hover:bg-gray-100 p-2 rounded-xl"
+                                className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
                                 > 
                                     {node.node_name}
                             </li>

@@ -19,7 +19,7 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
     if (!details) return <div>No details available.</div>;
     
     return (
-        <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 bg-white">
+        <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 bg-white animate-slideDown">
 
             <img
                 src={unnamed}
