@@ -3,7 +3,7 @@ import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
 
 import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
 
-import unnamed from "../../../assets/logo/unnamed.jpg";
+import WayfinderLogo1 from "/logo/WayfinderLogo1.png"
 
 import DirectionsIcon from '@mui/icons-material/Directions';
 import ShareIcon from '@mui/icons-material/Share';
@@ -22,7 +22,7 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
         <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 bg-white animate-slideDown">
 
             <img
-                src={unnamed}
+                src={WayfinderLogo1}
                 alt={details.Current?.img.alt}
                 className="mb-2 border-amber-600 w-110 h-62.5 object-cover"
             />

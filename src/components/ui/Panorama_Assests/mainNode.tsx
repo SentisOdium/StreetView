@@ -2,17 +2,12 @@ import { useLoader } from "@react-three/fiber"
 import { useRef, useState } from "react"
 import * as THREE from "three"
 
-type sphereProps = {
-    position?: [number, number, number],
-    size?: [number, number, number],
-    radius?: number,
-    color?: string,
-    widthSegments?: number;
-    heightSegments?: number;
-    textureUrl?: string
-}
+import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch"
 
-export default function MainNode ({ position = [0,0,0], radius, widthSegments = 64, heightSegments = 64, textureUrl }: sphereProps) {
+import type { SphereProps } from "./types/panoramaProps"
+
+export default function MainNode ({ position = [0,0,0], radius, widthSegments = 64, heightSegments = 64, textureUrl}: SphereProps) {
+    
     const textureLoader = useLoader(THREE.TextureLoader, textureUrl!);
     const ref = useRef<THREE.Mesh>(null);
         

@@ -1,4 +1,4 @@
-import WayfinderLogo1 from "../../assets/logo/WayfinderLogo1.png" 
+import WayfinderLogo1 from "/logo/WayfinderLogo1.png"
 
 export default function EmptySearchUi(){
     return(

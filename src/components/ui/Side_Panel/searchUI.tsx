@@ -2,6 +2,7 @@ import { useState, useMemo } from "react"
 import useAutoCompleteFetch from "../../hooks/useAutocomplete";
 import useLoadingError from "../../hooks/useLoadingError";
 import useShowModal from "../../hooks/useShowModal";
+import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
 
 import EmptySearchUi from "../reusableUI/emptySearchUi";
 import Modal from "../reusableUI/modal"
@@ -12,15 +13,16 @@ import ClearIcon from '@mui/icons-material/Clear';
 
 import type { SearchUiProps } from "./types/sidePanelProps";
 
-export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiProps) {
+export default function SearchUi({setCurrentNode, setCurrentNodeName, setCurrentNodeUrl}: SearchUiProps) {
     const [search, setSearch] = useState(""); 
     const {showModal, setShowModal} = useShowModal();
     const { list } = useAutoCompleteFetch()
+    const { details } = useNodeDetailsFetch(search);
     const { error, loading } = useLoadingError();
 
     const filteredList = useMemo(() => {
             return list.filter(node => 
-            node.node_name.toLowerCase().includes(search.toLowerCase())
+            (node.node_name ?? "").toLowerCase().includes(search.toLowerCase())
         );
     }, [search, list ]) 
 
@@ -34,7 +36,6 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
         setCurrentNode(filteredList[0].id);
         setCurrentNodeName(filteredList[0].node_name);
         // Update search history using functional update
-
     };
 
     if (loading) return <div>Loading...</div>; //refix to proper loading and error UI later
@@ -46,7 +47,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
             className = {`w-90 pt-1 pb-1 z-20 m-4 px-4 flex items-center justify-between bg-white  h-12
                             ${showModal?  
                                 " rounded-t-2xl  rounded-b-none" : 
-                                "  rounded-4xl shadow-xl"}`
+                                "  rounded-4xl shadow-xl "}`
                         } 
             >
                 <input 
@@ -85,6 +86,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
                                     setCurrentNodeName(node.node_name);
                                     setSearch(node.node_name);
                                     setShowModal(false);
+                                    setCurrentNodeUrl(details?.Current?.img?.src || details?.Current?.img?.alt || "");
                                 }}
                                 className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
                                 > 
