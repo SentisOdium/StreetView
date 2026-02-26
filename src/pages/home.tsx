@@ -20,7 +20,6 @@ export default function HomePage(){
                     <SearchUi 
                         setCurrentNode={setSelectedId} 
                         setCurrentNodeName={setSelectedNodeName}
-                        setCurrentNodeUrl={setSelectedNodeUrl}
                     />    
                 </div>
                 <div className="absolute top-0 left-0 z-9">
@@ -36,7 +35,7 @@ export default function HomePage(){
                 />   
             </div>
             <div className="flex justify-center ">
-                <h1>the selected id is: {selectedNodeId} - {selectedNodeName} - {selectedNodeUrl}</h1>
+                <h1>the selected id is: {selectedNodeId} - {selectedNodeName} </h1>
             </div>
 
             

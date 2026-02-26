@@ -13,7 +13,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 
 import type { SearchUiProps } from "./types/sidePanelProps";
 
-export default function SearchUi({setCurrentNode, setCurrentNodeName, setCurrentNodeUrl}: SearchUiProps) {
+export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiProps) {
     const [search, setSearch] = useState(""); 
     const {showModal, setShowModal} = useShowModal();
     const { list } = useAutoCompleteFetch()
@@ -86,7 +86,6 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName, setCurrent
                                     setCurrentNodeName(node.node_name);
                                     setSearch(node.node_name);
                                     setShowModal(false);
-                                    setCurrentNodeUrl(details?.Current?.img?.src || details?.Current?.img?.alt || "");
                                 }}
                                 className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
                                 > 
