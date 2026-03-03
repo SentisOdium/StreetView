@@ -1,5 +1,4 @@
 import { Canvas, useFrame,useLoader, useThree } from "@react-three/fiber"
-import { useRef, useState } from "react"
 import * as THREE from "three"
 import { OrbitControls } from "@react-three/drei"
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch"
@@ -67,7 +66,7 @@ return (
                 intensity={1} />
 
             {/* Geometry  */}
-            <Suspense fallback={null}>
+            <Suspense fallback={<div>Loading panorama...</div>}>
                 <MainNode radius={maxRadius} textureUrl={currentPano} />    
             </Suspense>
             

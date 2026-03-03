@@ -2,8 +2,6 @@ import { useLoader } from "@react-three/fiber"
 import { useRef, useState } from "react"
 import * as THREE from "three"
 
-import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch"
-
 import type { SphereProps } from "./types/panoramaProps"
 
 export default function MainNode ({ position = [0,0,0], radius, widthSegments = 128, heightSegments = 128, textureUrl}: SphereProps) {
@@ -49,6 +47,7 @@ export default function MainNode ({ position = [0,0,0], radius, widthSegments = 
         setIsDragging(false);
     }
 
+    console.log("MainNode Rendered with textureUrl:", textureUrl)
     return (
         <mesh 
             ref={ref} 

@@ -1,4 +1,3 @@
-import type { SearchUiProps } from "../../Side_Panel/types/sidePanelProps";
 export type SphereProps = {
     position?: [number, number, number],
     size?: [number, number, number],

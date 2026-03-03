@@ -2,11 +2,7 @@ import useLoadingError from "../../../hooks/useLoadingError";
 import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
 
 import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
-
-import WayfinderLogo1 from "/logo/WayfinderLogo1.png"
-
-import DirectionsIcon from '@mui/icons-material/Directions';
-import ShareIcon from '@mui/icons-material/Share';
+import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
 
 export default function NodeLocationDetails({selectedNodeName}: NodeLocationDetailsProps) {
 
@@ -22,8 +18,8 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
         <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 bg-white animate-slideDown">
 
             <img
-                src={WayfinderLogo1}
-                alt={details.Current?.img.alt}
+                src={details.Current?.img?.src || WayfinderLogo1}
+                alt={details.Current?.img.alt || "Node Image"}
                 className="mb-2 border-amber-600 w-110 h-62.5 object-cover"
             />
 

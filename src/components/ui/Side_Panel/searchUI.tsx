@@ -1,24 +1,20 @@
 import { useState, useMemo } from "react"
 import useAutoCompleteFetch from "../../hooks/useAutocomplete";
-import useLoadingError from "../../hooks/useLoadingError";
 import useShowModal from "../../hooks/useShowModal";
-import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
+import useLoadingError from "../../hooks/useLoadingError";
+import { resetSearch, handleEnterKey } from "../../utils/searchFunctions";
 
-import EmptySearchUi from "../reusableUI/emptySearchUi";
 import Modal from "../reusableUI/modal"
-
-import SearchIcon from '@mui/icons-material/Search';
-import DirectionsIcon from '@mui/icons-material/Directions';
-import ClearIcon from '@mui/icons-material/Clear';
+import { EmptySearchUi, Loading, Error } from "../reusableUI/emptySearchUi";
+import { SearchIcon, DirectionsIcon, ClearIcon } from "../reusableUI/logo.exports";
 
 import type { SearchUiProps } from "./types/sidePanelProps";
 
-export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiProps) {
+export default function SearchUi({currentNode, currentNodeName, renderLocationPanel}: SearchUiProps) {
     const [search, setSearch] = useState(""); 
     const {showModal, setShowModal} = useShowModal();
-    const { list } = useAutoCompleteFetch()
-    const { details } = useNodeDetailsFetch(search);
     const { error, loading } = useLoadingError();
+    const { list } = useAutoCompleteFetch()
 
     const filteredList = useMemo(() => {
             return list.filter(node => 
@@ -26,21 +22,6 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
         );
     }, [search, list ]) 
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key !== 'Enter' || filteredList.length === 0) return;
-
-        const trimmedSearch = search.trim();
-        if (!trimmedSearch) return;
-
-        // Select first filtered node
-        setCurrentNode(filteredList[0].id);
-        setCurrentNodeName(filteredList[0].node_name);
-        // Update search history using functional update
-    };
-
-    if (loading) return <div>Loading...</div>; //refix to proper loading and error UI later
-    if (error) return <div>Error: {error}</div>;
- 
     return(
     <div className="ml-14.75">
         <div 
@@ -56,7 +37,7 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
                     placeholder="Enter your Destination"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} 
-                    onKeyDown={handleKeyDown}
+                    onKeyDown={(e) => handleEnterKey(e, search, filteredList, {currentNode, currentNodeName})}
                     onClick={() => setShowModal(true)}
                 />
 
@@ -64,7 +45,9 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
                 <span onClick={() => setSearch(search)}><SearchIcon sx={{ color: '#800000' }}/></span>
                 {!search ?(
                     <span onClick={() => alert('test')} className="hover:bg-gray-100 rounded"><DirectionsIcon sx={{ color: '#800000' }}/></span>  
-                ):(<span onClick={() => setSearch("")} className="hover:bg-gray-100 rounded"><ClearIcon sx={{ color: '#800000'}} /></span> )}
+                ):(<span 
+                onClick={() => resetSearch(setSearch, renderLocationPanel, {currentNode, currentNodeName})}
+                className="hover:bg-gray-100 rounded"><ClearIcon sx={{ color: '#800000'}} /></span> )}
             </div>  
         </div>       
 
@@ -72,31 +55,38 @@ export default function SearchUi({setCurrentNode, setCurrentNodeName}: SearchUiP
             isVisible={showModal} 
             onClose={() => setShowModal(false)}
             design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown">
-                {search.length === 0 && <div className="text-gray-500 italic"><EmptySearchUi/></div>}
-                {loading && <div>Loading...</div>}  {/*change to proper loading and error UI */}
-                {error && <div>Error: {error}</div>}
 
-                {search.length > 0 && !loading && !error && (
-                    <ul>
-                        {filteredList.map(node =>(
-                            <li 
-                                key={node.id}
-                                onClick={()=> {
-                                    setCurrentNode(node.id);
-                                    setCurrentNodeName(node.node_name);
-                                    setSearch(node.node_name);
-                                    setShowModal(false);
-                                }}
-                                className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"
-                                > 
-                                    {node.node_name}
-                            </li>
-                        ))}
-                    </ul>    
-                )}
+                <Loading loading={loading} message="Loading locations..."/>
+                <Error error={error} />
+
+                {!loading && !error && (search.length > 0 ? 
+                    (
+                        <ul>
+                            {filteredList.map(node =>(
+                                <li 
+                                    key={node.id}
+                                    onClick={()=> {
+                                        currentNode(node.id);
+                                        currentNodeName(node.node_name);
+                                        setSearch(node.node_name);
+                                        setShowModal(false);
+                                    }}
+                                    className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"> 
+                                        {node.node_name}
+                                </li>
+                            ))}
+                        </ul>    
+                    )
+                        : 
+                    (
+                        <div 
+                            className="text-gray-500 italic">   
+                                <EmptySearchUi/>
+                        </div>
+                    ))
+                }
                 
         </Modal>
-
     </div>
     )
 }

@@ -1,6 +1,12 @@
-import WayfinderLogo1 from "/logo/WayfinderLogo1.png"
+import { WayfinderLogo1 } from "./logo.exports";
 
-export default function EmptySearchUi(){
+type LoadingErrorProps = {
+    loading?: boolean;
+    error?: string | null;
+    message?: string | null;
+}
+
+function EmptySearchUi(){
     return(
         <div className="items-center justify-items-center space-y-2 opacity-40 p-10">
             <img 
@@ -14,3 +20,16 @@ export default function EmptySearchUi(){
         </div>
     )
 }
+
+function Loading({loading, message = "Loading..."}: LoadingErrorProps) {
+    if(!loading) return null;
+    return <div>{message}</div>;
+    
+}
+
+function Error({error, message = "An error occurred."}: LoadingErrorProps) {
+    if (!error) return null;
+    return <div>Error: {message}</div>;
+}
+
+export { EmptySearchUi, Loading, Error };
