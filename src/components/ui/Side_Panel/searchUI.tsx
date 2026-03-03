@@ -2,12 +2,11 @@ import { useState, useMemo } from "react"
 import useAutoCompleteFetch from "../../hooks/useAutocomplete";
 import useShowModal from "../../hooks/useShowModal";
 import useLoadingError from "../../hooks/useLoadingError";
-import { resetSearch, handleEnterKey } from "../../utils/searchFunctions";
 
 import Modal from "../reusableUI/modal"
 import { EmptySearchUi, Loading, Error } from "../reusableUI/emptySearchUi";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../reusableUI/logo.exports";
-
+import { resetSearch, handleEnterKey } from "../../utils/searchFunctions";
 import type { SearchUiProps } from "./types/sidePanelProps";
 
 export default function SearchUi({currentNode, currentNodeName, renderLocationPanel}: SearchUiProps) {
@@ -42,12 +41,12 @@ export default function SearchUi({currentNode, currentNodeName, renderLocationPa
                 />
 
             <div className="flex space-x-2 ml-2">
-                <span onClick={() => setSearch(search)}><SearchIcon sx={{ color: '#800000' }}/></span>
+                <span onClick={() => setSearch(search)} className="hover:bg-gray-100 rounded-2xl p-1 cursor-pointer"><SearchIcon sx={{ color: '#800000' }}/></span>
                 {!search ?(
-                    <span onClick={() => alert('test')} className="hover:bg-gray-100 rounded"><DirectionsIcon sx={{ color: '#800000' }}/></span>  
+                    <span onClick={() => alert('test')} className="hover:bg-gray-100 rounded-2xl p-1 cursor-pointer"><DirectionsIcon sx={{ color: '#800000' }}/></span>  
                 ):(<span 
                 onClick={() => resetSearch(setSearch, renderLocationPanel, {currentNode, currentNodeName})}
-                className="hover:bg-gray-100 rounded"><ClearIcon sx={{ color: '#800000'}} /></span> )}
+                className="hover:bg-gray-100 rounded cursor-pointer"><ClearIcon sx={{ color: '#800000'}} /></span> )}
             </div>  
         </div>       
 

@@ -1,21 +1,23 @@
 import useLoadingError from "../../../hooks/useLoadingError";
 import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
 
-import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
-import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
+import { Loading, Error } from "../../reusableUI/emptySearchUi";
 
+import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
+import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
 export default function NodeLocationDetails({selectedNodeName}: NodeLocationDetailsProps) {
 
     const { error, loading } = useLoadingError();
     const { details } = useNodeDetailsFetch(selectedNodeName || "");
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
     if (!selectedNodeName) return null;
     if (!details) return <div>No details available.</div>;
     
     return (
         <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 bg-white animate-slideDown">
+            
+            {loading && <Loading loading={loading} message="Loading locations..."/>}
+            {error &&( <Error error={error} />)}
 
             <img
                 src={details.Current?.img?.src || WayfinderLogo1}

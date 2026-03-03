@@ -2,7 +2,7 @@ import { useState } from "react"
 import SearchUi from "../components/ui/Side_Panel/searchUI"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
 import Panorma from "../components/ui/Panorama_Assests/Panorma"
- 
+import NodeDirections from "../components/ui/Side_Panel/child_Panel/nodeDirections"
 export default function HomePage(){
     const [selectedNodeId, setSelectedId] = useState<number | null>(null)
     const [selectedNodeName, setSelectedNodeName] = useState<string |null>(null) //use for displaying  details of the node in the side panel.
@@ -10,7 +10,7 @@ export default function HomePage(){
 
     return(
         <>
-            <div >
+            {/* <div >
                 <div className="absolute top-0 left-0  z-10" >
                     <SearchUi 
                         currentNode={setSelectedId} 
@@ -29,9 +29,13 @@ export default function HomePage(){
                     </div>
                 )}
                 
+            </div> */}
+            
+            <div className="absolute top-0 left-0 z-9">
+                <NodeDirections />
             </div>
             
-            
+
             {/* <div className="absolute bottom-0 left-0 right-0 z-0">
                 <Panorma 
                     nodeName={selectedNodeName || ""}

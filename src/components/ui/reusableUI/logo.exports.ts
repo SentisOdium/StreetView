@@ -14,11 +14,15 @@ import
 import 
     ShareIcon 
         from '@mui/icons-material/Share';
+import 
+    SwapVertIcon 
+        from '@mui/icons-material/SwapVert';
 
 export {
     WayfinderLogo1, 
     SearchIcon, 
     DirectionsIcon, 
     ClearIcon, 
-    ShareIcon 
+    ShareIcon,
+    SwapVertIcon 
 };
