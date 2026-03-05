@@ -1,6 +1,7 @@
 export type NodeList = {
     id: number;
     node_name: string;
+    type: string;
 }
 
 export type NodeDetails = {
@@ -31,18 +32,37 @@ export type NodeDetails = {
         room_description: string;
     }[]
 }
+
+export type NodeRoute ={
+    path: 
+    {
+        id: number, 
+        dist: number
+    }[]
+}
+
 export type NodeListResponse= {
     success: boolean;
     message: string;
-    data: {
-        list: NodeList[];
-    }
+    list: NodeList[];
+
 }
 
 export type NodeDetailsResponse = {
     success: boolean;
     message: string;
-    data: {
-       Node: NodeDetails; 
-    }
+    node: NodeDetails; 
+
+}
+
+export type NodeRouteResponse = {
+    success: boolean;
+    message: string;
+    data: NodeRoute
+
+}
+
+export type RouteReq= {
+    src: string,
+    dest: string
 }

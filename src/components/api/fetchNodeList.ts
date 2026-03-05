@@ -5,14 +5,16 @@ import { BaseUrl } from "../objects/baseUrl";
 export const fetchNodeList =  async (): Promise<NodeList[]> => {
     try {
         const response = await axios.get<NodeListResponse>(`${BaseUrl}/list`);
-        return response.data.data.list
+        return response.data.list
     } catch (err: unknown) {
         console.error("Failed to fetch list:", err);
                 
         if(isAxiosError(err)){
            throw new Error (err.response?.data.message || err.message);
-        } 
-        throw new Error("Unknown error occurred");
+        }else {
+            console.error("Unexpected error:", err);
+        }
+        throw err;
     }
     
 }
