@@ -37,7 +37,9 @@ export type NodeRoute ={
     path: 
     {
         id: number, 
-        dist: number
+        dist: number,
+        name: string,
+        type: string
     }[]
 }
 

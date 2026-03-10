@@ -10,7 +10,6 @@ export default function RouteCardComponent({locA, locB}: RouteCardProps){
         src: locA, 
         dest: locB})
         
-         console.log("ROUTE:", route)
     return(
         <div className=" mt-10  bg-white rounded-xl border p-3">
             <span className="border-b"></span>
@@ -26,9 +25,9 @@ export default function RouteCardComponent({locA, locB}: RouteCardProps){
                     Logo
                 </span>
 
-                <div>
+                <div className="col-span-3">
                     {route?.path?.map((node) =>(
-                        <div key={node.id}>{node.id} - {node.dist}</div>
+                        <div key={node.id}>{node.dist} - {node.name} - {node.type}</div>
                     ))}
                 </div>
             </div>
