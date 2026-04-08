@@ -26,10 +26,10 @@ export default function useRouteDirection({src,  dest}: RouteReq){
 
     useEffect(() => {
         if(!src || !dest) return;
-        if(src === dest) return;
-        fetchData()
-    }, [src, dest])
 
-    
+        if(src && dest) fetchData()
+        
+    },[src, dest])
+
     return{ route, setRoute, refetch: fetchData}
 }

@@ -1,15 +1,12 @@
 import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
-import { useDebounce } from "../../../hooks/useDebounce"
+
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 
 export default function NodeDirections() {
 
     const [locationA, setLocationA] = useState("")
     const [locationB, setLocationB] = useState("")
-
-    const debounceLocA = useDebounce(locationA)
-    const debounceLocB = useDebounce(locationB)
 
     const locationSwap = () => {
 
@@ -19,6 +16,8 @@ export default function NodeDirections() {
         setLocationA(temp_locB)
         setLocationB(locationA)
     }
+
+    // const debounced = debounce(locationSwap, 500);
 
     return (
         <>
@@ -76,7 +75,7 @@ export default function NodeDirections() {
                 </form>
 
                 <div>
-                    <RouteCardComponent locA={debounceLocA} locB={debounceLocB}/>
+                    <RouteCardComponent locA={locationA} locB={locationB}/>
                 </div>
             </div>
 
