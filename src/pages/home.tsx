@@ -32,15 +32,19 @@ export default function HomePage(){
             </div> */}
             
             <div className="absolute top-0 left-0 z-9">
-                <NodeDirections />
+                <SearchUi 
+                        currentNode={setSelectedId} 
+                        currentNodeName={setSelectedNodeName}
+                        renderLocationPanel={setRenderLocationDetails}
+                        />    
             </div>
             
 
-            {/* <div className="absolute bottom-0 left-0 right-0 z-0">
+            <div className="absolute bottom-0 left-0 right-0 z-0">
                 <Panorma 
                     nodeName={selectedNodeName || ""}
                 />   
-            </div> */}
+            </div>
 
             <div className="flex justify-center ">
                 <h1>the selected id is: {selectedNodeId} - {selectedNodeName} </h1>
