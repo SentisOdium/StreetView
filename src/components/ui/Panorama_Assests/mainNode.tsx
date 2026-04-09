@@ -1,53 +1,55 @@
 import { useLoader } from "@react-three/fiber"
-import { useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import * as THREE from "three"
 
 import type { SphereProps } from "./types/panoramaProps"
 
 export default function MainNode ({ position = [0,0,0], radius, widthSegments = 128, heightSegments = 128, textureUrl}: SphereProps) {
     
-    const textureLoader = useLoader(THREE.TextureLoader, textureUrl!);
-  
-    textureLoader.wrapS = THREE.RepeatWrapping;
-    textureLoader.repeat.x = -1;
-    textureLoader.offset.x = 1;
+    const texture = useLoader(THREE.TextureLoader, textureUrl!);
     
-    textureLoader.minFilter = THREE.LinearFilter;
-    textureLoader.magFilter = THREE.LinearFilter;
-    textureLoader.generateMipmaps = false;
-        
+   
+    useEffect(() => {   
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.repeat.x = -1;
+        texture.offset.x = 1;
+
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = false;
+
+        texture.needsUpdate = true;
+    }, [texture]);
+
     const ref = useRef<THREE.Mesh>(null);
-        
-    const [isDragging, setIsDragging] = useState(false);
-    const [prevPosX, setPrevPosX] = useState(0);
-    const [prevPosY, setPrevPosY] = useState(0);
+    const prevPos = useRef({ x: 0, y: 0 });
+    const isDragging = useRef(false);
 
     const handlePointerDown = (e: React.PointerEvent) => {
-        setIsDragging(true);
-        setPrevPosX(e.clientX);
-        setPrevPosY(e.clientY);
+        isDragging.current = true;
+        prevPos.current = { x: e.clientX, y: e.clientY };   
     }
 
     const handlePointerMove = (e: React.PointerEvent) => {
         if (!isDragging || !ref.current) return; 
-        const deltaX = e.clientX - prevPosX;
-        const deltaY = e.clientY - prevPosY;
+        const deltaX = e.clientX - prevPos.current.x;
+        const deltaY = e.clientY - prevPos.current.y;
 
-        ref.current.rotation.y += deltaX * 0.00001;
-        ref.current.rotation.x += deltaY * 0.00001;
+        ref.current.rotation.y += deltaX * 0.00000001;
+        ref.current.rotation.x += deltaY * 0.00000001;
 
-        // Clamp X rotation
-        ref.current.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, ref.current.rotation.x));
+        ref.current.rotation.x = Math.max(
+            -Math.PI/2, 
+            Math.min(Math.PI/2, ref.current.rotation.x)
+        );
 
-        setPrevPosX(e.clientX);
-        setPrevPosY(e.clientY);
+        prevPos.current = { x: e.clientX, y: e.clientY };
     }
 
     const handlePointerUp = () => {
-        setIsDragging(false);
+        isDragging.current = false;
     }
 
-    console.log("MainNode Rendered with textureUrl:", textureUrl)
     return (
         <mesh 
             ref={ref} 
@@ -55,10 +57,11 @@ export default function MainNode ({ position = [0,0,0], radius, widthSegments = 
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
         >
 
             <sphereGeometry args={[radius, widthSegments, heightSegments]} />
-            <meshBasicMaterial map={textureLoader} side={THREE.BackSide} />
+            <meshBasicMaterial map={texture} side={THREE.BackSide} />
 
         </mesh>
     )

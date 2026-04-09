@@ -16,10 +16,14 @@ export default function SearchUi({currentNode, currentNodeName, renderLocationPa
     const { list } = useAutoCompleteFetch()
 
     const filteredList = useMemo(() => {
-            return list.filter(node => 
+        if (!list) return [];
+         
+        return list.filter(node =>
             (node.node_name ?? "").toLowerCase().includes(search.toLowerCase())
         );
-    }, [search, list ]) 
+    }, [search, list]);
+
+//console.log("SearchUI Rendered with search:", search, "filteredList length:", filteredList.length, "showModal:", showModal)//remove after testing
 
     return(
     <div className="ml-14.75">

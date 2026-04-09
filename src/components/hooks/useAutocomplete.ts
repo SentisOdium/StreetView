@@ -1,38 +1,30 @@
 import { useState, useEffect } from "react";
-import useLoadingError from "./useLoadingError";
 import { fetchNodeList } from "../api/fetchNodeList";
 import type { NodeList } from "../api/types/types_api";
 
-export default  function useAutoCompleteFetch(){
+// useAutocomplete.ts
+export default function useAutoCompleteFetch() {
     const [list, setList] = useState<NodeList[]>([]);
-    const {setError,  setLoading} = useLoadingError();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const fetchData = async() => {
-        
+    const fetchData = async () => {
         setLoading(true);
         setError(null);
-
         try {
             const data = await fetchNodeList();
-            setList(data);  
+            setList(data);
         } catch (err: unknown) {
-            console.error("Failed to fetch list:", err);
-            
-            if (err instanceof Error){
-                setError(err.message)
-            }else{
-                setError("Unknown Error Occured")
-            }
-
-        } finally{
-            setLoading(false)
+            setError(err instanceof Error ? err.message : "Unknown Error");
+        } finally {
+            setLoading(false);
         }
-    }
-  
+    };
 
-    useEffect(()  =>  {
+    useEffect(() => {
         fetchData();
     }, []);
 
-    return { list, setList, refetch: fetchData }
+    // Return the states here so SearchUi can use them
+    return { list, loading, error, refetch: fetchData };
 }

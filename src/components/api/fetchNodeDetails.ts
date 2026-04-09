@@ -5,7 +5,10 @@ import { BaseUrl } from "../objects/baseUrl";
 export const fetchNodeDetails = async(name: string): Promise<NodeDetails> =>{
     try {
         const response = await axios.get<NodeDetailsResponse>(`${BaseUrl}/search?location=${name}`)
-        return response.data.node;
+        console.log("API response:", response.data);
+        return response.data.data.Node;
+
+        
     } catch (err: unknown) {
         console.error("Failed to fetch node details:", err);
 

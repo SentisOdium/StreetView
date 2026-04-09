@@ -41,26 +41,23 @@ export type NodeRoute ={
     }[]
 }
 
-export type NodeListResponse= {
+type ApiResponse<T> = {
     success: boolean;
     message: string;
+    data: T;
+};
+
+export type NodeListResponse = ApiResponse<{
     list: NodeList[];
+}>;
 
-}
+export type NodeDetailsResponse = ApiResponse<{
+    Node: NodeDetails; 
+}>;
 
-export type NodeDetailsResponse = {
-    success: boolean;
-    message: string;
-    node: NodeDetails; 
-
-}
-
-export type NodeRouteResponse = {
-    success: boolean;
-    message: string;
-    data: NodeRoute
-
-}
+export type NodeRouteResponse = ApiResponse<{
+    route: NodeRoute
+}>;
 
 export type RouteReq= {
     src: string,

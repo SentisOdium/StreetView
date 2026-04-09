@@ -1,24 +1,23 @@
-import { Canvas, useFrame,useLoader, useThree } from "@react-three/fiber"
-import * as THREE from "three"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch"
-import pano from "/panorama/fallbackPanorama/pano.jpg"
 import { Suspense } from "react"
 import type { PanoramaProps } from "./types/panoramaProps"
 import MainNode from "./mainNode"
 import Hotspot from "./hotspot"
 
-export default function Panorma({nodeName}: PanoramaProps) {
+export default function Panorma({ nodeName }: PanoramaProps) {
     const { details } = useNodeDetailsFetch(nodeName);
 
-    
-    const defaultPano = pano; 
- 
-    const rawUrl = details?.Current?.img?.src;
-    const currentPano = rawUrl ? rawUrl.replace(/^"|"$/g, '') : defaultPano;
-  
+    if (!details?.Current?.img?.src) {
+        return <div className="ml-60">Loading panorama...</div>;
+    }
 
-   
+    const rawUrl = details.Current.img.src;
+    const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
+    const panoUrl = `${cloudfrontUrl}/${rawUrl}`;
+
+   console.log("Panorama Rendered with nodeName:", nodeName, "and panoUrl:", panoUrl);
     function CameraLogger() {
         const { camera } = useThree();
 
@@ -34,9 +33,7 @@ export default function Panorma({nodeName}: PanoramaProps) {
     }
 
     const maxRadius = 60;
-    if (!details?.Current?.img?.src) {
-    return <div>Loading panorama...</div>; // Standard HTML is fine here
-}
+   
 return (
         <Canvas 
             style={{width: '100vw', height: '100vh' }} 
@@ -44,14 +41,10 @@ return (
             fov: 75, 
             near: 0.1, 
             far: 2000}}
-            // frameloop="demand"
+            frameloop="demand"
         >
-
-            {/* 3D content goes here */}
-            {/* Helpers*/}
-            {/* <axesHelper args={[1000]} /> */}
             <CameraLogger />
-            {/* Controls*/}
+         
             <OrbitControls 
                 enableZoom={true} 
                 enablePan={true}  
@@ -59,15 +52,13 @@ return (
                 zoomSpeed={2}
                 maxDistance={55}/>
 
-            {/* Lighting */}
-            
 
             <ambientLight 
                 intensity={1} />
 
             {/* Geometry  */}
-            <Suspense fallback={<div>Loading panorama...</div>}>
-                <MainNode radius={maxRadius} textureUrl={currentPano} />    
+            <Suspense fallback={null}>
+                <MainNode radius={maxRadius} textureUrl={panoUrl} />    
             </Suspense>
             
             
