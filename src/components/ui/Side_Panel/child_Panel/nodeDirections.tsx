@@ -2,8 +2,8 @@ import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
-
-export default function NodeDirections() {
+import type { NodeDirectionsProps } from "../types/sidePanelProps"
+export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}: NodeDirectionsProps) {
 
     const [locationA, setLocationA] = useState("")
     const [locationB, setLocationB] = useState("")
@@ -24,7 +24,12 @@ export default function NodeDirections() {
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
                 <form >
                     <div className="grid grid-cols-3 gap-4 ">
-                        <div className="col-span-3 flex items-center  h-12 justify-center border rounded-xl shadow-sm">
+                        <div 
+                            onClick={() => {
+                                setShowSearchUI(true);
+                                renderDirectionsPanel(false);
+                            }}
+                            className="col-span-3 flex items-center  h-12 justify-center border rounded-xl shadow-sm">
                         other nav here  
                         </div>
                         

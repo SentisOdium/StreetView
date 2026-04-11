@@ -8,18 +8,24 @@ export default function HomePage(){
     const [selectedNodeId, setSelectedId] = useState<number | null>(null)
     const [selectedNodeName, setSelectedNodeName] = useState<string |null>(null) 
     const [renderLocationDetails, setRenderLocationDetails] = useState<boolean>(true)
+    const [renderNodeDirections, setRenderNodeDirections] = useState<boolean>(false)
+    const [showSearchUI, setShowSearchUI] = useState<boolean>(true);
 
     return(
         <>
             <div >
                 <div className="absolute top-0 left-0  z-10" >
-                    <SearchUi 
-                        currentNode={setSelectedId} 
-                        currentNodeName={setSelectedNodeName}
-                        renderLocationPanel={setRenderLocationDetails}
-                        />    
+                   {showSearchUI === true && (
+                        <SearchUi 
+                            currentNode={setSelectedId} 
+                            currentNodeName={setSelectedNodeName}
+                            renderLocationPanel={setRenderLocationDetails}
+                            renderDirectionsPanel={setRenderNodeDirections}
+                            setShowSearchUI={setShowSearchUI}
+                        />   )}
                 </div>
 
+                <div className="flex items-center justify-center">render SearchUI status: {showSearchUI.toString()}</div>
 
                 {renderLocationDetails === true && (
                     <div className="absolute top-0 left-0 z-9">
@@ -30,37 +36,29 @@ export default function HomePage(){
                     </div>
                 )}
                 
-<<<<<<< HEAD
-            </div> */}
+                {renderNodeDirections === true && (
+                    <div className="absolute top-0 left-0 z-9">
+                        <NodeDirections
+                            renderDirectionsPanel={setRenderNodeDirections}
+                            setShowSearchUI={setShowSearchUI}
+                        />  
+                    </div>
+                )}
+                
             
-            <div className="absolute top-0 left-0 z-9">
-                <SearchUi 
-                        currentNode={setSelectedId} 
-                        currentNodeName={setSelectedNodeName}
-                        renderLocationPanel={setRenderLocationDetails}
-                        />    
-=======
->>>>>>> 5c1bc63 (feat/fix: integratd cdn using s3 + cloudfront. fixed bugs such as white screen showing when entering a location, logic clean ups)
             </div>
             
-            {/* <div className="absolute top-0 left-0 z-9">
-                <NodeDirections />
-            </div> */}
             
 
-<<<<<<< HEAD
-            <div className="absolute bottom-0 left-0 right-0 z-0">
-=======
             <div className="absolute inset-0 z-0">
->>>>>>> 5c1bc63 (feat/fix: integratd cdn using s3 + cloudfront. fixed bugs such as white screen showing when entering a location, logic clean ups)
                 <Panorma 
                     nodeName={selectedNodeName || ""}
                 />   
             </div>
 
             <div className="flex justify-center ">
-                <h1>the selected id is: {selectedNodeId} - {selectedNodeName} </h1>
-            </div>   
+                
+            </div>        
         </>
     )
 }

@@ -6,7 +6,7 @@ function handleEnterKey(
     search: string,
     filteredList: NodeList[],
     callbacks: Pick<SearchUiProps, 'currentNode' | 'currentNodeName'>,
-){
+):void{
     if (e.key !== 'Enter' || filteredList.length === 0) return;
 
         const trimmedSearch = search.trim();
@@ -20,14 +20,23 @@ function resetSearch(
     setSearch: React.Dispatch<React.SetStateAction<string>>,
     renderLocationPanel: SearchUiProps['renderLocationPanel'],
     callbacks: Pick<SearchUiProps, 'currentNode' | 'currentNodeName'>,
-){
+):void{
     setSearch("");
     renderLocationPanel(false);
     callbacks.currentNode(null);
     callbacks.currentNodeName("");
 }
 
+function renderDirections(
+    renderDirectionsPanel: SearchUiProps['renderDirectionsPanel'],
+    renderLocationPanel: SearchUiProps['renderLocationPanel']
+):void {
+    renderDirectionsPanel(true);
+    renderLocationPanel(false);
+}
+
 export { 
     handleEnterKey, 
-    resetSearch 
+    resetSearch,
+    renderDirections
 }
