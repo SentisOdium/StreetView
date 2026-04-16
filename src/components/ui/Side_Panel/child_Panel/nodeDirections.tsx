@@ -1,13 +1,15 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
+import useAutoCompleteFetch from "../../../hooks/useAutocomplete"
+
 export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}: NodeDirectionsProps) {
 
     const [locationA, setLocationA] = useState("")
     const [locationB, setLocationB] = useState("")
-
+    const { list } = useAutoCompleteFetch()
     const locationSwap = () => {
 
         if(!locationA || !locationB) return;
@@ -17,8 +19,13 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
         setLocationB(locationA)
     }
 
-    // const debounced = debounce(locationSwap, 500);
-
+    const filteredList = useMemo(() => {
+        if (!list) return [];
+            
+            return list.filter(node =>
+                (node.node_name ?? "").toLowerCase().includes(locationA.toLowerCase() || locationB.toLocaleLowerCase())
+            );
+    }, [locationA, locationB, list])
     return (
         <>
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
