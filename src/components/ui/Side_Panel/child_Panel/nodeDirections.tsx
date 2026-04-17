@@ -1,15 +1,12 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
-
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
-import useAutoCompleteFetch from "../../../hooks/useAutocomplete"
-
+import Direction_SearchUi from "../../../ui/reusableUI/directionSearchUi"
 export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}: NodeDirectionsProps) {
 
     const [locationA, setLocationA] = useState("")
     const [locationB, setLocationB] = useState("")
-    const { list } = useAutoCompleteFetch()
     const locationSwap = () => {
 
         if(!locationA || !locationB) return;
@@ -18,14 +15,7 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
         setLocationA(temp_locB)
         setLocationB(locationA)
     }
-
-    const filteredList = useMemo(() => {
-        if (!list) return [];
-            
-            return list.filter(node =>
-                (node.node_name ?? "").toLowerCase().includes(locationA.toLowerCase() || locationB.toLocaleLowerCase())
-            );
-    }, [locationA, locationB, list])
+    
     return (
         <>
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
@@ -73,22 +63,20 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
                         {/* Destination */}
                         <div className="col-span-2">
                             <div className="px-4 flex items-center bg-white h-12 rounded-xl shadow-sm">
-                                <input 
-                                    type="text" 
-                                    value={locationB}
-                                    onChange={(e) => setLocationB(e.target.value)}
-                                    className="w-full outline-none placeholder:italic bg-transparent"
-                                    placeholder="Choose Destination"
-                                />
+                                <Direction_SearchUi 
+                                    value={locationB} 
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocationB(e.target.value)}
+                                    placeholder="Choose Destination Point"
+                                    modalLoc="absolute z-10 mt-50"/>
                             </div>
                         </div>
 
                     </div>
                 </form>
 
-                <div>
+                {/* <div>
                     <RouteCardComponent locA={locationA} locB={locationB}/>
-                </div>
+                </div> */}
             </div>
 
             

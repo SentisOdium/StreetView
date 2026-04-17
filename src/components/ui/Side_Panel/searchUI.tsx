@@ -33,7 +33,7 @@ export default function SearchUi(
             );
         }, [search, list]);
 
-// console.log("SearchUI Rendered with search:", search, "filteredList length:", filteredList.length, "showModal:", showModal)//remove after testing
+    // console.log("SearchUI Rendered with search:", search, "filteredList length:", filteredList.length, "showModal:", showModal)//remove after testing
 
     return(
         <div className="ml-14.75">
@@ -80,42 +80,42 @@ export default function SearchUi(
                 </div>  
             </div>       
     
-            <Modal 
-                isVisible={showModal} 
-                onClose={() => setShowModal(false)}
-                design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown">
+                <Modal 
+                    isVisible={showModal} 
+                    onClose={() => setShowModal(false)}
+                    design="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown">
 
-                    <Loading loading={loading} message="Loading locations..."/>
-                    <Error error={error} />
+                        <Loading loading={loading} message="Loading locations..."/>
+                        <Error error={error} />
 
-                    {!loading && !error && (search.length > 0 ? 
-                        (
-                            <ul>
-                                {filteredList.map(node =>(
-                                    <li 
-                                        key={node.id}
-                                        onClick={()=> {
-                                            currentNode(node.id);
-                                            currentNodeName(node.node_name);
-                                            setSearch(node.node_name);
-                                            setShowModal(false);
-                                        }}
-                                        className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"> 
-                                            {node.node_name}
-                                    </li>
-                                ))}
-                            </ul>    
-                        )
-                            : 
-                        (
-                            <div 
-                                className="text-gray-500 italic">   
-                                    <EmptySearchUi/>
-                            </div>
-                        ))
-                    }
-                    
-            </Modal>
+                        {!loading && !error && (search.length > 0 ? 
+                            (
+                                <ul>
+                                    {filteredList.map(node =>(
+                                        <li 
+                                            key={node.id}
+                                            onClick={()=> {
+                                                currentNode(node.id);
+                                                currentNodeName(node.node_name);
+                                                setSearch(node.node_name);
+                                                setShowModal(false);
+                                            }}
+                                            className="hover:bg-gray-100 p-2 rounded-xl cursor-pointer"> 
+                                                {node.node_name}
+                                        </li>
+                                    ))}
+                                </ul>    
+                            )
+                                : 
+                            (
+                                <div 
+                                    className="text-gray-500 italic">   
+                                        <EmptySearchUi/>
+                                </div>
+                            ))
+                        }
+                        
+                </Modal>
         </div>
     )
 }
