@@ -1,8 +1,9 @@
 import { useState } from "react"
-import SearchUi from "../components/ui/Side_Panel/searchUI"
+import SearchUi from "../components/ui/trash/searchUI"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
 import Panorma from "../components/ui/Panorama_Assests/Panorma"
 import NodeDirections from "../components/ui/Side_Panel/child_Panel/nodeDirections"
+import SearchUI2 from "../components/ui/Side_Panel/child_Panel/searchUI2"
 
 export default function HomePage(){
     const [selectedNodeId, setSelectedId] = useState<number | null>(null)
@@ -16,13 +17,14 @@ export default function HomePage(){
             <div >
                 <div className="absolute top-0 left-0  z-10" >
                    {showSearchUI === true && (
-                        <SearchUi 
-                            currentNode={setSelectedId} 
+                        <SearchUI2
+                            currentNode={setSelectedId}
                             currentNodeName={setSelectedNodeName}
                             renderLocationPanel={setRenderLocationDetails}
                             renderDirectionsPanel={setRenderNodeDirections}
                             setShowSearchUI={setShowSearchUI}
-                        />   )}
+                        />
+                    )}
                 </div>
 
                 <div className="flex items-center justify-center">render SearchUI status: {showSearchUI.toString()}</div>
@@ -56,7 +58,7 @@ export default function HomePage(){
                 />   
             </div>
 
-            <div className="flex justify-center ">
+            <div className="flex justify-center z-50">
                 
             </div>        
         </>

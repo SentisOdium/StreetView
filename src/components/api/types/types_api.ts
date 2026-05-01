@@ -33,13 +33,12 @@ export type NodeDetails = {
     }[]
 }
 
-export type NodeRoute ={
-    path: 
-    {
-        id: number, 
-        dist: number
-    }[]
-}
+export type NodeRoute ={ 
+        id: number;
+        dist: number;
+        name: string;
+        type: string;
+}[];
 
 type ApiResponse<T> = {
     success: boolean;
@@ -56,7 +55,7 @@ export type NodeDetailsResponse = ApiResponse<{
 }>;
 
 export type NodeRouteResponse = ApiResponse<{
-    route: NodeRoute
+    path: NodeRoute
 }>;
 
 export type RouteReq= {

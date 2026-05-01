@@ -13,6 +13,7 @@ export default function useRouteDirection({src,  dest}: RouteReq){
         try {
             const data = await fetchNodeRoute({src, dest})
             setRoute(data)
+            console.log("Fetched route data: ", data)
         } catch (err: unknown) {
             if (err instanceof Error){
                 setError(err.message)

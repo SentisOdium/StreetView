@@ -2,23 +2,28 @@ import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
-import Direction_SearchUi from "../../../ui/reusableUI/directionSearchUi"
+import useAutoCompleteFetch from "../../../hooks/useAutocomplete"
+
+import Search from "../../reusableUI/search"
+
 export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}: NodeDirectionsProps) {
+    const { list } = useAutoCompleteFetch()
+    const [locationA, setLocationA] = useState("");
+    const [locationB, setLocationB] = useState("");
+    const [round, setRound] = useState(true);
 
-    const [locationA, setLocationA] = useState("")
-    const [locationB, setLocationB] = useState("")
+
     const locationSwap = () => {
+        if (!locationA || !locationB) return;
+        
+        setLocationA(locationB);
+        setLocationB(locationA);
+    };
 
-        if(!locationA || !locationB) return;
 
-        const temp_locB = locationB;
-        setLocationA(temp_locB)
-        setLocationB(locationA)
-    }
-    
     return (
         <>
-            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
+            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4 -z-10">
                 <form >
                     <div className="grid grid-cols-3 gap-4 ">
                         <div 
@@ -31,17 +36,21 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
                         </div>
                         
                         {/* Starting Point */}
-                        <div className="col-span-2">
-                            <div className="px-4 flex items-center bg-white h-12 rounded-xl shadow-sm">
-                                <input 
-                                    type="text" 
+                        <div  className="col-span-2 z-10">
+                            <div onClick={() => setRound(true)}  className={`px-4 flex items-center bg-white h-12 
+                                ${round && locationA === "" ?  
+                                    "rounded-4xl shadow-xl" : 
+                                    "rounded-t-2xl  rounded-b-none"}`}>
+                                <Search
                                     value={locationA}
-                                    onChange={(e) => 
-                                        setLocationA(e.target.value)    
-                                    }
-                                    className="w-full outline-none placeholder:italic bg-transparent"
+                                    onChange={setLocationA}
                                     placeholder="Choose Starting Point"
-                                    
+                                    items={list || []}
+                                    getLabel={(node: any) => node?.node_name ?? ""}    
+                                    onSelect={(node: any) => {
+                                        setLocationA(node?.node_name ?? "");
+                                    }} 
+                                    modalDesign="mt-32 ml-4 w-66 shadow-xl animate-slideDown"
                                 />
                             </div>
                         </div>
@@ -50,7 +59,7 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
                         <div 
                             className="row-span-2 flex items-center justify-center bg-white rounded-lg"
                             onClick={locationSwap}>
-                                <span 
+                                <span
                                     className="p-1 hover:bg-gray-100 rounded-xl cursor-pointer ">
                                         <SwapVertIcon 
                                             sx={{ 
@@ -61,22 +70,31 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
                         </div>
 
                         {/* Destination */}
-                        <div className="col-span-2">
-                            <div className="px-4 flex items-center bg-white h-12 rounded-xl shadow-sm">
-                                <Direction_SearchUi 
-                                    value={locationB} 
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocationB(e.target.value)}
+                        <div className="col-span-2 z-10">
+                            <div onClick={() => setRound(true)}  className={`px-4 flex items-center bg-white h-12 
+                                ${round && locationB === "" ?  
+                                    "rounded-4xl shadow-xl" : 
+                                    "rounded-t-2xl  rounded-b-none"}`}>
+                                <Search
+                                    value={locationB}
+                                    onChange={setLocationB}
                                     placeholder="Choose Destination Point"
-                                    modalLoc="absolute z-10 mt-50"/>
+                                    items={list || []}
+                                    getLabel={(node: any) => node?.node_name ?? ""}    
+                                    onSelect={(node: any) => {
+                                        setLocationB(node?.node_name ?? "");
+                                        }} 
+                                    modalDesign="mt-47 ml-4 w-66.5 shadow-xl animate-slideDown"
+                                />
                             </div>
                         </div>
 
                     </div>
                 </form>
 
-                {/* <div>
+                <div className="mt-10">
                     <RouteCardComponent locA={locationA} locB={locationB}/>
-                </div> */}
+                </div>
             </div>
 
             

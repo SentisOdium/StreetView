@@ -7,7 +7,7 @@ import Modal from "../reusableUI/modal"
 import { EmptySearchUi, Loading, Error } from "../reusableUI/emptySearchUi";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../reusableUI/logo.exports";
 import { resetSearch, handleEnterKey, renderDirections } from "../../utils/searchFunctions";
-import type { SearchUiProps } from "./types/sidePanelProps";
+import type { SearchUiProps } from "../Side_Panel/types/sidePanelProps";
 
 export default function SearchUi(
     {

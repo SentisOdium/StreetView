@@ -17,7 +17,8 @@ export default function Panorma({ nodeName }: PanoramaProps) {
     const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL;
     const panoUrl = `${cloudfrontUrl}/${rawUrl}`;
 
-   console.log("Panorama Rendered with nodeName:", nodeName, "and panoUrl:", panoUrl);
+    // console.log("Panorama Rendered with nodeName:", nodeName, "and panoUrl:", panoUrl); //for debugging
+    
     function CameraLogger() {
         const { camera } = useThree();
 

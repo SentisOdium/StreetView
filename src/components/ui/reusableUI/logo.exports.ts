@@ -33,6 +33,12 @@ import
 import 
     TurnSlightRightIcon 
         from '@mui/icons-material/TurnSlightRight';
+import 
+    VrpanoIcon 
+        from '@mui/icons-material/Vrpano';
+import 
+    PanoramaHorizontalIcon 
+        from '@mui/icons-material/PanoramaHorizontal';
 export {
     WayfinderLogo1, 
 
@@ -41,6 +47,9 @@ export {
     ClearIcon, 
     ShareIcon,
     SwapVertIcon,
+
+    VrpanoIcon,
+    PanoramaHorizontalIcon,
 
     StraightIcon,
     TurnLeftIcon,
