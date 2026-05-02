@@ -1,9 +1,9 @@
 import { useState } from "react"
-import SearchUi from "../components/ui/trash/searchUI"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
 import Panorma from "../components/ui/Panorama_Assests/Panorma"
 import NodeDirections from "../components/ui/Side_Panel/child_Panel/nodeDirections"
 import SearchUI2 from "../components/ui/Side_Panel/child_Panel/searchUI2"
+import useAutoCompleteFetch from "../components/hooks/useAutocomplete"
 
 export default function HomePage(){
     const [selectedNodeId, setSelectedId] = useState<number | null>(null)
@@ -11,6 +11,8 @@ export default function HomePage(){
     const [renderLocationDetails, setRenderLocationDetails] = useState<boolean>(true)
     const [renderNodeDirections, setRenderNodeDirections] = useState<boolean>(false)
     const [showSearchUI, setShowSearchUI] = useState<boolean>(true);
+
+    const {list, loading, error} = useAutoCompleteFetch()
 
     return(
         <>
@@ -23,6 +25,9 @@ export default function HomePage(){
                             renderLocationPanel={setRenderLocationDetails}
                             renderDirectionsPanel={setRenderNodeDirections}
                             setShowSearchUI={setShowSearchUI}
+                            list={list}
+                            loading={loading}
+                            error={error}
                         />
                     )}
                 </div>
@@ -33,7 +38,6 @@ export default function HomePage(){
                     <div className="absolute top-0 left-0 z-9">
                         <NodeLocationDetails 
                             selectedNodeName={selectedNodeName}
-                            
                             />  
                     </div>
                 )}
@@ -43,6 +47,7 @@ export default function HomePage(){
                         <NodeDirections
                             renderDirectionsPanel={setRenderNodeDirections}
                             setShowSearchUI={setShowSearchUI}
+                            list={list}
                         />  
                     </div>
                 )}

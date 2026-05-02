@@ -59,6 +59,8 @@ export type NodeRouteResponse = ApiResponse<{
 }>;
 
 export type RouteReq= {
-    src: string,
-    dest: string
+    src: string;
+    dest: string;
+    signal?: AbortSignal;
+
 }

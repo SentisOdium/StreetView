@@ -2,22 +2,21 @@ import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
-import useAutoCompleteFetch from "../../../hooks/useAutocomplete"
-
 import Search from "../../reusableUI/search"
 
-export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}: NodeDirectionsProps) {
-    const { list } = useAutoCompleteFetch()
+export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel, list }: NodeDirectionsProps) {
     const [locationA, setLocationA] = useState("");
     const [locationB, setLocationB] = useState("");
     const [round, setRound] = useState(true);
 
 
     const locationSwap = () => {
-        if (!locationA || !locationB) return;
+        if (!locationA || !locationB || locationA === locationB) return;
         
-        setLocationA(locationB);
-        setLocationB(locationA);
+        setLocationA(prevA => {
+            setLocationB(prevA);  
+            return locationB;
+        });
     };
 
 
@@ -36,7 +35,7 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel}
                         </div>
                         
                         {/* Starting Point */}
-                        <div  className="col-span-2 z-10">
+                        <div  className="col-span-2 z-15">
                             <div onClick={() => setRound(true)}  className={`px-4 flex items-center bg-white h-12 
                                 ${round && locationA === "" ?  
                                     "rounded-4xl shadow-xl" : 

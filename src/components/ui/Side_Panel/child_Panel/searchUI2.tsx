@@ -1,16 +1,13 @@
 //remeber to add teh handleenterkey function. 
-
-import useAutoCompleteFetch from "../../../hooks/useAutocomplete";
 import { useState } from "react";
 import type { SearchUiProps } from "../types/sidePanelProps";
 import Search from "../../reusableUI/search"
 
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
 import { renderDirections, handleEnterKey, resetSearch } from "../../../utils/searchFunctions";
-export default function SearchUI2(props: SearchUiProps){
-    const { list } = useAutoCompleteFetch()
-    const [search, setSearch] = useState("")
 
+export default function SearchUI2(props: SearchUiProps){
+    const [search, setSearch] = useState("")
     const [round, setRound] = useState(true);
 
 
@@ -27,7 +24,7 @@ export default function SearchUI2(props: SearchUiProps){
                     value={search}
                     onChange={setSearch}
                     placeholder="Enter your Destination"
-                    items={list || []}
+                    items={props.list || []}
                     getLabel={(node: any) => node?.node_name ?? ""}                
                     onSelect={(node: any) => {
                         props.currentNode(node?.id ?? null)

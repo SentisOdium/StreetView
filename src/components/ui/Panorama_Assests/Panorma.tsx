@@ -18,20 +18,6 @@ export default function Panorma({ nodeName }: PanoramaProps) {
     const panoUrl = `${cloudfrontUrl}/${rawUrl}`;
 
     // console.log("Panorama Rendered with nodeName:", nodeName, "and panoUrl:", panoUrl); //for debugging
-    
-    function CameraLogger() {
-        const { camera } = useThree();
-
-        useFrame(() => {
-            console.log(
-                "x:", camera.position.x.toFixed(2),
-                "y:", camera.position.y.toFixed(2),
-                "z:", camera.position.z.toFixed(2)
-            );
-        });
-
-        return null;
-    }
 
     const maxRadius = 60;
    
@@ -44,7 +30,6 @@ return (
             far: 2000}}
             frameloop="demand"
         >
-            <CameraLogger />
          
             <OrbitControls 
                 enableZoom={true} 

@@ -1,4 +1,4 @@
-import { useState, useEffect  } from "react";
+import { useState, useEffect, useCallback, useRef  } from "react";
 import useLoadingError from "./useLoadingError";
 import { fetchNodeDetails } from "../api/fetchNodeDetails";
 import type { NodeDetails } from "../api/types/types_api";
@@ -6,29 +6,44 @@ import type { NodeDetails } from "../api/types/types_api";
 export default function useNodeDetailsFetch(name: string){
     const [details, setDetails] = useState<NodeDetails | null>(null);
     const {setError, setLoading} = useLoadingError();
+    const controllerRef = useRef<AbortController | null>(null);
 
-    const fetchData = async() => {
+    const fetchData = useCallback(async() =>{ 
+        controllerRef.current?.abort();
+
+        const controller = new AbortController();
+        controllerRef.current = controller;
+
         setLoading(true);
         setError(null);
 
         try {
-            const data = await fetchNodeDetails(name);
+            const data = await fetchNodeDetails(name, controller.signal);
+            
             setDetails(data);
         } catch (err: unknown) {
-            if (err instanceof Error){
-                setError(err.message)
-            }else{
-                setError("Unknown Error Occured")
+            if (err instanceof Error) {
+                if (err.name === "AbortError") return; 
+                setError(err.message);
+            } else {
+                setError("Unknown Error Occurred");
             }
-        } finally {
-            setLoading(false);
+        }finally {
+            if (!controller.signal?.aborted) {
+                setLoading(false);
+            }
         }
+    }, [name, setError, setLoading])
         
-    }
-
     useEffect(() => {
-            if (name) fetchData();
-        }, [name]);
+        if(name.trim()){
+            fetchData();
+        }
+    }, [ fetchData])
 
-    return { details, setDetails, refetch: fetchData }
+    const refetch = () => {
+        fetchData();
+    };
+
+    return { details, setDetails, refetch}
 }

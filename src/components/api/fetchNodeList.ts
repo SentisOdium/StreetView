@@ -2,9 +2,9 @@ import axios, { isAxiosError } from "axios";
 import type { NodeList, NodeListResponse } from "./types/types_api";
 import { BaseUrl } from "../objects/baseUrl";
 
-export const fetchNodeList =  async (): Promise<NodeList[]> => {
+export const fetchNodeList =  async (signal?: AbortSignal): Promise<NodeList[]> => {
     try {
-        const response = await axios.get<NodeListResponse>(`${BaseUrl}/list`);
+        const response = await axios.get<NodeListResponse>(`${BaseUrl}/list`, {signal});
         return response.data.data.list || [];
     } catch (err: unknown) {
         console.error("Failed to fetch list:", err);
