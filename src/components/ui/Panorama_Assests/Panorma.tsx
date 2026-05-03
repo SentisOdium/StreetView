@@ -28,7 +28,6 @@ return (
             fov: 75, 
             near: 0.1, 
             far: 2000}}
-            frameloop="demand"
         >
          
             <OrbitControls 

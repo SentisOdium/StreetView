@@ -4,7 +4,7 @@ import type { SearchUiProps } from "../types/sidePanelProps";
 import Search from "../../reusableUI/search"
 
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
-import { renderDirections, handleEnterKey, resetSearch } from "../../../utils/searchFunctions";
+import { renderDirections, resetSearch } from "../../../utils/searchFunctions";
 
 export default function SearchUI2(props: SearchUiProps){
     const [search, setSearch] = useState("")
@@ -29,6 +29,8 @@ export default function SearchUI2(props: SearchUiProps){
                     onSelect={(node: any) => {
                         props.currentNode(node?.id ?? null)
                         props.currentNodeName(node?.node_name ?? "")
+                        props.renderLocationPanel(true)
+                        props.renderDirectionsPanel(false)
                         setSearch(node?.node_name ?? "")
                     }}
                     modalDesign="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown "

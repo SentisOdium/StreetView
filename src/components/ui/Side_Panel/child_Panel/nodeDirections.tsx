@@ -19,6 +19,7 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel,
         });
     };
 
+    console.log("NodeDirections rendered with:", { locationA, locationB });
 
     return (
         <>
