@@ -5,7 +5,7 @@ import type { NodeRoute, RouteReq } from "../api/types/types_api";
 
 export default function useRouteDirection({src,  dest, signal}: RouteReq){
     const { setError, setLoading} = useLoadingError();
-    const [route, setRoute] = useState<NodeRoute | null>(null);
+    const [route, setRoute] = useState<NodeRoute[] | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
 
     const fetchData = useCallback(async() =>{

@@ -5,14 +5,16 @@ import { BaseUrl } from "../objects/baseUrl";
 export const fetchNodeList =  async (signal?: AbortSignal): Promise<NodeList[]> => {
     try {
         const response = await axios.get<NodeListResponse>(`${BaseUrl}/list`, {signal});
-        return response.data.data.list || [];
+
+        if (!response.data.success) {
+            throw new Error(response.data.message);
+        }
+        return response.data.data;
     } catch (err: unknown) {
         console.error("Failed to fetch list:", err);
                 
         if(isAxiosError(err)){
            throw new Error (err.response?.data.message || err.message);
-        }else {
-            console.error("Unexpected error:", err);
         }
         throw err;
     }

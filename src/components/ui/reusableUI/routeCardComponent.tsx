@@ -54,7 +54,7 @@ export default function RouteCardComponent({ locA, locB }: RouteCardProps) {
                         {/* image (fallback safe) */}
                         
 
-                        {node.panoUrl ? (
+                        {/* {node.panoUrl ? (
                             <img
                                 src={"test" || ""}
                                 alt="click to view pano"
@@ -64,7 +64,7 @@ export default function RouteCardComponent({ locA, locB }: RouteCardProps) {
                             <div className="w-full h-20 flex items-center justify-center">
                                 <EmptySearchUi />
                             </div>
-                        )}
+                        )} */}
 
                         {/* icon overlay */}
                         
