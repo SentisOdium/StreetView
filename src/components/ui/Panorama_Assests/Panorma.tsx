@@ -1,4 +1,4 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch"
 import { Suspense } from "react"

@@ -4,7 +4,7 @@ import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
 import Search from "../../reusableUI/search"
 
-export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel, list }: NodeDirectionsProps) {
+export default function NodeDirections({  list, onBack }: NodeDirectionsProps) {
     const [locationA, setLocationA] = useState("");
     const [locationB, setLocationB] = useState("");
     const [round, setRound] = useState(true);
@@ -12,25 +12,21 @@ export default function NodeDirections({ setShowSearchUI, renderDirectionsPanel,
 
     const locationSwap = () => {
         if (!locationA || !locationB || locationA === locationB) return;
-        
-        setLocationA(prevA => {
-            setLocationB(prevA);  
-            return locationB;
-        });
+
+        const temp = locationA;
+        setLocationA(locationB);
+        setLocationB(temp);
     };
 
     console.log("NodeDirections rendered with:", { locationA, locationB });
 
     return (
         <>
-            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4 -z-10">
+            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
                 <form >
                     <div className="grid grid-cols-3 gap-4 ">
                         <div 
-                            onClick={() => {
-                                setShowSearchUI(true);
-                                renderDirectionsPanel(false);
-                            }}
+                            onClick={onBack}
                             className="col-span-3 flex items-center  h-12 justify-center border rounded-xl shadow-sm">
                         other nav here  
                         </div>

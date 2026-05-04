@@ -1,4 +1,4 @@
-export type NodeList = {
+export type MapNode = {
     id: number;
     node_name: string;
     type: string;
@@ -46,7 +46,7 @@ type ApiResponse<T> = {
     data: T;
 };
 
-export type NodeListResponse = ApiResponse<NodeList[]>;
+export type NodeListResponse = ApiResponse<MapNode[]>;
 
 export type NodeDetailsResponse = ApiResponse<NodeDetails>;
 

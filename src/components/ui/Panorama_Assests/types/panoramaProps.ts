@@ -9,5 +9,5 @@ export type SphereProps = {
 }
 
 export type PanoramaProps = {
-    nodeName: string | "";
+    nodeName: string;
 }

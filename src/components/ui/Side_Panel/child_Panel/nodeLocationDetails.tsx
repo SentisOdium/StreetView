@@ -1,11 +1,10 @@
 import useLoadingError from "../../../hooks/useLoadingError";
 import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
-
 import { Loading, Error } from "../../reusableUI/emptySearchUi";
-
 import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
 import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
-export default function NodeLocationDetails({selectedNodeName}: NodeLocationDetailsProps) {
+
+export default function NodeLocationDetails({selectedNodeName, onDirections}: NodeLocationDetailsProps) {
 
     const { error, loading } = useLoadingError();
     const { details } = useNodeDetailsFetch(selectedNodeName || "");
@@ -25,8 +24,6 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
                 className="mb-2 border-amber-600 w-110 h-62.5 object-cover"
             />
 
-            {/* change to reuable functional components */}
-            {/* create variables for the design of the icons */}
             <div className="flex justify-center shadow-sm border-gray-300 mb-2 gap-6">
                 <div className="flex flex-col items-center p-2 ">
                     <div className="group bg-[#800000]/10 rounded-full p-2 flex items-center justify-center 
@@ -37,10 +34,15 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
                 </div>
                 
                 <div className="flex flex-col items-center p-2 ">
-                    <div className="group bg-[#800000] rounded-full p-2 flex items-center justify-center 
-                                    hover:bg-[#800000]/10 cursor-pointer shadow-xl transition-colors duration-300">
-                    <DirectionsIcon className="text-white text-2xl group-hover:text-[#800000] transition-colors duration-800" />
-                    </div>
+                    <button
+                        type="button"
+                        onClick={onDirections} 
+                        className="group bg-[#800000] rounded-full p-2 flex items-center justify-center 
+                                    hover:bg-[#800000]/10 cursor-pointer shadow-xl transition-colors duration-300"
+                        aria-label="Show directions"
+                    >
+                        <DirectionsIcon className="text-white text-2xl group-hover:text-[#800000] transition-colors duration-800" />
+                    </button>
                     <p className="mt-1 text-center text-sm">Directions</p>
                 </div>
             </div>
@@ -56,25 +58,12 @@ export default function NodeLocationDetails({selectedNodeName}: NodeLocationDeta
                         <h3 className="font-medium text-sm">
                             {room.room_type}
                         </h3>
-
-                        {/* <img
-                            src={room.room_img}
-                            alt={room.room_type}
-                            className="rounded-md"
-                        /> */}
-
                         <p className="text-sm text-gray-600">
                             {room.room_description}
                         </p>
-
                     </div>
                 ))}    
-
             </div>
-            
-
-            
-
         </div>
     )
 }

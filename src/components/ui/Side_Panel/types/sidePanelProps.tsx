@@ -1,18 +1,19 @@
-import type { NodeList } from "../../../api/types/types_api";
+import type { MapNode } from "../../../api/types/types_api";
 export type SearchUiProps = {
-    currentNode: (id: number | null) => void;
-    currentNodeName: (name: string ) => void;
-    renderLocationPanel: (render: boolean) => void;
-    renderDirectionsPanel: (render: boolean) => void;
-    setShowSearchUI: (render: boolean) => void;
-    list: NodeList[];
+    list: MapNode[];
     loading?: boolean;     
-    error?: string | null; 
+    error?: unknown; 
+    dispatch?: React.Dispatch<any>;
+    onSelect: (node: MapNode) => void;
+    onDirections: () => void;
 }
 
-export type NodeLocationDetailsProps =  {
+export type NodeLocationDetailsProps = Pick<SearchUiProps, "onDirections"> & {
     selectedNodeName: string | null;
+    onBack: () => void;
 }
 
-export type NodeDirectionsProps = Pick<SearchUiProps, "renderDirectionsPanel" | "setShowSearchUI" | "list"> 
+export type NodeDirectionsProps = Pick<SearchUiProps, "list"> & {
+    onBack: () => void;
+}
 
