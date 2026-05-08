@@ -62,11 +62,21 @@ export default function HomePage(){
                         <NodeDirections
                             list={list}
                             onBack={() =>
-                                dispatch({ type: "GO_BACK" })
+                                dispatch({
+                                    type: "GO_BACK"
+                                    })
                             }
+                            onSelectedRouteNode={(node) => {
+                                dispatch({
+                                    type: "SELECT_NODE",
+                                    payload: {
+                                        id: node.id,
+                                        name: node.name
+                                    }
+                                })
+                            }}
                         />
                     )}
-
             
                 </div>
 

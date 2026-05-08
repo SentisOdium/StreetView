@@ -14,10 +14,11 @@ type SearchProps<T> = {
     loading?: boolean;
     error?: any;
     modalDesign?: string;
+    disabled?: boolean;
 }
 
 export default function Search<T>(props: SearchProps<T>) {
-    const { items, value, onChange, onSelect, getLabel, placeholder, loading, error, modalDesign } = props;
+    const { items, value, onChange, onSelect, getLabel, placeholder, loading, error, modalDesign, disabled } = props;
 
     const [showModal, setShowModal] = useState(false);
 
@@ -39,7 +40,10 @@ export default function Search<T>(props: SearchProps<T>) {
                         onChange(e.target.value);
                         setShowModal(true);
                     }}
-                    onFocus={() => setShowModal(true)}
+                    onFocus={() => {
+                        if (disabled) return;
+                        setShowModal(true)
+                    }}
                 />
             </div>
 
@@ -60,7 +64,7 @@ export default function Search<T>(props: SearchProps<T>) {
                                     onSelect(item);
                                     setShowModal(false);
                                 }}
-                                className="hover:bg-gray-100 p-2 cursor-pointer"
+                                className="hover:bg-gray-100 p-2 cursor-pointer rounded-xl"
                             >
                                 {getLabel(item)}
                             </li>
