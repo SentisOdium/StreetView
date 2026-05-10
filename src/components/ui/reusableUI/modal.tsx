@@ -15,7 +15,7 @@ const Modal = ({ children, onClose, isVisible, design }: ModalProps) => {
 
     return (
         <div 
-            className="fixed inset-0 -z-1  "
+            className="fixed inset-0 z-50"
             id="wrapper"
             onClick={handleClose}>
 

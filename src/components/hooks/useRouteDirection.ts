@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import useLoadingError from "./useLoadingError";
 import { fetchNodeRoute } from "../api/fetchRouteDetails";
 import type { NodeRoute, RouteReq } from "../api/types/types_api";
-
-export default function useRouteDirection({src,  dest, signal}: RouteReq){
+    
+export default function useRouteDirection({src,  dest}: RouteReq){
     const { setError, setLoading} = useLoadingError();
     const [route, setRoute] = useState<NodeRoute[] | null>(null);
     const controllerRef = useRef<AbortController | null>(null);

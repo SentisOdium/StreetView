@@ -42,22 +42,17 @@ export default function RouteCardComponent({locA, locB, onSelectedRouteNode}: Ro
                   <div className="col-span-2">
                     <span className="absolute -left-2.5 top-1.5 w-3 h-3 bg-[#800000] rounded-full"></span>
 
-                    <div className="transition rounded-lg p-3">
+                    <div className="transition rounded p-3">
 
                       <div className="flex justify-between items-center">
-                        <p className="font-medium text-gray-800">{node.name}</p>
-
-                        <span className="text-xs text-gray-500">
-                          #{index + 1}
-                        </span>
+                        <p className="font-medium text-lg text-[#800000]">{node.name}</p>
                       </div>
 
                       <p className="text-sm text-gray-600 mt-1">
-                        Distance:
-                        <span className="font-medium">
+                        <span className="font-medium italic">
                           {" "}{node.dist}m
                         </span>
-                        {" "}from the next location
+                        {" "}from previous
                       </p>
 
                     </div>

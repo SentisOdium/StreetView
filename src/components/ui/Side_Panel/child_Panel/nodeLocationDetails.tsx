@@ -4,7 +4,7 @@ import { Loading, Error } from "../../reusableUI/emptySearchUi";
 import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
 import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
 
-export default function NodeLocationDetails({selectedNodeName, onDirections}: NodeLocationDetailsProps) {
+export default function NodeLocationDetails({selectedNodeName, onDirections, onBack, hasDirectionsPanel = false}: NodeLocationDetailsProps) {
 
     const { error, loading } = useLoadingError();
     const { details } = useNodeDetailsFetch(selectedNodeName || "");
@@ -64,6 +64,13 @@ export default function NodeLocationDetails({selectedNodeName, onDirections}: No
                     </div>
                 ))}    
             </div>
+
+            {hasDirectionsPanel && (
+            <div>
+                <button onClick={onBack}>back to node directions</button>
+            </div>
+            )}
+
         </div>
     )
 }

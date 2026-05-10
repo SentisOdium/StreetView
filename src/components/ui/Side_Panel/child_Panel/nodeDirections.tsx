@@ -6,39 +6,50 @@ import type { NodeDirectionsProps } from "../types/sidePanelProps"
 
 type ActiveField = "A" | "B" | null;
 
-export default function NodeDirections({  list, onBack, onSelectedRouteNode, initialLocationA }: NodeDirectionsProps) {
-    const [locationA, setLocationA] = useState(initialLocationA || "");
-    const [locationB, setLocationB] = useState("");
+export default function NodeDirections({  list, onBack, onSelectedRouteNode, directionsState, onUpdate }: NodeDirectionsProps) {
+    const locationA = directionsState.locationA;
+    const locationB = directionsState.locationB;
     const [activeField, setActiveField] = useState<ActiveField>("A");
     
     const locationSwap = () => {
         if (!locationA || !locationB || locationA === locationB) return;
 
-        const temp = locationA;
-        setLocationA(locationB);
-        setLocationB(temp);
+        onUpdate({
+            locationA: locationB,
+            locationB: locationA,
+            });
     };
 
-    function handleLocationSelect(node: any) {
+    function handleLocationASelect(node: any) {
         const name = node?.node_name ?? "";
+        onUpdate({ locationA: name });
+        setActiveField("B");
+    }
 
-        if (activeField === "A") {
-            setLocationA(name);
-            // auto move to B
-            setActiveField("B");
+    function handleLocationBSelect(node: any) {
+        const name = node?.node_name ?? "";
+        onUpdate({ locationB: name });
+        setActiveField(null);
+    }
+
+    function handleLocationSelect(node: any) {
+        if (activeField === "B") {
+            handleLocationBSelect(node);
             return;
         }
-        if (activeField === "B") {
-            setLocationB(name);
-            setActiveField(null);
-        }
+        handleLocationASelect(node);
     }
 
     useEffect(() => {
-        if(initialLocationA){
-            setActiveField("B")
+        if (locationA && !locationB) {
+            setActiveField("B");
         }
-    }, [initialLocationA])
+
+        if (locationA && locationB) {
+            setActiveField(null);
+        }
+    }, [locationA, locationB]);
+
     return (
         <>
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
@@ -58,11 +69,11 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, ini
                                         ${locationA ? "text-black" : "text-gray-400"}`}>
                                             <Search
                                                 value={locationA}
-                                                onChange={setLocationA}
+                                                onChange={(val: string) => onUpdate({ locationA: val })}
                                                 placeholder="Choose Starting Point"
                                                 items={list || []}
                                                 getLabel={(node: any) => node?.node_name ?? ""}    
-                                                onSelect={handleLocationSelect} 
+                                                onSelect={handleLocationASelect} 
                                                 disabled={activeField !== "A"}
                                                 modalDesign="mt-32 ml-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
@@ -79,7 +90,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, ini
                         </div>
                         {/* Destination */}
                         <div className="col-span-2 z-10">
-                            <div onClick={() => setActiveField("B")}  
+                            <div onClick={() => setActiveField("B")}
                                 className={`px-4 flex items-center bg-white h-12 transition-all
                                         ${activeField === "B"
                                             ? "ring-2 ring-[#800000] shadow-xl rounded-xl"
@@ -89,11 +100,11 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, ini
                                     `}>
                                             <Search
                                                 value={locationB}
-                                                onChange={setLocationB}
+                                                onChange={(val: string) => onUpdate({ locationB: val })}
                                                 placeholder="Choose Destination Point"
                                                 items={list || []}
                                                 getLabel={(node: any) => node?.node_name ?? ""}    
-                                                onSelect={handleLocationSelect} 
+                                                onSelect={handleLocationBSelect} 
                                                 disabled={activeField !== "B"}
                                                 modalDesign="mt-47 ml-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
@@ -110,7 +121,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, ini
                     {(!locationA || !locationB) && (
                         <div className="mt-4 bg-white rounded-2xl shadow-lg max-h-90 overflow-y-auto">
                             <h1 className="ml-5 p-2">Select Locations</h1>
-                            {list.map((node: any) => (
+                            {list?.map((node: any) => (
                                 <button
                                     key={node.id}
                                     onClick={() => handleLocationSelect(node)}

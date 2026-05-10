@@ -1,17 +1,15 @@
 //remember to add the handleenterkey function. 
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import Search from "../../reusableUI/search"
 import type { SearchUiProps } from "../types/sidePanelProps";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
 
 export default function SearchUI2(props: SearchUiProps){
     const [search, setSearch] = useState("")
-    const [round, setRound] = useState(true);
 
     return(
         <div className="ml-14.75">
-            <div
-                onClick={() => setRound(true)} 
+            <div 
                 className = {`w-90 pt-1 pb-1 z-20 m-4 px-4 flex items-center justify-between bg-white  h-12 
                                     ${ search.length > 0 ?  
                                             "rounded-2xl" : 
@@ -47,8 +45,8 @@ export default function SearchUI2(props: SearchUiProps){
                     ):(
                         <span 
                             onClick={() => {
-                                setSearch("")
-                                props.dispatch?.({ type: "RESET_TO_SEARCH" })
+                                setSearch("");
+                                props.onClear?.();
                             }}
                             className="hover:bg-gray-100 rounded curor-pointer">
                                 <ClearIcon sx={{ color: '#800000'}} />
