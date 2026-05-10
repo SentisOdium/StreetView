@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import Search from "../../reusableUI/search"
@@ -6,8 +6,8 @@ import type { NodeDirectionsProps } from "../types/sidePanelProps"
 
 type ActiveField = "A" | "B" | null;
 
-export default function NodeDirections({  list, onBack, onSelectedRouteNode }: NodeDirectionsProps) {
-    const [locationA, setLocationA] = useState("");
+export default function NodeDirections({  list, onBack, onSelectedRouteNode, initialLocationA }: NodeDirectionsProps) {
+    const [locationA, setLocationA] = useState(initialLocationA || "");
     const [locationB, setLocationB] = useState("");
     const [activeField, setActiveField] = useState<ActiveField>("A");
     
@@ -33,7 +33,12 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode }: N
             setActiveField(null);
         }
     }
-    // console.log("NodeDirections rendered with:", { locationA, locationB });
+
+    useEffect(() => {
+        if(initialLocationA){
+            setActiveField("B")
+        }
+    }, [initialLocationA])
     return (
         <>
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">

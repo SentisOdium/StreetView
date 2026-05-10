@@ -45,9 +45,7 @@ export default function RouteCardComponent({locA, locB, onSelectedRouteNode}: Ro
                     <div className="transition rounded-lg p-3">
 
                       <div className="flex justify-between items-center">
-                        <p className="font-medium text-gray-800">
-                          {node.name}
-                        </p>
+                        <p className="font-medium text-gray-800">{node.name}</p>
 
                         <span className="text-xs text-gray-500">
                           #{index + 1}
@@ -85,16 +83,12 @@ export default function RouteCardComponent({locA, locB, onSelectedRouteNode}: Ro
                       />
 
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
             ))}
 
           </div>
-
         </div>
       )}
     </div>

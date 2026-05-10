@@ -50,7 +50,8 @@ export default function HomePage(){
                         <NodeLocationDetails
                             selectedNodeName={present.selectedNodeName}
                             onDirections={() =>
-                                dispatch({ type: "SHOW_DIRECTIONS" })
+                                dispatch({ 
+                                    type: "SHOW_DIRECTIONS" })
                             }
                             onBack={() =>
                                 dispatch({ type: "GO_BACK" })
@@ -61,6 +62,7 @@ export default function HomePage(){
                     {present.mode === "directions" && (
                         <NodeDirections
                             list={list}
+                            initialLocationA={present.locationA}
                             onBack={() =>
                                 dispatch({
                                     type: "GO_BACK"

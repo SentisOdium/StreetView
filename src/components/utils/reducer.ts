@@ -4,6 +4,7 @@ type StateSnapshot = {
     mode: Mode;
     selectedNodeId: number | null;
     selectedNodeName: string | null;
+    locationA?: string | null;
 }
 
 type State =  {
@@ -47,7 +48,8 @@ export function reducer(state: State, action: Action): State {
         case "SHOW_DIRECTIONS": {
             const newPresent: StateSnapshot = {
                 ...present,
-                mode: "directions"
+                mode: "directions",
+                locationA: present.selectedNodeName
             }
 
             return {

@@ -16,5 +16,6 @@ export type NodeLocationDetailsProps = Pick<SearchUiProps, "onDirections"> & {
 export type NodeDirectionsProps = Pick<SearchUiProps, "list"> & {
     onBack: () => void;
     onSelectedRouteNode: (node: NodeRoute) => void;
+    initialLocationA?: string | null;
 }
 
