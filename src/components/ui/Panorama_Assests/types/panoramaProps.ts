@@ -6,8 +6,10 @@ export type SphereProps = {
     widthSegments?: number;
     heightSegments?: number;
     textureUrl?: string
+    opacity?: number;
 }
 
-export type PanoramaProps = {
+export type PanoramaProps  = {
     nodeName: string;
+    onNavigate: (node: string) => void;
 }

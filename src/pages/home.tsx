@@ -91,7 +91,22 @@ export default function HomePage(){
            
 
             <div className="absolute inset-0 z-0">
-                <Panorma nodeName={latestLocationPanel?.nodeName || ""}/>   
+                <Panorma
+                    nodeName={latestLocationPanel?.nodeName || ""}
+                    onNavigate={(nodeName) => {
+                        if (nodeName === latestLocationPanel?.nodeName) {
+                            return;
+                        }
+
+                        dispatch({
+                            type: "SELECT_NODE",
+                            payload: {
+                                id: -1,
+                                name: nodeName,
+                            },
+                        });
+                    }}
+                />   
             </div>
 
         </>

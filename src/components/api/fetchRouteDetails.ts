@@ -8,12 +8,9 @@ export const fetchNodeRoute = async({src,  dest, signal}: RouteReq): Promise<Nod
     const cacheKey = `${src}->${dest}`
 
     if (routeCache.has(cacheKey)){
-        console.log("🟢 CACHE HIT:", cacheKey)
         return routeCache.get(cacheKey)!;
     }
 
-    console.log("🔵 CACHE MISS (fetching):", cacheKey);
-    
     try {
         const response = await axios.get<NodeRouteResponse>(`${BaseUrl}/route?source=${src}&destination=${dest}`, 
             { signal }
