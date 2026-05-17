@@ -1,7 +1,7 @@
 // mainNode.tsx
 
 import { useLoader } from "@react-three/fiber";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 import type {
@@ -11,49 +11,51 @@ import type {
 export default function MainNode({
     position = [0, 0, 0],
     radius,
-    widthSegments = 128,
-    heightSegments = 128,
+    widthSegments = 64,
+    heightSegments = 32,
+    geometry,
     textureUrl,
     opacity = 1
 }: SphereProps) {
 
-    const texture = useLoader(
+    const loadedTexture = useLoader(
         THREE.TextureLoader,
         textureUrl!
     );
 
+    const texture = useMemo(() => {
+        const configuredTexture = loadedTexture.clone();
+
+        configuredTexture.wrapS = THREE.RepeatWrapping;
+        configuredTexture.repeat.x = -1;
+        configuredTexture.offset.x = 1;
+        configuredTexture.minFilter = THREE.LinearFilter;
+        configuredTexture.magFilter = THREE.LinearFilter;
+        configuredTexture.generateMipmaps = false;
+        configuredTexture.needsUpdate = true;
+
+        return configuredTexture;
+    }, [loadedTexture]);
+
     useEffect(() => {
-
-        texture.wrapS =
-            THREE.RepeatWrapping;
-
-        texture.repeat.x = -1;
-
-        texture.offset.x = 1;
-
-        texture.minFilter =
-            THREE.LinearFilter;
-
-        texture.magFilter =
-            THREE.LinearFilter;
-
-        texture.generateMipmaps = false;
-
-        texture.needsUpdate = true;
-
+        return () => {
+            texture.dispose();
+        };
     }, [texture]);
 
     return (
 
-        <mesh position={position}>
+        <mesh position={position} geometry={geometry}>
 
-            <sphereGeometry
-                args={[
-                    radius,
-                    widthSegments,
-                    heightSegments
-                ]}
-            />
+            {!geometry && (
+                <sphereGeometry
+                    args={[
+                        radius,
+                        widthSegments,
+                        heightSegments
+                    ]}
+                />
+            )}
 
             <meshBasicMaterial
                 map={texture}

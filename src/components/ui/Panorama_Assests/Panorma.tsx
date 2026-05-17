@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import * as THREE from "three";
 
 import type { PanoramaProps } from "./types/panoramaProps";
@@ -21,6 +21,10 @@ type PendingNavigation = {
   nodeName: string;
   targetPosition: [number, number, number];
 };
+
+const PANORAMA_RADIUS = 60;
+const PANORAMA_WIDTH_SEGMENTS = 64;
+const PANORAMA_HEIGHT_SEGMENTS = 32;
 
 export default function Panorma({
   nodeName,
@@ -72,7 +76,21 @@ export default function Panorma({
   const panoUrl =
     rawUrl && cloudfrontUrl ? `${cloudfrontUrl}/${rawUrl}` : null;
 
-  const maxRadius = 60;
+  const panoramaGeometry = useMemo(
+    () =>
+      new THREE.SphereGeometry(
+        PANORAMA_RADIUS,
+        PANORAMA_WIDTH_SEGMENTS,
+        PANORAMA_HEIGHT_SEGMENTS
+      ),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      panoramaGeometry.dispose();
+    };
+  }, [panoramaGeometry]);
 
   // panorama transition
   useEffect(() => {
@@ -206,7 +224,8 @@ export default function Panorma({
         {/* PREVIOUS PANORAMA */}
         {previousImage && (
           <MainNode
-            radius={maxRadius}
+            radius={PANORAMA_RADIUS}
+            geometry={panoramaGeometry}
             textureUrl={previousImage}
             position={[0, 0, 0]}
             opacity={1 - transition}
@@ -216,7 +235,8 @@ export default function Panorma({
         {/* CURRENT PANORAMA */}
         {currentImage && (
           <MainNode
-            radius={maxRadius}
+            radius={PANORAMA_RADIUS}
+            geometry={panoramaGeometry}
             textureUrl={currentImage}
             position={[0, 0, 0]}
             opacity={transition}
