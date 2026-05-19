@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { fetchNodeList } from "../api/fetchNodeList";
-import type { NodeList } from "../api/types/types_api";
+import type { MapNode } from "../api/types/types_api";
 
 // useAutocomplete.ts
 export default function useAutoCompleteFetch() {
-    const [list, setList] = useState<NodeList[]>([]);
+    const [list, setList] = useState<MapNode[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

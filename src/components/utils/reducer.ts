@@ -7,6 +7,7 @@ type Panel =
 
 type State = {
   stack: Panel[];
+  activeNodeName: string;
   directionsState: {
     locationA: string;
     locationB: string;
@@ -26,6 +27,7 @@ type Action =
 
 export const initialState: State = {
   stack: [{ type: "search" }],
+  activeNodeName: "",
   directionsState: {
     locationA: "",
     locationB: "",
@@ -38,6 +40,7 @@ export function reducer(state: State, action: Action): State {
     case "SELECT_NODE":
       return {
         ...state,
+        activeNodeName: action.payload.name,
         stack: [
           ...state.stack,
           {
@@ -91,6 +94,7 @@ export function reducer(state: State, action: Action): State {
     case "RESET_TO_SEARCH":
       return {
         ...state,
+        activeNodeName: "",
         stack: [{ type: "search" }],
       };
 

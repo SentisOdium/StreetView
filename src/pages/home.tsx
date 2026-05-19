@@ -13,13 +13,10 @@ export default function HomePage(){
     const {list, loading, error} = useAutoCompleteFetch()
    
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { stack, directionsState } = state;
+    const { stack, activeNodeName, directionsState } = state;
 
     const currentPanel = stack.at(-1);
     if (!currentPanel) return null;
-
-    const locationPanels = stack.filter(p => p.type === "location");
-    const latestLocationPanel = locationPanels.at(-1);
 
     const hasDirectionsPanel = stack.some(p => p.type === "directions");
 
@@ -92,9 +89,9 @@ export default function HomePage(){
 
             <div className="absolute inset-0 z-0">
                 <Panorma
-                    nodeName={latestLocationPanel?.nodeName || ""}
+                    nodeName={activeNodeName}
                     onNavigate={(nodeName) => {
-                        if (nodeName === latestLocationPanel?.nodeName) {
+                        if (nodeName === activeNodeName) {
                             return;
                         }
 
