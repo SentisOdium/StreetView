@@ -16,3 +16,10 @@ export type PanoramaProps  = {
     nodeName: string;
     onNavigate: (node: string) => void;
 }
+
+export type hotspotProps = {
+    position?: [number, number, number];
+    size?: [number, number, number];
+    color?: string;
+    onclick?: () => void;
+}

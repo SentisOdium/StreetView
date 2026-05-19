@@ -1,11 +1,5 @@
 // hotspot.tsx
-
-type hotspotProps = {
-    position?: [number, number, number];
-    size?: [number, number, number];
-    color?: string;
-    onclick?: () => void;
-}
+import type { hotspotProps } from "./types/panoramaProps";
 
 export default function Hotspot({
     position,

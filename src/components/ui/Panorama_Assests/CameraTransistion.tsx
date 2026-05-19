@@ -2,7 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-type Props = {
+type CameraProps = {
   trigger: number;
   targetPosition: [number, number, number] | null;
   onStart?: () => void;
@@ -21,7 +21,7 @@ export default function CameraTransition({
   onStart,
   onMidpoint,
   onComplete,
-}: Props) {
+}: CameraProps) {
   const { camera } = useThree() as { camera: THREE.PerspectiveCamera };
 
   const startPos = useRef(new THREE.Vector3());
@@ -45,9 +45,9 @@ export default function CameraTransition({
     // startRot.current.copy(camera.quaternion);
 
     // 2. Calculate where we want to "end" (a dash toward the target)
-    const targetVec = _v1.set(...targetPosition);
-    const direction = _v1.subVectors(targetVec, startPos.current).normalize();
-    endPos.current.copy(startPos.current).add(direction.multiplyScalar(pushDist));
+    // const targetVec = _v1.set(...targetPosition);
+    // const direction = _v1.subVectors(targetVec, startPos.current).normalize();
+    // endPos.current.copy(startPos.current).add(direction.multiplyScalar(pushDist));
 
     // 3. Calculate the rotation we need to be facing
     // const originalRot = camera.quaternion.clone();

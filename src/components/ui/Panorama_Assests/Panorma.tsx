@@ -101,7 +101,7 @@ export default function Panorma({
     let preloadTexture: THREE.Texture | null = null;
     let start: number;
 
-    const duration = 800;
+    const duration = 200;
 
     const animate = (time: number) => {
       if (cancelled) return;
@@ -120,7 +120,7 @@ export default function Panorma({
       const progress = Math.min(elapsed / duration, 1);
 
       const eased =
-        progress < 0.5
+        progress < 1
           ? 4 * progress * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
