@@ -66,8 +66,28 @@ export default function NodeLocationDetails({selectedNodeName, onDirections, onB
             </div>
 
             {hasDirectionsPanel && (
-            <div>
-                <button onClick={onBack}>back to node directions</button>
+            <div className="fixed bottom-0 left-0 w-full flex justify-center pb-6 z-50">
+                <button
+                    onClick={onBack}
+                    className="
+                        bg-[#800000]
+                        hover:bg-[#660000]
+                        text-white
+                        font-semibold
+                        px-6
+                        py-3
+                        rounded-2xl
+                        shadow-lg
+                        transition-all
+                        duration-200
+                        hover:scale-105
+                        active:scale-95
+                        border border-white/10
+                        backdrop-blur-sm
+                    "
+                >
+                    Back to Node Directions
+                </button>
             </div>
             )}
 
