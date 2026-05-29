@@ -11,6 +11,8 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
     const locationB = directionsState.locationB;
     const [activeField, setActiveField] = useState<ActiveField>("A");
     
+    const hasBothLocations = locationA.length > 0 && locationB.length > 0;
+
     const locationSwap = () => {
         if (!locationA || !locationB || locationA === locationB) return;
 
@@ -56,7 +58,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                     <div className="grid grid-cols-3 gap-4">
                         <div onClick={onBack}
                             className="col-span-3 flex items-center  h-12 justify-center border rounded-xl shadow-sm">
-                            other nav here  
+                            <h1 className="ml-5 p-2">Select Locations</h1>
                         </div>
                         {/* Starting Point */}
                         <div  className="col-span-2 z-15">
@@ -112,15 +114,17 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                         </div>
                     </div>
                     
-                        <RouteCardComponent 
-                        locA={locationA} 
-                        locB={locationB} 
-                        onSelectedRouteNode={onSelectedRouteNode}
-                        />
+                        {hasBothLocations && (
+                            <RouteCardComponent 
+                                locA={locationA} 
+                                locB={locationB} 
+                                onSelectedRouteNode={onSelectedRouteNode}
+                            />
+                        )}
                     
                     {(!locationA || !locationB) && (
-                        <div className="mt-4 bg-white rounded-2xl shadow-lg max-h-90 overflow-y-auto">
-                            <h1 className="ml-5 p-2">Select Locations</h1>
+                        <div className="mt-7 border bg-white rounded-2xl p-3 shadow-lg max-h-[700px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            
                             {list?.map((node: any) => (
                                 <button
                                     key={node.id}

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import Modal from "./modal";
 import { Loading, Error } from "./emptySearchUi";
 import { EmptySearchUi } from "./emptySearchUi";
+import { debounce } from "../../utils/debounce";
 
 type SearchProps<T> = {
     items: T[];

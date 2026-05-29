@@ -25,7 +25,7 @@ export default function SearchUI2(props: SearchUiProps){
                         props.onSelect(node);
                         setSearch(node?.node_name ?? "")
                     }}
-                    modalDesign="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown "
+                    modalDesign="mt-[64.6px] ml-[74.9px] w-90 shadow-xl animate-slideDown max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 />
 
 
