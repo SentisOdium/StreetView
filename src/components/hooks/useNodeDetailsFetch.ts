@@ -1,49 +1,40 @@
-import { useState, useEffect, useCallback, useRef  } from "react";
-import useLoadingError from "./useLoadingError";
-import { fetchNodeDetails } from "../api/fetchNodeDetails";
-import type { NodeDetails } from "../api/types/types_api";
+import { useEffect, useRef } from "react";
+import { useLocation } from "../../context/LocationContext";
 
-export default function useNodeDetailsFetch(name: string){
-    const [details, setDetails] = useState<NodeDetails | null>(null);
-    const {setError, setLoading} = useLoadingError();
-    const controllerRef = useRef<AbortController | null>(null);
+export default function useNodeDetailsFetch(name: string) {
+    const { 
+        nodeDetails, 
+        nodeDetailsLoading, 
+        nodeDetailsError, 
+        fetchNodeDetails, 
+        preloadAdjacentNodes 
+    } = useLocation();
 
-    const fetchData = useCallback(async() =>{ 
-        controllerRef.current?.abort();
+    const preloadedForRef = useRef<string | null>(null);
 
-        const controller = new AbortController();
-        controllerRef.current = controller;
+    const details = nodeDetails[name] || null;
+    const loading = nodeDetailsLoading[name] || false;
+    const error = nodeDetailsError[name] || null;
 
-        setLoading(true);
-        setError(null);
-
-        try {
-            const data = await fetchNodeDetails(name, controller.signal);
-            
-            setDetails(data);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                if (err.name === "AbortError") return; 
-                setError(err.message);
-            } else {
-                setError("Unknown Error Occurred");
-            }
-        }finally {
-            if (!controller.signal?.aborted) {
-                setLoading(false);
-            }
-        }
-    }, [name, setError, setLoading])
-        
     useEffect(() => {
-        if(name.trim()){
-            fetchData();
+        if (name.trim()) {
+            fetchNodeDetails(name);
         }
-    }, [ fetchData])
+    }, [name, fetchNodeDetails]);
+
+    // Preload adjacent nodes in the background for instant transitions!
+    useEffect(() => {
+        if (name.trim() && details && preloadedForRef.current !== name) {
+            preloadedForRef.current = name;
+            preloadAdjacentNodes(name);
+        }
+    }, [name, details, preloadAdjacentNodes]);
 
     const refetch = () => {
-        fetchData();
+        if (name.trim()) {
+            fetchNodeDetails(name);
+        }
     };
 
-    return { details, setDetails, refetch}
+    return { details, loading, error, refetch };
 }

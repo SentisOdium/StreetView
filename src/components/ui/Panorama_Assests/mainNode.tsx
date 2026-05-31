@@ -20,7 +20,10 @@ export default function MainNode({
 
     const loadedTexture = useLoader(
         THREE.TextureLoader,
-        textureUrl!
+        textureUrl!,
+        (loader) => {
+            loader.setCrossOrigin("anonymous");
+        }
     );
 
     const texture = useMemo(() => {

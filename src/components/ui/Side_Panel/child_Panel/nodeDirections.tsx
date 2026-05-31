@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import Search from "../../reusableUI/search"
@@ -42,15 +42,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
         handleLocationASelect(node);
     }
 
-    useEffect(() => {
-        if (locationA && !locationB) {
-            setActiveField("B");
-        }
 
-        if (locationA && locationB) {
-            setActiveField(null);
-        }
-    }, [locationA, locationB]);
 
     return (
         <>
@@ -77,7 +69,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 getLabel={(node: any) => node?.node_name ?? ""}    
                                                 onSelect={handleLocationASelect} 
                                                 disabled={activeField !== "A"}
-                                                modalDesign="mt-32 ml-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
+                                                modalDesign="mt-32 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
                             </div>
                         </div>
@@ -108,7 +100,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 getLabel={(node: any) => node?.node_name ?? ""}    
                                                 onSelect={handleLocationBSelect} 
                                                 disabled={activeField !== "B"}
-                                                modalDesign="mt-47 ml-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
+                                                modalDesign="mt-47 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
                             </div>
                         </div>

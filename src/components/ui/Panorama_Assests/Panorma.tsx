@@ -134,6 +134,7 @@ export default function Panorma({
     };
 
     const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
 
     preloadTexture = loader.load(
       panoUrl,

@@ -52,6 +52,6 @@
     }
 }
 
-.animate-slideDown {
-    animation: slideDown 0.25s forwards;
+.animate-slideUp {
+    animation: slideUp 0.25s forwards;
 }

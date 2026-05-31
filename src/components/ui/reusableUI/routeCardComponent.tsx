@@ -34,7 +34,7 @@ export default function RouteCardComponent({locA, locB, onSelectedRouteNode}: Ro
           {/* Timeline */}
           <div className="relative border-l border-gray-200 pl-5 space-y-4">
 
-            {route.map((node, index) => (
+            {route.map((node) => (
               <div key={node.id} className="relative">
                 <div className="grid grid-cols-3 bg-gray-50 hover:bg-gray-100">
 

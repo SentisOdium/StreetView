@@ -1,4 +1,3 @@
-import useLoadingError from "../../../hooks/useLoadingError";
 import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
 import { Loading, Error } from "../../reusableUI/emptySearchUi";
 import {WayfinderLogo1, DirectionsIcon, ShareIcon } from "../../reusableUI/logo.exports";
@@ -6,8 +5,7 @@ import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
 
 export default function NodeLocationDetails({selectedNodeName, onDirections, onBack, hasDirectionsPanel = false}: NodeLocationDetailsProps) {
 
-    const { error, loading } = useLoadingError();
-    const { details } = useNodeDetailsFetch(selectedNodeName || "");
+    const { details, loading, error } = useNodeDetailsFetch(selectedNodeName || "");
 
     if (!selectedNodeName) return null;
     if (!details) return <div>No details available.</div>;

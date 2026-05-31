@@ -10,10 +10,7 @@ type CameraProps = {
   onComplete?: () => void;
 };
 
-// Internal scratch variables to keep memory usage low
 const _v1 = new THREE.Vector3();
-const _qStart = new THREE.Quaternion();
-const _qEnd = new THREE.Quaternion();
 
 export default function CameraTransition({
   trigger,
@@ -41,19 +38,19 @@ export default function CameraTransition({
     if (!targetPosition) return;
 
     // 1. Capture snapshots of where we are now
-    // startPos.current.copy(camera.position);
-    // startRot.current.copy(camera.quaternion);
+    startPos.current.copy(camera.position);
+    startRot.current.copy(camera.quaternion);
 
     // 2. Calculate where we want to "end" (a dash toward the target)
-    // const targetVec = _v1.set(...targetPosition);
-    // const direction = _v1.subVectors(targetVec, startPos.current).normalize();
-    // endPos.current.copy(startPos.current).add(direction.multiplyScalar(pushDist));
+    const targetVec = _v1.set(...targetPosition);
+    const direction = _v1.subVectors(targetVec, startPos.current).normalize();
+    endPos.current.copy(startPos.current).add(direction.multiplyScalar(pushDist));
 
     // 3. Calculate the rotation we need to be facing
-    // const originalRot = camera.quaternion.clone();
-    // camera.lookAt(targetVec);
-    // endRot.current.copy(camera.quaternion);
-    // camera.quaternion.copy(originalRot); // Reset immediately so we can animate it
+    const originalRot = camera.quaternion.clone();
+    camera.lookAt(targetVec);
+    endRot.current.copy(camera.quaternion);
+    camera.quaternion.copy(originalRot); // Reset immediately so we can animate it
 
     progress.current = 0;
     animating.current = true;
@@ -74,8 +71,8 @@ export default function CameraTransition({
         : 1 - Math.pow(-2 * p + 2, 5) / 2;
 
     // Position & Rotation lerping
-    // camera.position.lerpVectors(startPos.current, endPos.current, eased);
-    // camera.quaternion.slerpQuaternions(startRot.current, endRot.current, eased);
+    camera.position.lerpVectors(startPos.current, endPos.current, eased);
+    camera.quaternion.slerpQuaternions(startRot.current, endRot.current, eased);
 
     // FOV PUMP: Stretches the world visually during the dash
     const stretch = Math.pow(Math.sin(p * Math.PI), 2);
