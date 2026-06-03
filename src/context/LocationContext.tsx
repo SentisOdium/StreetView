@@ -121,7 +121,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     // For each hotspot, get the adjacent node id and fetch its details if not already cached/loading
     const adjacentNodeNames: string[] = [];
     mainDetails.Hotspots.forEach(hotspot => {
-      const adjacentNodeId = hotspot.node_id; // This is the destination node id
+      const adjacentNodeId = hotspot.node_id; // `node.id` of the destination
       const adjacentNodeName = nodeIdToNameMap[adjacentNodeId];
       if (adjacentNodeName) {
         adjacentNodeNames.push(adjacentNodeName);

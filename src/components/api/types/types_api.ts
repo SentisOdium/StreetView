@@ -16,6 +16,7 @@ export type NodeDetails = {
     }
 
     Hotspots: {
+        /** Destination node id (`node.id`), not `node_details.id`. */
         node_id: number;
         currentNode_id: number;
         hotspot_name: string;

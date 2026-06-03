@@ -14,7 +14,7 @@ export type SphereProps = {
 
 export type PanoramaProps  = {
     nodeName: string;
-    onNavigate: (node: string) => void;
+    onNavigate: (nodeId: number, destinationName?: string) => void;
 }
 
 export type hotspotProps = {

@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
-import { Suspense, useState, useEffect, useCallback, useMemo } from "react";
+import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import type { PanoramaProps } from "./types/panoramaProps";
@@ -18,7 +18,8 @@ function convertCoordinates(coord: string): [number, number, number] {
 }
 
 type PendingNavigation = {
-  nodeName: string;
+  nodeId: number;
+  destinationName: string;
   targetPosition: [number, number, number];
 };
 
@@ -41,6 +42,12 @@ export default function Panorma({
     useState<PendingNavigation | null>(null);
 
   const [transitionTrigger, setTransitionTrigger] = useState(0);
+  const blinkTimeouts = useRef<number[]>([]);
+  const currentImageRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    currentImageRef.current = currentImage;
+  }, [currentImage]);
 
   const handleCameraTransitionStart = useCallback(() => {
     setCameraTransitionActive(true);
@@ -51,23 +58,30 @@ export default function Panorma({
     setPendingNavigation(null);
   }, []);
 
+  const currentNodeId = details?.Current?.id;
+
   const handleCameraTransitionMidpoint = useCallback(() => {
     if (!pendingNavigation) return;
-    onNavigate(pendingNavigation.nodeName);
+    onNavigate(pendingNavigation.nodeId, pendingNavigation.destinationName);
   }, [onNavigate, pendingNavigation]);
 
   const handleHotspotClick = useCallback(
-    (nextNodeName: string, targetPosition: [number, number, number]) => {
-      if (nextNodeName === nodeName) return;
+    (
+      destinationNodeId: number,
+      destinationName: string,
+      targetPosition: [number, number, number]
+    ) => {
+      if (!destinationNodeId || destinationNodeId === currentNodeId) return;
 
       setPendingNavigation({
-        nodeName: nextNodeName,
+        nodeId: destinationNodeId,
+        destinationName,
         targetPosition,
       });
 
       setTransitionTrigger((prev) => prev + 1);
     },
-    [nodeName]
+    [currentNodeId]
   );
 
   const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL || "";
@@ -92,67 +106,33 @@ export default function Panorma({
     };
   }, [panoramaGeometry]);
 
-  // panorama transition
+  // panorama blink transition
   useEffect(() => {
     if (!panoUrl) return;
 
-    let animationFrameId: number;
-    let cancelled = false;
-    let preloadTexture: THREE.Texture | null = null;
-    let start: number;
+    blinkTimeouts.current.forEach(clearTimeout);
+    blinkTimeouts.current = [];
 
-    const duration = 200;
+    setPreviousImage(currentImageRef.current ?? null);
+    setCurrentImage(panoUrl);
+    setTransition(1);
 
-    const animate = (time: number) => {
-      if (cancelled) return;
+    const blinkSequence = [0, 1, 0, 1];
+    blinkSequence.forEach((value, index) => {
+      const timeoutId = window.setTimeout(() => {
+        setTransition(value);
+      }, index * 120);
+      blinkTimeouts.current.push(timeoutId);
+    });
 
-      if (!start) {
-        start = time;
-        setTransition(0);
-
-        setCurrentImage((prev) => {
-          setPreviousImage(prev ?? null);
-          return panoUrl;
-        });
-      }
-
-      const elapsed = time - start;
-      const progress = Math.min(elapsed / duration, 1);
-
-      const eased =
-        progress < 1
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-      setTransition(eased);
-
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setPreviousImage(null);
-      }
-    };
-
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin("anonymous");
-
-    preloadTexture = loader.load(
-      panoUrl,
-      () => {
-        if (cancelled) return;
-        animationFrameId = requestAnimationFrame(animate);
-      },
-      undefined,
-      () => {
-        if (cancelled) return;
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    );
+    const cleanupId = window.setTimeout(() => {
+      setPreviousImage(null);
+    }, blinkSequence.length * 120);
+    blinkTimeouts.current.push(cleanupId);
 
     return () => {
-      cancelled = true;
-      cancelAnimationFrame(animationFrameId);
-      preloadTexture?.dispose();
+      blinkTimeouts.current.forEach(clearTimeout);
+      blinkTimeouts.current = [];
     };
   }, [panoUrl]);
 
@@ -213,6 +193,7 @@ export default function Panorma({
                 position={position}
                 onclick={() =>
                   handleHotspotClick(
+                    h.node_id,
                     h.hotspot_name,
                     position
                   )

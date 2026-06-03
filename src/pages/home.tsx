@@ -136,16 +136,18 @@ export default function HomePage(){
                 {activeNodeName ? (
                     <Panorma
                         nodeName={activeNodeName}
-                        onNavigate={(nodeName) => {
-                            if (nodeName === activeNodeName) {
+                        onNavigate={(nodeId, destinationName) => {
+                            const fromList = list.find((n) => n.id === nodeId);
+                            const name = fromList?.node_name ?? destinationName;
+                            if (!name || name === activeNodeName) {
                                 return;
                             }
 
                             dispatch({
                                 type: "SELECT_NODE",
                                 payload: {
-                                    id: -1,
-                                    name: nodeName,
+                                    id: fromList?.id ?? nodeId,
+                                    name,
                                 },
                             });
                         }}
