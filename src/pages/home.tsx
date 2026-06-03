@@ -16,7 +16,7 @@ export default function HomePage(){
     const {list, loading, error} = useAutoCompleteFetch()
    
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { stack, activeNodeName, directionsState } = state;
+    const { stack, activeNodeName, activeNodeId, directionsState } = state;
     const [isCollapsed, setIsCollapsed] = useState(false);
 
 
@@ -68,6 +68,7 @@ export default function HomePage(){
                         <NodeLocationDetails
                             selectedNodeName={currentPanel.nodeName}
                             hasDirectionsPanel={hasDirectionsPanel}
+                            canGoBack={stack.length > 2}
                             onDirections={() =>
                                 dispatch({ type: "SHOW_DIRECTIONS" })
                             }
@@ -136,17 +137,19 @@ export default function HomePage(){
                 {activeNodeName ? (
                     <Panorma
                         nodeName={activeNodeName}
-                        onNavigate={(nodeId, destinationName) => {
-                            const fromList = list.find((n) => n.id === nodeId);
-                            const name = fromList?.node_name ?? destinationName;
-                            if (!name || name === activeNodeName) {
+                        onNavigate={(destinationId, destinationName) => {
+                            const resolvedNode = list.find((n) => n.id === destinationId);
+                            const name =
+                                resolvedNode?.node_name?.trim() || destinationName?.trim();
+
+                            if (!name || resolvedNode?.id === activeNodeId) {
                                 return;
                             }
 
                             dispatch({
-                                type: "SELECT_NODE",
+                                type: "NAVIGATE_NODE",
                                 payload: {
-                                    id: fromList?.id ?? nodeId,
+                                    id: resolvedNode?.id ?? destinationId,
                                     name,
                                 },
                             });

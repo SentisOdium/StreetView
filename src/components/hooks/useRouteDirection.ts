@@ -4,7 +4,7 @@ import { fetchNodeRoute } from "../api/fetchRouteDetails";
 import type { NodeRoute, RouteReq } from "../api/types/types_api";
     
 export default function useRouteDirection({src,  dest}: RouteReq){
-    const { setError, setLoading} = useLoadingError();
+    const { error, setError, loading, setLoading} = useLoadingError();
     const [route, setRoute] = useState<NodeRoute[] | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
 
@@ -20,7 +20,6 @@ export default function useRouteDirection({src,  dest}: RouteReq){
         try {
             const data = await fetchNodeRoute({src, dest, signal:controller.signal})
             setRoute(data)
-            console.log("Fetched route data: ", data)
         } catch (err: unknown) {
             if (err instanceof Error) {
                 if (err.name === "AbortError") return; 
@@ -50,5 +49,5 @@ export default function useRouteDirection({src,  dest}: RouteReq){
         fetchData();
     }
 
-    return{ route, setRoute, refetch}
+    return { route, loading, error, setRoute, refetch };
 }

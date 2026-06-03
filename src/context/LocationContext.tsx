@@ -11,7 +11,7 @@ interface LocationContextProps {
   nodeDetailsLoading: Record<string, boolean>;
   nodeDetailsError: Record<string, string | null>;
   fetchNodeList: () => Promise<void>;
-  fetchNodeDetails: (name: string) => Promise<void>;
+  fetchNodeDetails: (name: string) => Promise<NodeDetails | null>;
   preloadAdjacentNodes: (nodeName: string) => Promise<void>;
 }
 
@@ -30,21 +30,18 @@ interface LocationProviderProps {
 }
 
 export const LocationProvider = ({ children }: LocationProviderProps) => {
-  // State for node list
   const [nodeList, setNodeList] = useState<MapNode[]>([]);
   const [nodeListLoading, setNodeListLoading] = useState<boolean>(false);
   const [nodeListError, setNodeListError] = useState<string | null>(null);
 
-  // State for node details (per node)
   const [nodeDetails, setNodeDetails] = useState<Record<string, NodeDetails>>({});
   const [nodeDetailsLoading, setNodeDetailsLoading] = useState<Record<string, boolean>>({});
   const [nodeDetailsError, setNodeDetailsError] = useState<Record<string, string | null>>({});
 
-  // Refs for caching (to avoid refetching on re-renders)
   const listCacheRef = useRef<Map<string, MapNode[]>>(new Map());
   const detailsCacheRef = useRef<Map<string, NodeDetails>>(new Map());
+  const preloadGenerationRef = useRef(0);
 
-  // Fetch node list
   const fetchNodeList = useCallback(async () => {
     setNodeListLoading(true);
     setNodeListError(null);
@@ -58,7 +55,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
           return;
         }
       }
-      const data = await apiFetchNodeList(undefined); // No signal for now, we can add if needed
+      const data = await apiFetchNodeList(undefined);
       listCacheRef.current.set(cacheKey, data);
       setNodeList(data);
     } catch (err: unknown) {
@@ -72,75 +69,71 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     }
   }, []);
 
-  // Fetch node details for a specific node name
-  const fetchNodeDetails = useCallback(async (name: string) => {
-    if (!name.trim()) return;
+  const fetchNodeDetails = useCallback(async (name: string): Promise<NodeDetails | null> => {
+    if (!name.trim()) return null;
 
-    setNodeDetailsLoading(prev => ({ ...prev, [name]: true }));
-    setNodeDetailsError(prev => ({ ...prev, [name]: null }));
+    const cacheKey = `node-details-${name}`;
+    const cached = detailsCacheRef.current.get(cacheKey);
+    if (cached) {
+      setNodeDetails((prev) => ({ ...prev, [name]: cached }));
+      return cached;
+    }
+
+    setNodeDetailsLoading((prev) => ({ ...prev, [name]: true }));
+    setNodeDetailsError((prev) => ({ ...prev, [name]: null }));
 
     try {
-      const cacheKey = `node-details-${name}`;
-      if (detailsCacheRef.current.has(cacheKey)) {
-        const cachedDetails = detailsCacheRef.current.get(cacheKey);
-        if (cachedDetails) {
-          setNodeDetails(prev => ({ ...prev, [name]: cachedDetails }));
-          setNodeDetailsLoading(prev => ({ ...prev, [name]: false }));
-          return;
-        }
-      }
-      const data = await apiFetchNodeDetails(name, undefined); // No signal for now
+      const data = await apiFetchNodeDetails(name, undefined);
       detailsCacheRef.current.set(cacheKey, data);
-      setNodeDetails(prev => ({ ...prev, [name]: data }));
+      setNodeDetails((prev) => ({ ...prev, [name]: data }));
+      return data;
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setNodeDetailsError(prev => ({ ...prev, [name]: err.message }));
+        setNodeDetailsError((prev) => ({ ...prev, [name]: err.message }));
       } else {
-        setNodeDetailsError(prev => ({ ...prev, [name]: "Unknown error" }));
+        setNodeDetailsError((prev) => ({ ...prev, [name]: "Unknown error" }));
       }
+      return null;
     } finally {
-      setNodeDetailsLoading(prev => ({ ...prev, [name]: false }));
+      setNodeDetailsLoading((prev) => ({ ...prev, [name]: false }));
     }
   }, []);
 
-  // Preload adjacent nodes for a given node name
-  const preloadAdjacentNodes = useCallback(async (mainNodeName: string) => {
-    // First, ensure the main node details are loaded
-    await fetchNodeDetails(mainNodeName);
+  const preloadAdjacentNodes = useCallback(
+    async (mainNodeName: string) => {
+      const generation = ++preloadGenerationRef.current;
 
-    // Get the main node details from state (after fetch)
-    const mainDetails = nodeDetails[mainNodeName];
-    if (!mainDetails || !mainDetails.Hotspots) return;
-
-    // Create a map from node_id to node_name for quick lookup
-    const nodeIdToNameMap: Record<number, string> = {};
-    nodeList.forEach(node => {
-      nodeIdToNameMap[node.id] = node.node_name;
-    });
-
-    // For each hotspot, get the adjacent node id and fetch its details if not already cached/loading
-    const adjacentNodeNames: string[] = [];
-    mainDetails.Hotspots.forEach(hotspot => {
-      const adjacentNodeId = hotspot.node_id; // `node.id` of the destination
-      const adjacentNodeName = nodeIdToNameMap[adjacentNodeId];
-      if (adjacentNodeName) {
-        adjacentNodeNames.push(adjacentNodeName);
+      const mainDetails = await fetchNodeDetails(mainNodeName);
+      if (!mainDetails?.Hotspots?.length || generation !== preloadGenerationRef.current) {
+        return;
       }
-    });
 
-    // Fetch details for each adjacent node (if not already cached or loading)
-    await Promise.all(
-      adjacentNodeNames.map(name => {
-        // Skip if we already have the details or if it's currently loading
-        if (nodeDetails[name] || nodeDetailsLoading[name]) {
-          return Promise.resolve();
+      const nodeIdToName = new Map(nodeList.map((node) => [node.id, node.node_name]));
+
+      const adjacentNames = new Set<string>();
+      for (const hotspot of mainDetails.Hotspots) {
+        const name =
+          nodeIdToName.get(hotspot.destination_id) ?? hotspot.destination_name;
+        if (name?.trim()) {
+          adjacentNames.add(name);
         }
-        return fetchNodeDetails(name);
-      })
-    );
-  }, [fetchNodeDetails, nodeDetails, nodeDetailsLoading, nodeList]);
+      }
 
-  // Initial fetch of node list
+      await Promise.all(
+        [...adjacentNames].map((name) => {
+          if (generation !== preloadGenerationRef.current) {
+            return Promise.resolve();
+          }
+          if (detailsCacheRef.current.has(`node-details-${name}`)) {
+            return Promise.resolve();
+          }
+          return fetchNodeDetails(name);
+        })
+      );
+    },
+    [fetchNodeDetails, nodeList]
+  );
+
   useEffect(() => {
     fetchNodeList();
   }, [fetchNodeList]);

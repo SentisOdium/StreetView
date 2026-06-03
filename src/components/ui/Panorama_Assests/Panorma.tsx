@@ -5,11 +5,15 @@ import { Suspense, useState, useEffect, useCallback, useMemo, useRef } from "rea
 import * as THREE from "three";
 
 import type { PanoramaProps } from "./types/panoramaProps";
-import type { NodeDetails } from "../../api/types/types_api";
+import type { Hotspot as HotspotData, NodeDetails } from "../../api/types/types_api";
 
 import CameraTransition from "./CameraTransistion";
 import MainNode from "./mainNode";
 import Hotspot from "./hotspot";
+import PanoramaStatus from "../reusableUI/PanoramaStatus";
+import { panoramaImageUrl } from "../../utils/imageUrl";
+
+const DEBUG_NAV = import.meta.env.DEV;
 
 function convertCoordinates(coord: string): [number, number, number] {
   const [x, y] = coord.split(",").map(Number);
@@ -18,7 +22,7 @@ function convertCoordinates(coord: string): [number, number, number] {
 }
 
 type PendingNavigation = {
-  nodeId: number;
+  destinationId: number;
   destinationName: string;
   targetPosition: [number, number, number];
 };
@@ -62,20 +66,27 @@ export default function Panorma({
 
   const handleCameraTransitionMidpoint = useCallback(() => {
     if (!pendingNavigation) return;
-    onNavigate(pendingNavigation.nodeId, pendingNavigation.destinationName);
+    onNavigate(
+      pendingNavigation.destinationId,
+      pendingNavigation.destinationName
+    );
   }, [onNavigate, pendingNavigation]);
 
   const handleHotspotClick = useCallback(
-    (
-      destinationNodeId: number,
-      destinationName: string,
-      targetPosition: [number, number, number]
-    ) => {
-      if (!destinationNodeId || destinationNodeId === currentNodeId) return;
+    (hotspot: HotspotData, targetPosition: [number, number, number]) => {
+      const { destination_id: destinationId } = hotspot;
+
+      if (DEBUG_NAV) {
+        console.log("Hotspot payload:", hotspot);
+        console.log("Current node:", currentNodeId);
+        console.log("Destination node:", destinationId);
+      }
+
+      if (!destinationId || destinationId === currentNodeId) return;
 
       setPendingNavigation({
-        nodeId: destinationNodeId,
-        destinationName,
+        destinationId,
+        destinationName: hotspot.destination_name,
         targetPosition,
       });
 
@@ -84,11 +95,9 @@ export default function Panorma({
     [currentNodeId]
   );
 
-  const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL || "";
   const rawUrl = details?.Current?.img.src;
-
-  const panoUrl =
-    rawUrl && cloudfrontUrl ? `${cloudfrontUrl}/${rawUrl}` : null;
+  const panoUrl = panoramaImageUrl(rawUrl);
+  const cloudfrontUrl = import.meta.env.VITE_CLOUDFRONT_URL || "";
 
   const panoramaGeometry = useMemo(
     () =>
@@ -136,17 +145,22 @@ export default function Panorma({
     };
   }, [panoUrl]);
 
-  // loading guard
-  if (!rawUrl) {
-    return <div className="ml-60">Loading panorama...</div>;
-  }
-
   if (!cloudfrontUrl) {
     console.error("VITE_CLOUDFRONT_URL is not set");
-    return <div className="ml-60">Configuration error</div>;
+    return (
+      <PanoramaStatus
+        variant="error"
+        message="Panorama images are unavailable. Set VITE_CLOUDFRONT_URL and reload."
+      />
+    );
+  }
+
+  if (!rawUrl || !panoUrl) {
+    return <PanoramaStatus message="Loading panorama..." />;
   }
 
   return (
+    <div className="relative h-full w-full">
     <Canvas
       style={{ width: "100vw", height: "100vh" }}
       camera={{
@@ -180,24 +194,18 @@ export default function Panorma({
 
       <Suspense fallback={null}>
         {/* HOTSPOTS */}
-        {(details.Hotspots ?? []).map(
-          (h: NodeDetails["Hotspots"][number]) => {
+        {(details?.Hotspots ?? []).map(
+          (h: NodeDetails["Hotspots"][number], index: number) => {
             const position = convertCoordinates(
               h.coordinates.node_Coordinates
             );
 
             return (
               <Hotspot
-                key={h.node_id}
+                key={`${h.destination_id}-${h.coordinates.node_Direction}-${index}`}
                 color="red"
                 position={position}
-                onclick={() =>
-                  handleHotspotClick(
-                    h.node_id,
-                    h.hotspot_name,
-                    position
-                  )
-                }
+                onclick={() => handleHotspotClick(h, position)}
               />
             );
           }
@@ -226,5 +234,6 @@ export default function Panorma({
         )}
       </Suspense>
     </Canvas>
+    </div>
   );
 }

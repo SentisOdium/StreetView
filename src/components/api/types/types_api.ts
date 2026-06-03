@@ -4,6 +4,16 @@ export type MapNode = {
     type: string;
 }
 
+export type Hotspot = {
+    destination_id: number;
+    destination_name: string;
+    hotspot_label: string;
+    coordinates: {
+        node_Coordinates: string;
+        node_Direction: string;
+    };
+};
+
 export type NodeDetails = {
     Current?: {
         id: number;
@@ -15,16 +25,7 @@ export type NodeDetails = {
         }
     }
 
-    Hotspots: {
-        /** Destination node id (`node.id`), not `node_details.id`. */
-        node_id: number;
-        currentNode_id: number;
-        hotspot_name: string;
-        coordinates: {
-            node_Coordinates: string;
-            node_Direction: string;
-        }
-    }[]
+    Hotspots: Hotspot[];
 
     Room_Sprite?: {
         room_number: number;

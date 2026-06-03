@@ -16,9 +16,10 @@ interface hotspot_coordinates {
 }
 
 interface hotspot {
-    node_id: number,
-    hotspot_name: string,
-    hotspot_coordinates:hotspot_coordinates 
+    destination_id: number,
+    destination_name: string,
+    hotspot_label: string,
+    hotspot_coordinates: hotspot_coordinates 
 }
 
 interface room_sprite {

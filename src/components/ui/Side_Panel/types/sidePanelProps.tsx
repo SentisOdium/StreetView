@@ -12,6 +12,7 @@ export type NodeLocationDetailsProps = Pick<SearchUiProps, "onDirections"> & {
     selectedNodeName: string | null;
     onBack: () => void;
     hasDirectionsPanel?: boolean;
+    canGoBack?: boolean;
 }
 
 export type NodeDirectionsProps = {

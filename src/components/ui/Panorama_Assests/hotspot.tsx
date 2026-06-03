@@ -12,7 +12,10 @@ export default function Hotspot({
 
         <mesh
             position={position}
-            onClick={onclick}
+            onClick={(e) => {
+                e.stopPropagation();
+                onclick?.();
+            }}
         >
 
             <boxGeometry args={size} />

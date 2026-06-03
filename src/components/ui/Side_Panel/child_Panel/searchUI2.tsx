@@ -1,57 +1,73 @@
-//remember to add the handleenterkey function. 
-import { useState } from "react";
-import Search from "../../reusableUI/search"
+import { useRef, useState } from "react";
+import Search from "../../reusableUI/search";
 import type { SearchUiProps } from "../types/sidePanelProps";
+import type { MapNode } from "../../../api/types/types_api";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
 
-export default function SearchUI2(props: SearchUiProps){
-    const [search, setSearch] = useState("")
+export default function SearchUI2(props: SearchUiProps) {
+  const [search, setSearch] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const errorMessage =
+    typeof props.error === "string"
+      ? props.error
+      : props.error instanceof Error
+        ? props.error.message
+        : null;
 
-    return(
-        <div className = "ml-14.75">
-            <div 
-                className = {`w-90 pt-1 pb-1 z-20 m-4 px-4 flex items-center justify-between bg-white  h-12 
-                                    ${ search.length > 0 ?  
-                                            "rounded-2xl" : 
-                                            "rounded-2xl shadow-xl"}`} >
+  return (
+    <div className="ml-14.75">
+      <div
+        className={`z-20 m-4 flex h-12 w-90 items-center justify-between bg-white px-4 pt-1 pb-1 ${
+          search.length > 0 ? "rounded-2xl" : "rounded-2xl shadow-xl"
+        }`}
+      >
+        <Search
+          inputRef={inputRef}
+          value={search}
+          onChange={setSearch}
+          placeholder="Enter your Destination"
+          items={props.list || []}
+          loading={props.loading}
+          error={errorMessage}
+          getLabel={(node: MapNode) => node.node_name}
+          getKey={(node: MapNode) => node.id}
+          onSelect={(node: MapNode) => {
+            props.onSelect(node);
+            setSearch(node.node_name);
+          }}
+          modalDesign="mt-[64.6px] ml-auto mr-4 w-90 max-h-[300px] overflow-y-auto shadow-xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        />
 
-                <Search
-                    value={search}
-                    onChange={setSearch}
-                    placeholder="Enter your Destination"
-                    items={props.list || []}
-                    getLabel={(node: any) => node?.node_name ?? ""}                
-                    onSelect={(node: any) => {
-                        props.onSelect(node);
-                        setSearch(node?.node_name ?? "")
-                    }}
-                    modalDesign="mt-[64.6px] ml-auto mr-4 w-90 shadow-xl animate-slideDown max-h-[300px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                />
-
-                <div className="flex space-x-2 ml-2">
-                    <span 
-                        onClick={() => {}} 
-                        className="hover:bg-gray-100 rounded-2xl p-1 cursor-pointer">
-                            <SearchIcon sx={{ color: '#800000' }}/>
-                    </span>
-                    {!search ?(
-                        <span 
-                            onClick={() => {props.onDirections(); console.log("Directions clicked");}} 
-                            className="hover:bg-gray-100 rounded-2xl p-1 cursor-pointer">
-                                <DirectionsIcon sx={{ color: '#800000' }}/>
-                        </span>  
-                    ):(
-                        <span 
-                            onClick={() => {
-                                setSearch("");
-                            }}
-                            className="hover:bg-gray-100 rounded-2xl cursor-pointer">
-                                <ClearIcon sx={{ color: '#800000'}} />
-                        </span> )
-                    }
-                </div>
-                </div>
+        <div className="ml-2 flex space-x-2">
+          <button
+            type="button"
+            aria-label="Focus search"
+            onClick={() => inputRef.current?.focus()}
+            className="cursor-pointer rounded-2xl p-1 hover:bg-gray-100"
+          >
+            <SearchIcon sx={{ color: "#800000" }} />
+          </button>
+          {!search ? (
+            <button
+              type="button"
+              aria-label="Open directions"
+              onClick={props.onDirections}
+              className="cursor-pointer rounded-2xl p-1 hover:bg-gray-100"
+            >
+              <DirectionsIcon sx={{ color: "#800000" }} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => setSearch("")}
+              className="cursor-pointer rounded-2xl p-1 hover:bg-gray-100"
+            >
+              <ClearIcon sx={{ color: "#800000" }} />
+            </button>
+          )}
         </div>
-        
-    )
+      </div>
+    </div>
+  );
 }

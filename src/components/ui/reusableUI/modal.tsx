@@ -16,11 +16,13 @@ const Modal = ({ children, onClose, isVisible, design }: ModalProps) => {
     return (
         <div 
             className="fixed inset-0 z-50"
-            id="wrapper"
+            role="presentation"
             onClick={handleClose}>
 
                 <div 
-                    className={`bg-white   rounded-b-xl  p-4 shadow-lg flex flex-col ${design}`}
+                    role="dialog"
+                    aria-modal="true"
+                    className={`flex flex-col rounded-b-xl bg-white p-4 shadow-lg ${design}`}
                     onClick={(e) => e.stopPropagation()}>
                         {children}
                 </div>  

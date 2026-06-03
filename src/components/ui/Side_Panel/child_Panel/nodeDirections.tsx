@@ -48,10 +48,13 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
         <>
             <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
                     <div className="grid grid-cols-3 gap-4">
-                        <div onClick={onBack}
-                            className="col-span-3 flex items-center  h-12 justify-center border rounded-xl shadow-sm">
-                            <h1 className="ml-5 p-2">Select Locations</h1>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={onBack}
+                            className="col-span-3 flex h-12 cursor-pointer items-center justify-center rounded-xl border shadow-sm transition hover:bg-gray-50"
+                        >
+                            <h1 className="p-2 text-base font-medium">Select Locations</h1>
+                        </button>
                         {/* Starting Point */}
                         <div  className="col-span-2 z-15">
                             <div onClick={() => setActiveField("A")}
@@ -66,7 +69,8 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 onChange={(val: string) => onUpdate({ locationA: val })}
                                                 placeholder="Choose Starting Point"
                                                 items={list || []}
-                                                getLabel={(node: any) => node?.node_name ?? ""}    
+                                                getLabel={(node: any) => node?.node_name ?? ""}
+                                                getKey={(node: any) => node?.id}
                                                 onSelect={handleLocationASelect} 
                                                 disabled={activeField !== "A"}
                                                 modalDesign="mt-32 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
@@ -97,7 +101,8 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 onChange={(val: string) => onUpdate({ locationB: val })}
                                                 placeholder="Choose Destination Point"
                                                 items={list || []}
-                                                getLabel={(node: any) => node?.node_name ?? ""}    
+                                                getLabel={(node: any) => node?.node_name ?? ""}
+                                                getKey={(node: any) => node?.id}
                                                 onSelect={handleLocationBSelect} 
                                                 disabled={activeField !== "B"}
                                                 modalDesign="mt-47 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
