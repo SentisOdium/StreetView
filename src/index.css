@@ -55,3 +55,28 @@
 .animate-slideUp {
     animation: slideUp 0.25s forwards;
 }
+
+/* Admin panel theme */
+.admin-card {
+  background: var(--admin-card-bg);
+  border-color: var(--admin-border);
+  color: inherit;
+}
+
+.admin-input {
+  background: var(--admin-input-bg);
+  border-color: var(--admin-border);
+  color: inherit;
+}
+
+:root {
+  --admin-card-bg: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-input-bg: #ffffff;
+}
+
+.dark {
+  --admin-card-bg: #0f172a;
+  --admin-border: #1e293b;
+  --admin-input-bg: #1e293b;
+}

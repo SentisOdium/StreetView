@@ -8,6 +8,8 @@ export type Hotspot = {
     destination_id: number;
     destination_name: string;
     hotspot_label: string;
+    yaw?: number | null;
+    pitch?: number | null;
     coordinates: {
         node_Coordinates: string;
         node_Direction: string;
