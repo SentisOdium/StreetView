@@ -23,3 +23,10 @@ export type hotspotProps = {
     color?: string;
     onclick?: () => void;
 }
+
+export type HotspotMarkerProps = {
+  position: [number, number, number];
+  label: string;
+  onClick: () => void;
+  disabled: boolean;
+};

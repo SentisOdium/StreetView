@@ -4,15 +4,23 @@ import { BaseUrl } from "../objects/baseUrl";
 
 const detailsCache = new Map<string,  NodeDetails>();
 
-export const fetchNodeDetails = async(name: string, signal?: AbortSignal): Promise<NodeDetails> =>{
-    const cacheKey = `node-details-${name}`
+export const fetchNodeDetails = async (
+    name: string,
+    signal?: AbortSignal,
+    forceRefresh: boolean = false
+): Promise<NodeDetails> => {
+    const cacheKey = `node-details-${name}`;
     
-    if(detailsCache.has(cacheKey)){
+    if (detailsCache.has(cacheKey) && !forceRefresh) {
         return detailsCache.get(cacheKey)!;
     }
 
     try {
-        const response = await axios.get<NodeDetailsResponse>(`${BaseUrl}/search?location=${name}`, { signal });    
+        const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : "";
+        const response = await axios.get<NodeDetailsResponse>(
+            `${BaseUrl}/search?location=${name}${cacheBuster}`,
+            { signal }
+        );    
         // console.log("API response:", response.data);
 
         if (!response.data.success) {
@@ -31,3 +39,16 @@ export const fetchNodeDetails = async(name: string, signal?: AbortSignal): Promi
         throw err;
     }
 }
+
+/**
+ * Clear cached node details from the module-level cache.
+ * @param name - Optional location name to clear specific entry. If omitted, clears all cached details.
+ */
+export const clearNodeDetailsCache = (name?: string): void => {
+    if (name) {
+        const cacheKey = `node-details-${name}`;
+        detailsCache.delete(cacheKey);
+    } else {
+        detailsCache.clear();
+    }
+};

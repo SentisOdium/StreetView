@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import type { AdminHotspot, AdminLocation } from "../api/types";
 import { adminApi } from "../api/adminApi";
+import { clearNodeDetailsCache } from "../../components/api/fetchNodeDetails";
+import { clearNodeListCache } from "../../components/api/fetchNodeList";
+import { broadcastAdminChange } from "../../utils/cacheInvalidation";
 
 type AdminState = {
   locations: AdminLocation[];
@@ -148,7 +151,8 @@ export const useHotspotEditorStore = create<HotspotEditorState>((set, get) => ({
 export async function saveHotspotEditorChanges(
   nodeId: number,
   current: EditorHotspot[],
-  original: EditorHotspot[]
+  original: EditorHotspot[],
+  nodeName?: string
 ) {
   const originalIds = new Set(original.filter((h) => h.id).map((h) => h.id!));
   const currentIds = new Set(current.filter((h) => h.id).map((h) => h.id!));
@@ -173,4 +177,20 @@ export async function saveHotspotEditorChanges(
       await adminApi.createHotspot(nodeId, payload);
     }
   }
+
+  // Clear frontend caches after successful save
+  try {
+    if (nodeName) {
+      clearNodeDetailsCache(nodeName);
+    } else {
+      clearNodeDetailsCache(); // Clear all if no name provided
+    }
+    clearNodeListCache();
+  } catch (err) {
+    console.warn("Failed to clear frontend caches:", err);
+    // Don't throw - cache clearing is non-critical optimization
+  }
+
+  // Broadcast change to other tabs and same‑tab listeners
+  broadcastAdminChange({ nodeId, type: "hotspot", timestamp: Date.now() });
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { broadcastAdminChange } from "../utils/cacheInvalidation"; // helper import (optional for type consistency)
 import type { MapNode, NodeDetails } from "../components/api/types/types_api";
 import { fetchNodeList as apiFetchNodeList } from "../components/api/fetchNodeList";
 import { fetchNodeDetails as apiFetchNodeDetails } from "../components/api/fetchNodeDetails";
@@ -7,12 +8,13 @@ interface LocationContextProps {
   nodeList: MapNode[];
   nodeListLoading: boolean;
   nodeListError: string | null;
-  nodeDetails: Record<string, NodeDetails>;
-  nodeDetailsLoading: Record<string, boolean>;
-  nodeDetailsError: Record<string, string | null>;
+  nodeDetails: Record<number, NodeDetails>;
+  nodeDetailsLoading: Record<number, boolean>;
+  nodeDetailsError: Record<number, string | null>;
   fetchNodeList: () => Promise<void>;
-  fetchNodeDetails: (name: string) => Promise<NodeDetails | null>;
-  preloadAdjacentNodes: (nodeName: string) => Promise<void>;
+  fetchNodeDetails: (id: number, signal?: AbortSignal, forceRefresh?: boolean) => Promise<NodeDetails | null>;
+  preloadAdjacentNodes: (id: number) => Promise<void>;
+  clearCacheRef: (id?: number) => void;
 }
 
 const LocationContext = createContext<LocationContextProps | undefined>(undefined);
@@ -25,6 +27,20 @@ export const useLocation = () => {
   return context;
 };
 
+/**
+ * Hook to access cache clearing functions.
+ * Use this to invalidate cached node details when external updates occur (e.g., admin panel edits).
+ */
+export const useLocationCache = () => {
+  const context = useContext(LocationContext);
+  if (!context) {
+    throw new Error("useLocationCache must be used within a LocationProvider");
+  }
+  return {
+    clearCacheRef: context.clearCacheRef,
+  };
+};
+
 interface LocationProviderProps {
   children: React.ReactNode;
 }
@@ -34,13 +50,13 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
   const [nodeListLoading, setNodeListLoading] = useState<boolean>(false);
   const [nodeListError, setNodeListError] = useState<string | null>(null);
 
-  const [nodeDetails, setNodeDetails] = useState<Record<string, NodeDetails>>({});
-  const [nodeDetailsLoading, setNodeDetailsLoading] = useState<Record<string, boolean>>({});
-  const [nodeDetailsError, setNodeDetailsError] = useState<Record<string, string | null>>({});
-
+  const [nodeDetails, setNodeDetails] = useState<Record<number, NodeDetails>>({});
+  const [nodeDetailsLoading, setNodeDetailsLoading] = useState<Record<number, boolean>>({});
+  const [nodeDetailsError, setNodeDetailsError] = useState<Record<number, string | null>>({});
   const listCacheRef = useRef<Map<string, MapNode[]>>(new Map());
-  const detailsCacheRef = useRef<Map<string, NodeDetails>>(new Map());
+  const detailsCacheRef = useRef<Map<number, NodeDetails>>(new Map());
   const preloadGenerationRef = useRef(0);
+
 
   const fetchNodeList = useCallback(async () => {
     setNodeListLoading(true);
@@ -69,74 +85,133 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     }
   }, []);
 
-  const fetchNodeDetails = useCallback(async (name: string): Promise<NodeDetails | null> => {
-    if (!name.trim()) return null;
+  const fetchNodeDetails = useCallback(
+    async (id: number, signal?: AbortSignal, forceRefresh = false): Promise<NodeDetails | null> => {
+      if (!id) return null;
 
-    const cacheKey = `node-details-${name}`;
-    const cached = detailsCacheRef.current.get(cacheKey);
-    if (cached) {
-      setNodeDetails((prev) => ({ ...prev, [name]: cached }));
-      return cached;
-    }
+      const cached = detailsCacheRef.current.get(id);
+      if (cached && !forceRefresh) {
+        setNodeDetails((prev) => ({ ...prev, [id]: cached }));
+        return cached;
+      }
 
-    setNodeDetailsLoading((prev) => ({ ...prev, [name]: true }));
-    setNodeDetailsError((prev) => ({ ...prev, [name]: null }));
+      setNodeDetailsLoading((prev) => ({ ...prev, [id]: true }));
+      setNodeDetailsError((prev) => ({ ...prev, [id]: null }));
 
-    try {
-      const data = await apiFetchNodeDetails(name, undefined);
-      detailsCacheRef.current.set(cacheKey, data);
-      setNodeDetails((prev) => ({ ...prev, [name]: data }));
+      try {
+        let currentList = nodeList;
+        if (currentList.length === 0) {
+          currentList = await apiFetchNodeList(undefined);
+          setNodeList(currentList);
+        }
+        const node = currentList.find((n) => n.id === id);
+        if (!node) {
+          throw new Error(`Node with ID ${id} not found in nodeList`);
+        }
+        const name = node.node_name;
+        const data = await apiFetchNodeDetails(name, signal, forceRefresh);
+      detailsCacheRef.current.set(id, data);
+      setNodeDetails((prev) => ({ ...prev, [id]: data }));
       return data;
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setNodeDetailsError((prev) => ({ ...prev, [name]: err.message }));
+        setNodeDetailsError((prev) => ({ ...prev, [id]: err.message }));
       } else {
-        setNodeDetailsError((prev) => ({ ...prev, [name]: "Unknown error" }));
+        setNodeDetailsError((prev) => ({ ...prev, [id]: "Unknown error" }));
       }
       return null;
     } finally {
-      setNodeDetailsLoading((prev) => ({ ...prev, [name]: false }));
+      setNodeDetailsLoading((prev) => ({ ...prev, [id]: false }));
     }
-  }, []);
+  }, [nodeList]);
 
   const preloadAdjacentNodes = useCallback(
-    async (mainNodeName: string) => {
+    async (mainNodeId: number) => {
       const generation = ++preloadGenerationRef.current;
 
-      const mainDetails = await fetchNodeDetails(mainNodeName);
+      const mainDetails = await fetchNodeDetails(mainNodeId);
       if (!mainDetails?.Hotspots?.length || generation !== preloadGenerationRef.current) {
         return;
       }
 
-      const nodeIdToName = new Map(nodeList.map((node) => [node.id, node.node_name]));
-
-      const adjacentNames = new Set<string>();
-      for (const hotspot of mainDetails.Hotspots) {
-        const name =
-          nodeIdToName.get(hotspot.destination_id) ?? hotspot.destination_name;
-        if (name?.trim()) {
-          adjacentNames.add(name);
-        }
-      }
-
       await Promise.all(
-        [...adjacentNames].map((name) => {
+        mainDetails.Hotspots.map((hotspot) => {
           if (generation !== preloadGenerationRef.current) {
             return Promise.resolve();
           }
-          if (detailsCacheRef.current.has(`node-details-${name}`)) {
+          const adjId = hotspot.destination_id;
+          if (detailsCacheRef.current.has(adjId)) {
             return Promise.resolve();
           }
-          return fetchNodeDetails(name);
+          return fetchNodeDetails(adjId);
         })
       );
     },
-    [fetchNodeDetails, nodeList]
+    [fetchNodeDetails]
   );
+
+  const clearCacheRef = useCallback((id?: number) => {
+    if (id !== undefined) {
+      // Clear specific node
+      detailsCacheRef.current.delete(id);
+      setNodeDetailsLoading((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setNodeDetailsError((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    } else {
+      // Clear all
+      detailsCacheRef.current.clear();
+      listCacheRef.current.clear();
+      setNodeDetailsLoading({});
+      setNodeDetailsError({});
+    }
+  }, []);
 
   useEffect(() => {
     fetchNodeList();
   }, [fetchNodeList]);
+
+  // Listen for admin panel changes via storage event (cross‑tab)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "admin_data_changed" && e.newValue) {
+        try {
+          const change = JSON.parse(e.newValue);
+          if (change.type === "hotspot" && typeof change.nodeId === "number") {
+            clearCacheRef(change.nodeId);
+            fetchNodeDetails(change.nodeId, undefined, true);
+          }
+          if (change.type === "list") {
+            listCacheRef.current.clear();
+            fetchNodeList();
+          }
+        } catch (err) {
+          console.warn("Error processing admin data change event:", err);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [clearCacheRef, fetchNodeDetails, fetchNodeList]);
+
+  // Same‑tab listener for CustomEvent broadcast
+  useEffect(() => {
+    const handleCustom = (e: CustomEvent) => {
+      const change = e.detail;
+      if (change?.type === "hotspot" && typeof change.nodeId === "number") {
+        clearCacheRef(change.nodeId);
+        fetchNodeDetails(change.nodeId, undefined, true);
+      }
+    };
+    window.addEventListener("admin_data_changed", handleCustom as EventListener);
+    return () => window.removeEventListener("admin_data_changed", handleCustom as EventListener);
+  }, [clearCacheRef, fetchNodeDetails]);
 
   const value = {
     nodeList,
@@ -148,6 +223,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     fetchNodeList,
     fetchNodeDetails,
     preloadAdjacentNodes,
+    clearCacheRef,
   };
 
   return (

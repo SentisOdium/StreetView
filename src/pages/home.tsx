@@ -1,6 +1,6 @@
 import { useReducer, useState, useEffect } from "react"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
-import Panorma from "../components/ui/Panorama_Assests/Panorma"
+import PanoramaViewer from "../components/ui/Panorama_Assests/PanoramaViewer"
 import NodeDirections from "../components/ui/Side_Panel/child_Panel/nodeDirections"
 import SearchUI2 from "../components/ui/Side_Panel/child_Panel/searchUI2"
 import useAutoCompleteFetch from "../components/hooks/useAutocomplete"
@@ -8,6 +8,7 @@ import LandingPage from "./landing"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import RedPanel from "../components/ui/Side_Panel/child_Panel/redPanel"
+
 import { reducer, initialState } from "../components/utils/reducer"
 import type { MapNode } from "../components/api/types/types_api"
 
@@ -16,7 +17,7 @@ export default function HomePage(){
     const {list, loading, error} = useAutoCompleteFetch()
    
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { stack, activeNodeName, activeNodeId, directionsState } = state;
+    const { stack, activeNodeId, directionsState } = state;
     const [isCollapsed, setIsCollapsed] = useState(false);
 
 
@@ -34,7 +35,8 @@ export default function HomePage(){
 
     return(
         <>
-            <RedPanel />
+
+        <RedPanel />
             {/* Unified Sliding Container */}
             <div className={`absolute top-0 left-0 h-screen z-10 w-120 transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
                 {/* Search Bar Panel (z-20) */}
@@ -66,7 +68,7 @@ export default function HomePage(){
                 <div className="absolute top-0 left-0 z-10">
                     {currentPanel.type === "location" && (
                         <NodeLocationDetails
-                            selectedNodeName={currentPanel.nodeName}
+                            selectedNodeId={currentPanel.nodeId}
                             hasDirectionsPanel={hasDirectionsPanel}
                             canGoBack={stack.length > 2}
                             onDirections={() =>
@@ -134,23 +136,18 @@ export default function HomePage(){
            
 
             <div className="absolute inset-0 z-0">
-                {activeNodeName ? (
-                    <Panorma
-                        nodeName={activeNodeName}
-                        onNavigate={(destinationId, destinationName) => {
+                {activeNodeId != null ? (
+                    <PanoramaViewer
+                        nodeId={activeNodeId}
+                        onNavigate={(destinationId) => {
                             const resolvedNode = list.find((n) => n.id === destinationId);
-                            const name =
-                                resolvedNode?.node_name?.trim() || destinationName?.trim();
-
-                            if (!name || resolvedNode?.id === activeNodeId) {
-                                return;
-                            }
+                            if (!resolvedNode) return;
 
                             dispatch({
                                 type: "NAVIGATE_NODE",
                                 payload: {
-                                    id: resolvedNode?.id ?? destinationId,
-                                    name,
+                                    id: resolvedNode.id,
+                                    name: resolvedNode.node_name,
                                 },
                             });
                         }}

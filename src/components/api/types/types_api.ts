@@ -37,7 +37,7 @@ export type NodeDetails = {
     }[]
 }
 
-export type NodeRoute ={ 
+export type NodeRoute = {
     id: number;
     dist: number;
     name: string;
@@ -58,7 +58,7 @@ export type NodeRouteResponse = ApiResponse<{
     path: NodeRoute[]
 }>;
 
-export type RouteReq= {
+export type RouteReq = {
     src: string;
     dest: string;
     signal?: AbortSignal;

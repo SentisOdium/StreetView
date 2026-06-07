@@ -44,3 +44,19 @@ export function directionToYaw(label: string): number | null {
   };
   return map[label.trim().toUpperCase()] ?? null;
 }
+
+/**
+ * Formats 3D coordinates (x, y, z) into a human-readable string.
+ */
+export function formatXYZ(x: number, y: number, z: number, decimals = 2): string {
+  return `X: ${x.toFixed(decimals)}, Y: ${y.toFixed(decimals)}, Z: ${z.toFixed(decimals)}`;
+}
+
+/**
+ * Converts yaw and pitch angles into 3D position coordinates and formats them.
+ */
+export function displayXYZFromYawPitch(yawDeg: number, pitchDeg: number, decimals = 2): string {
+  const [x, y, z] = yawPitchToPosition(yawDeg, pitchDeg);
+  return formatXYZ(x, y, z, decimals);
+}
+

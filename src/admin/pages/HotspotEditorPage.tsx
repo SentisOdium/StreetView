@@ -9,7 +9,7 @@ import {
   saveHotspotEditorChanges,
   type EditorHotspot,
 } from "../store/adminStore";
-import { yawPitchToPosition, positionToYawPitch, snapAngle } from "../utils/hotspotMath";
+import { yawPitchToPosition, positionToYawPitch, snapAngle, displayXYZFromYawPitch } from "../utils/hotspotMath";
 import { panoramaImageUrl } from "../../components/utils/imageUrl";
 import PageHeader, {
   AdminButton,
@@ -19,6 +19,7 @@ import PageHeader, {
   ErrorBanner,
 } from "../components/shared/AdminUI";
 import type { AdminLocation } from "../api/types";
+import { useLocationCache } from "../../context/LocationContext";
 
 const PANORAMA_RADIUS = 60;
 
@@ -138,9 +139,25 @@ function HotspotEditorCanvas({
       : { yaw, pitch };
 
   return (
+  <div className="relative w-full h-full">
+
+    {/* COMPASS UI OVERLAY (TOP RIGHT) */}
+    <div className="absolute top-4 right-4 bg-white p-3 rounded-md shadow-lg z-10">
+      <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+        Compass Reference
+      </div>
+
+      <img
+        src="/logo/compassForDumbass.png"
+        alt="Compass Guide"
+        className="w-32 object-contain opacity-70"
+      />
+    </div>
+
     <Canvas camera={{ position: [0.3, 0, 0], fov: 75, near: 0.1, far: 2000 }}>
       <ambientLight intensity={1} />
       <OrbitControls enableZoom enablePan maxDistance={55} />
+
       <Suspense fallback={null}>
         <MainNode
           radius={PANORAMA_RADIUS}
@@ -149,12 +166,14 @@ function HotspotEditorCanvas({
           position={[0, 0, 0]}
           opacity={1}
         />
+
         <PanoramaClickHandler
           onClick={(yaw, pitch) => {
             const s = applySnap(yaw, pitch);
             onPanoramaClick(s.yaw, s.pitch);
           }}
         />
+
         {hotspots.map((h) => {
           const id = h.id ?? h.tempId!;
           return (
@@ -172,7 +191,8 @@ function HotspotEditorCanvas({
         })}
       </Suspense>
     </Canvas>
-  );
+  </div>
+);
 }
 
 export default function HotspotEditorPage() {
@@ -186,6 +206,7 @@ export default function HotspotEditorPage() {
   const [newLabel, setNewLabel] = useState("E");
 
   const store = useHotspotEditorStore();
+  const { clearCacheRef } = useLocationCache();
 
   useEffect(() => {
     adminApi.getLocations().then(setLocations).catch(() => {});
@@ -241,7 +262,9 @@ export default function HotspotEditorPage() {
     if (!store.nodeId) return;
     setSaving(true);
     try {
-      await saveHotspotEditorChanges(store.nodeId, store.hotspots, originalHotspots);
+      await saveHotspotEditorChanges(store.nodeId, store.hotspots, originalHotspots, store.nodeName);
+      // Clear context-level cache refs after successful save
+      clearCacheRef(store.nodeId);
       store.markClean();
       await loadNode(store.nodeId);
     } catch (e) {
@@ -399,6 +422,14 @@ export default function HotspotEditorPage() {
                     }
                   />
                 </label>
+              </div>
+              <div className="rounded-lg bg-slate-100 p-2.5 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  3D Coordinates
+                </span>
+                <span className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {displayXYZFromYawPitch(selectedHotspot.yaw, selectedHotspot.pitch)}
+                </span>
               </div>
               <AdminButton
                 variant="danger"

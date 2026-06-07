@@ -39,6 +39,10 @@ import
 import 
     PanoramaHorizontalIcon 
         from '@mui/icons-material/PanoramaHorizontal';
+
+import 
+    ExpandCircleDownOutlinedIcon 
+        from '@mui/icons-material/ExpandCircleDownOutlined';
 export {
     WayfinderLogo1, 
 
@@ -55,5 +59,6 @@ export {
     TurnLeftIcon,
     TurnRightIcon,
     TurnSlightLeftRoundedIcon,
-    TurnSlightRightIcon
+    TurnSlightRightIcon,
+    ExpandCircleDownOutlinedIcon
 };

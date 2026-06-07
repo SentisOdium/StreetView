@@ -30,3 +30,10 @@ export const fetchNodeList =  async (signal?: AbortSignal): Promise<MapNode[]> =
     }
     
 }
+
+/**
+ * Clear the cached node list from the module-level cache.
+ */
+export const clearNodeListCache = (): void => {
+    listCache.clear();
+};

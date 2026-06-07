@@ -2,21 +2,25 @@
 
 @keyframes fadeIn {
     from {
-        opacity: 0; 
-    }to { 
-        opacity: 1; 
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
     }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.12345s ease-in-out;
+    animation: fadeIn 0.12345s ease-in-out;
 }
 
 @keyframes slideInLeft {
-    from{
+    from {
         transform: translateX(-100%);
         opacity: 0;
-    }to{
+    }
+
+    to {
         transform: translateX(0);
         opacity: 1;
     }
@@ -27,18 +31,19 @@
 }
 
 @keyframes slideDown {
-    from{
+    from {
         transform: translateY(-20px);
         opacity: 0;
     }
-    to{
+
+    to {
         transform: translateY(0);
         opacity: 1;
     }
 }
 
 .animate-slideDown {
-    animation: slideDown 0.25s  forwards;
+    animation: slideDown 0.25s forwards;
 }
 
 @keyframes slideUp {
@@ -46,6 +51,7 @@
         transform: translateY(0);
         opacity: 1;
     }
+
     to {
         transform: translateY(20px);
         opacity: 0;
@@ -58,25 +64,29 @@
 
 /* Admin panel theme */
 .admin-card {
-  background: var(--admin-card-bg);
-  border-color: var(--admin-border);
-  color: inherit;
+    background: var(--admin-card-bg);
+    border-color: var(--admin-border);
+    color: inherit;
 }
 
 .admin-input {
-  background: var(--admin-input-bg);
-  border-color: var(--admin-border);
-  color: inherit;
+    background: var(--admin-input-bg);
+    border-color: var(--admin-border);
+    color: inherit;
 }
 
 :root {
-  --admin-card-bg: #ffffff;
-  --admin-border: #e2e8f0;
-  --admin-input-bg: #ffffff;
+    --admin-card-bg: #ffffff;
+    --admin-border: #e2e8f0;
+    --admin-input-bg: #ffffff;
 }
 
 .dark {
-  --admin-card-bg: #0f172a;
-  --admin-border: #1e293b;
-  --admin-input-bg: #1e293b;
+    --admin-card-bg: #0f172a;
+    --admin-border: #1e293b;
+    --admin-input-bg: #1e293b;
+}
+
+.custom-cursor {
+    cursor: url("../public/logo/arrow-up-circle-svgrepo-com.svg") 16 16, auto;
 }

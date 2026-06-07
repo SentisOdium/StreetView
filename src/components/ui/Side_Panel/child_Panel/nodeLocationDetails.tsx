@@ -5,15 +5,15 @@ import type { NodeLocationDetailsProps } from "../types/sidePanelProps";
 import { panoramaImageUrl } from "../../../utils/imageUrl";
 
 export default function NodeLocationDetails({
-  selectedNodeName,
+  selectedNodeId,
   onDirections,
   onBack,
   hasDirectionsPanel = false,
   canGoBack = false,
 }: NodeLocationDetailsProps) {
-  const { details, loading, error } = useNodeDetailsFetch(selectedNodeName || "");
+  const { details, loading, error } = useNodeDetailsFetch(selectedNodeId);
 
-  if (!selectedNodeName) return null;
+  if (selectedNodeId == null) return null;
 
   if (loading && !details) {
     return (
