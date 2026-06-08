@@ -1,9 +1,10 @@
 import type { Hotspot as HotspotData } from "../../../api/types/types_api";
 import HotspotMarker from "./HotspotMarker";
+import HotspotArrow from "./HotspotArrow";
 import { directionToYaw } from "../../../../admin/utils/hotspotMath";
 
 const HOTSPOT_DISTANCE = 25;
-
+const HOTSPOT_ARROW_Y_POS = -10
 function convertCoordinates(coord: string): [number, number, number] {
   const [x, y] = coord.split(",").map(Number);
   return [x * 5, 0, y * -5];
@@ -78,14 +79,28 @@ export default function HotspotLayer({
     <group>
       {hotspots.map((h, index) => {
         const position = getHotspotPosition(h);
+        const arrowScale = (HOTSPOT_DISTANCE + HOTSPOT_ARROW_Y_POS) / HOTSPOT_DISTANCE;
+        const arrowPosition: [number, number, number] = [
+          position[0] * arrowScale,
+          position[1],
+          position[2] * arrowScale,
+        ];
+
         return (
-          <HotspotMarker
-            key={`${h.destination_id}-${h.hotspot_label}-${index}`}
-            position={position}
-            label={h.hotspot_label || h.destination_name}
-            onClick={() => onHotspotClick(h.destination_id)}
-            disabled={disabled}
-          />
+          <group key={`${h.destination_id}-${h.hotspot_label}-${index}`}>
+            <HotspotMarker
+              position={position}
+              label={h.hotspot_label || h.destination_name}
+              onClick={() => onHotspotClick(h.destination_id)}
+              disabled={disabled}
+            />
+            <HotspotArrow
+              position={arrowPosition}
+              label={h.hotspot_label || h.destination_name}
+              onClick={() => onHotspotClick(h.destination_id)}
+              disabled={disabled}
+            />
+          </group>
         );
       })}
     </group>
