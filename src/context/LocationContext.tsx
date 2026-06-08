@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
-import { broadcastAdminChange } from "../utils/cacheInvalidation"; // helper import (optional for type consistency)
 import type { MapNode, NodeDetails } from "../components/api/types/types_api";
 import { fetchNodeList as apiFetchNodeList } from "../components/api/fetchNodeList";
 import { fetchNodeDetails as apiFetchNodeDetails } from "../components/api/fetchNodeDetails";

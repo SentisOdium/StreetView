@@ -1,0 +1,521 @@
+/* ═══════════════════════════════════════════════
+   Wayfinder Landing Page — Styles
+   Google Antigravity-inspired design
+   ═══════════════════════════════════════════════ */
+
+/* ── Base ──────────────────────────────────── */
+.wayfinder-landing {
+  --wf-maroon: #800000;
+  --wf-maroon-light: #9a1515;
+  --wf-maroon-glow: rgba(128, 0, 0, 0.15);
+  --wf-dark: #111111;
+  --wf-gray-100: #f7f7f8;
+  --wf-gray-200: #e8e8ec;
+  --wf-gray-400: #9ca3af;
+  --wf-gray-600: #6b7280;
+  --wf-white: #ffffff;
+  --wf-radius: 16px;
+  --wf-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  color: var(--wf-dark);
+  background: var(--wf-white);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* ── Reveal animation ─────────────────────── */
+.wf-reveal {
+  animation: wfRevealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+:root {
+  --wf-maroon: #800000;
+}
+
+
+@keyframes wfRevealUp {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═════════════════════════════════════════════
+   NAVBAR
+   ═════════════════════════════════════════════ */
+.wf-nav {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 32px;
+  transition: background var(--wf-transition), box-shadow var(--wf-transition), padding var(--wf-transition);
+}
+
+.wf-nav--scrolled {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  padding: 10px 32px;
+}
+
+.wf-nav__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wf-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity var(--wf-transition);
+}
+
+.wf-nav__brand:hover {
+  opacity: 0.7;
+}
+
+.wf-nav__logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.wf-nav__name {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  color: var(--wf-maroon);
+}
+
+.wf-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wf-nav__link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--wf-gray-600);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color var(--wf-transition), background var(--wf-transition);
+}
+
+.wf-nav__link:hover {
+  color: var(--wf-dark);
+  background: var(--wf-gray-100);
+}
+
+/* ═════════════════════════════════════════════
+   HERO
+   ═════════════════════════════════════════════ */
+.wf-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wf-white);
+  overflow: hidden;
+}
+
+.wf-hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: wfHeroIn 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes wfHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wf-hero__logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 14px;
+  margin-bottom: 0;
+  filter: drop-shadow(0 4px 24px rgba(128, 0, 0, 0.12));
+}
+
+.wf-hero__title {
+  font-size: clamp(20px, 4vw, 36px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--wf-maroon);
+  margin: 0;
+}
+
+.wf-hero__tagline {
+  font-size: clamp(64px, 9vw, 96px);
+  font-weight: 700;
+  font-style: italic;
+  color: var(--wf-maroon);
+  margin: 12px 0 32px;
+  letter-spacing: -0.03em;
+}
+
+.wf-hero__cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.wf-hero__branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ── Buttons ──────────────────────────────── */
+.wf-btn {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--wf-transition);
+  letter-spacing: -0.01em;
+}
+
+.wf-btn--primary {
+  background: var(--wf-maroon);
+  color: var(--wf-white);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
+}
+
+.wf-btn--primary:hover {
+  background: #222;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px);
+}
+
+.wf-btn--ghost {
+  background: transparent;
+  color: var(--wf-dark);
+  border: 1.5px solid var(--wf-gray-200);
+}
+
+.wf-btn--ghost:hover {
+  border-color: var(--wf-gray-400);
+  background: var(--wf-gray-100);
+  transform: translateY(-2px);
+}
+
+/* ═════════════════════════════════════════════
+   VIDEO TEASER
+   ═════════════════════════════════════════════ */
+.wf-video-section {
+  padding: 80px 24px 100px;
+  display: flex;
+  justify-content: center;
+}
+
+.wf-video-card {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0a0a0a;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 24px 80px -16px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(48px);
+}
+
+.wf-video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wf-video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  pointer-events: none;
+}
+
+.wf-video-placeholder__icon {
+  opacity: 0.6;
+  animation: wfPulsePlay 2.5s ease-in-out infinite;
+}
+
+@keyframes wfPulsePlay {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+.wf-video-placeholder__text {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═════════════════════════════════════════════
+   CORE FEATURES
+   ═════════════════════════════════════════════ */
+.wf-features-section {
+  padding: 80px 24px 120px;
+  text-align: center;
+}
+
+.wf-section-heading {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--wf-dark);
+  margin: 0 0 56px;
+}
+
+.wf-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1060px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(48px);
+}
+
+.wf-feature-card {
+  background: var(--wf-white);
+  border: 1px solid var(--wf-gray-200);
+  border-radius: var(--wf-radius);
+  padding: 44px 32px 40px;
+  text-align: center;
+  transition: all var(--wf-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.wf-feature-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--wf-radius);
+  border: 2px solid transparent;
+  transition: border-color var(--wf-transition);
+  pointer-events: none;
+}
+
+.wf-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px -8px rgba(128, 0, 0, 0.1), 0 0 0 1px var(--wf-maroon-glow);
+}
+
+.wf-feature-card:hover::after {
+  border-color: var(--wf-maroon);
+}
+
+.wf-feature-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  border-radius: 14px;
+  background: var(--wf-gray-100);
+  color: var(--wf-maroon);
+  transition: background var(--wf-transition), color var(--wf-transition);
+}
+
+.wf-feature-card:hover .wf-feature-icon {
+  background: var(--wf-maroon);
+  color: var(--wf-white);
+}
+
+.wf-feature-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  color: var(--wf-dark);
+}
+
+.wf-feature-desc {
+  font-size: 15px;
+  color: var(--wf-gray-600);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ═════════════════════════════════════════════
+   FOOTER
+   ═════════════════════════════════════════════ */
+.wf-footer {
+  background: var(--wf-white);
+  border-top: 1px solid var(--wf-gray-200);
+  padding: 72px 32px 32px;
+  opacity: 0;
+  transform: translateY(48px);
+}
+
+.wf-footer__top {
+  max-width: 1200px;
+  margin: 0 auto 64px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.wf-footer__heading {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wf-gray-400);
+  margin: 0 0 20px;
+}
+
+.wf-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wf-footer__link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--wf-gray-600);
+  text-align: left;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: color var(--wf-transition);
+}
+
+.wf-footer__link:hover {
+  color: var(--wf-dark);
+}
+
+.wf-footer__link--admin {
+  color: var(--wf-maroon);
+  font-weight: 600;
+}
+
+.wf-footer__link--admin:hover {
+  color: var(--wf-maroon-light);
+}
+
+.wf-footer__text {
+  font-size: 14px;
+  color: var(--wf-gray-600);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Giant Wordmark ──────────────────────── */
+.wf-footer__wordmark-container {
+  overflow: hidden;
+  padding: 0 0 8px;
+}
+
+.wf-footer__wordmark {
+  display: block;
+  font-size: clamp(80px, 15vw, 220px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+  color: var(--wf-dark);
+  white-space: nowrap;
+  user-select: none;
+  width: 100%;
+  text-align: center;
+}
+
+.wf-footer__bottom {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--wf-gray-200);
+  text-align: center;
+  font-size: 13px;
+  color: var(--wf-gray-400);
+}
+
+/* ═════════════════════════════════════════════
+   RESPONSIVE
+   ═════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .wf-nav__links {
+    gap: 2px;
+  }
+
+  .wf-nav__link {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .wf-features-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .wf-footer__top {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .wf-hero__cta {
+    flex-direction: column;
+    align-items: center;
+  }
+}

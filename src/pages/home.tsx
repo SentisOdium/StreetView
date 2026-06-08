@@ -36,7 +36,12 @@ export default function HomePage(){
     return(
         <>
 
-        <RedPanel />
+        <RedPanel
+          onSearchClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
+          onDirectionsClick={() => dispatch({ type: "SHOW_DIRECTIONS" })}
+          onLogoClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
+          currentPanelType={currentPanel?.type}
+        />
             {/* Unified Sliding Container */}
             <div className={`absolute top-0 left-0 h-screen z-10 w-120 transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
                 {/* Search Bar Panel (z-20) */}

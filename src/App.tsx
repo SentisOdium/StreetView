@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import HomePage from "./pages/home";
+import WayfinderLanding from "./pages/WayfinderLanding";
 import AdminRoutes from "./admin/AdminRoutes";
 import { useThemeStore } from "./admin/store/themeStore";
 
@@ -17,8 +18,9 @@ export default function App() {
     <BrowserRouter>
       <ThemeSync />
       <Routes>
+        <Route path="/" element={<WayfinderLanding />} />
         <Route
-          path="/"
+          path="/tour"
           element={
             <div className="relative h-screen w-screen overflow-hidden">
               <HomePage />
@@ -30,3 +32,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
