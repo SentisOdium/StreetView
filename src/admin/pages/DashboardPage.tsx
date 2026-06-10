@@ -12,6 +12,7 @@ import PlaceIcon from "@mui/icons-material/Place";
 import LinkIcon from "@mui/icons-material/Link";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import LayersIcon from "@mui/icons-material/Layers";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -90,12 +91,13 @@ export default function DashboardPage() {
 
             <div className="admin-card rounded-xl border p-6 shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">Quick Actions</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
                 {[
                   { to: "/admin/locations", icon: PlaceIcon, label: "Add Location" },
                   { to: "/admin/hotspot-editor", icon: LinkIcon, label: "Edit Hotspots" },
                   { to: "/admin/rooms", icon: MeetingRoomIcon, label: "Manage Rooms" },
                   { to: "/admin/graph", icon: LayersIcon, label: "View Graph" },
+                  { to: "/admin/accounts", icon: PersonAddIcon, label: "Add Admin" },
                 ].map(({ to, icon: Icon, label }) => (
                   <Link
                     key={to}

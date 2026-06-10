@@ -1,10 +1,10 @@
 import { useReducer, useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
 import PanoramaViewer from "../components/ui/Panorama_Assests/PanoramaViewer"
 import NodeDirections from "../components/ui/Side_Panel/child_Panel/nodeDirections"
 import SearchUI2 from "../components/ui/Side_Panel/child_Panel/searchUI2"
 import useAutoCompleteFetch from "../components/hooks/useAutocomplete"
-import LandingPage from "./landing"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import RedPanel from "../components/ui/Side_Panel/child_Panel/redPanel"
@@ -12,18 +12,33 @@ import RedPanel from "../components/ui/Side_Panel/child_Panel/redPanel"
 import { reducer, initialState } from "../components/utils/reducer"
 import type { MapNode } from "../components/api/types/types_api"
 
-    
-export default function HomePage(){
-    const {list, loading, error} = useAutoCompleteFetch()
-   
+
+export default function HomePage() {
+    const { list, loading, error } = useAutoCompleteFetch()
+    const location = useLocation()
+
     const [state, dispatch] = useReducer(reducer, initialState);
     const { stack, activeNodeId, directionsState } = state;
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    useEffect(() => {
+        if (location.state?.targetNode) {
+            const node = location.state.targetNode;
+            dispatch({
+                type: "SELECT_NODE",
+                payload: {
+                    id: node.id,
+                    name: node.node_name,
+                },
+            });
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
+
 
 
     const currentPanel = stack.at(-1);
-    
+
     // Automatically expand the panel on navigation
     useEffect(() => {
         setIsCollapsed(false);
@@ -33,33 +48,33 @@ export default function HomePage(){
 
     const hasDirectionsPanel = stack.some(p => p.type === "directions");
 
-    return(
+    return (
         <>
 
-        <RedPanel
-          onSearchClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
-          onDirectionsClick={() => dispatch({ type: "SHOW_DIRECTIONS" })}
-          onLogoClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
-          currentPanelType={currentPanel?.type}
-        />
+            <RedPanel
+                onSearchClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
+                onDirectionsClick={() => dispatch({ type: "SHOW_DIRECTIONS" })}
+                onLogoClick={() => dispatch({ type: "RESET_TO_SEARCH" })}
+                currentPanelType={currentPanel?.type}
+            />
             {/* Unified Sliding Container */}
             <div className={`absolute top-0 left-0 h-screen z-10 w-120 transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
                 {/* Search Bar Panel (z-20) */}
-                
+
                 <div className="absolute top-0 left-0 z-20">
                     {currentPanel.type !== "directions" && (
                         <SearchUI2
                             list={list}
                             loading={loading}
                             error={error}
-                            onClear={() => dispatch({ type: "RESET_TO_SEARCH"})}
+                            onClear={() => dispatch({ type: "RESET_TO_SEARCH" })}
                             onSelect={(node: MapNode) =>
                                 dispatch({
-                                type: "SELECT_NODE",
-                                payload: {
-                                    id: node.id,
-                                    name: node.node_name,
-                                },
+                                    type: "SELECT_NODE",
+                                    payload: {
+                                        id: node.id,
+                                        name: node.node_name,
+                                    },
                                 })
                             }
                             onDirections={() =>
@@ -94,17 +109,17 @@ export default function HomePage(){
                             }
                             onSelectedRouteNode={(node) =>
                                 dispatch({
-                                type: "SELECT_NODE",
-                                payload: {
-                                    id: node.id,
-                                    name: node.name,
-                                },
+                                    type: "SELECT_NODE",
+                                    payload: {
+                                        id: node.id,
+                                        name: node.name,
+                                    },
                                 })
                             }
                             onUpdate={(data) =>
                                 dispatch({
-                                type: "UPDATE_DIRECTIONS_STATE",
-                                payload: data,
+                                    type: "UPDATE_DIRECTIONS_STATE",
+                                    payload: data,
                                 })
                             }
                         />
@@ -137,11 +152,11 @@ export default function HomePage(){
                 )}
 
             </div>
-                
-           
+
+
 
             <div className="absolute inset-0 z-0">
-                {activeNodeId != null ? (
+                {activeNodeId != null && (
                     <PanoramaViewer
                         nodeId={activeNodeId}
                         onNavigate={(destinationId) => {
@@ -157,8 +172,6 @@ export default function HomePage(){
                             });
                         }}
                     />
-                ) : (
-                    <LandingPage />
                 )}
             </div>
 

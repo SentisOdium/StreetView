@@ -16,6 +16,7 @@ type SearchProps<T> = {
   modalDesign?: string;
   disabled?: boolean;
   inputRef?: RefObject<HTMLInputElement | null>;
+  noModal?: boolean;
 };
 
 export default function Search<T>(props: SearchProps<T>) {
@@ -32,6 +33,7 @@ export default function Search<T>(props: SearchProps<T>) {
     modalDesign,
     disabled,
     inputRef,
+    noModal,
   } = props;
 
   const [showModal, setShowModal] = useState(false);
@@ -47,9 +49,44 @@ export default function Search<T>(props: SearchProps<T>) {
     );
   }, [items, value, getLabel]);
 
+  const dropdownContent = (
+    <div id={listboxId} role="listbox" className={noModal ? modalDesign : undefined}>
+      <Loading loading={loading} message="Loading locations..." />
+      <Error error={error} />
+
+      {!loading && !error && filteredList.length > 0 && (
+        <ul>
+          {filteredList.map((item) => {
+            const key = getKey?.(item) ?? getLabel(item);
+            return (
+              <li
+                key={key}
+                role="option"
+                onClick={() => {
+                  onSelect(item);
+                  setShowModal(false);
+                }}
+                className="cursor-pointer rounded-xl p-2 hover:bg-gray-100"
+              >
+                {getLabel(item)}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {!loading && !error && value.length > 0 && filteredList.length === 0 && (
+        <div className="text-gray-500 italic">
+          <EmptySearchUi />
+          <p className="pb-4 text-center text-sm">No locations match your search.</p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 relative">
         <input
           ref={resolvedInputRef}
           type="search"
@@ -72,46 +109,27 @@ export default function Search<T>(props: SearchProps<T>) {
             if (e.key === "Escape") setShowModal(false);
           }}
         />
+        {noModal && showModal && value.length > 0 && !disabled && (
+          <>
+            {/* Invisible backdrop to catch clicks outside when noModal is true */}
+            <div className="fixed inset-0 z-40" onClick={() => setShowModal(false)} />
+            <div className="absolute top-full mt-2 w-full z-50">
+              {dropdownContent}
+            </div>
+          </>
+        )}
       </div>
 
-      <Modal
-        isVisible={showModal && value.length > 0 && !disabled}
-        onClose={() => setShowModal(false)}
-        design={modalDesign ?? ""}
-      >
-        <div id={listboxId} role="listbox">
-          <Loading loading={loading} message="Loading locations..." />
-          <Error error={error} />
-
-          {!loading && !error && filteredList.length > 0 && (
-            <ul>
-              {filteredList.map((item) => {
-                const key = getKey?.(item) ?? getLabel(item);
-                return (
-                  <li
-                    key={key}
-                    role="option"
-                    onClick={() => {
-                      onSelect(item);
-                      setShowModal(false);
-                    }}
-                    className="cursor-pointer rounded-xl p-2 hover:bg-gray-100"
-                  >
-                    {getLabel(item)}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          {!loading && !error && value.length > 0 && filteredList.length === 0 && (
-            <div className="text-gray-500 italic">
-              <EmptySearchUi />
-              <p className="pb-4 text-center text-sm">No locations match your search.</p>
-            </div>
-          )}
-        </div>
-      </Modal>
+      {!noModal && (
+        <Modal
+          isVisible={showModal && value.length > 0 && !disabled}
+          onClose={() => setShowModal(false)}
+          design={modalDesign ?? ""}
+        >
+          {dropdownContent}
+        </Modal>
+      )}
     </>
   );
 }
+

@@ -15,18 +15,11 @@ import type {
 
 const adminBase = `${BaseUrl}/admin`;
 
-function headers() {
-  const token = localStorage.getItem("admin_token");
-  const user = localStorage.getItem("admin_user") || "admin";
-  return {
-    "x-admin-token": token || "",
-    "x-admin-user": user,
-  };
-}
+// Removed legacy custom headers function. Authentication is now handled via HTTP-only cookies.
 
 async function get<T>(path: string, params?: Record<string, string>) {
   const res = await axios.get<ApiResponse<T>>(`${adminBase}${path}`, {
-    headers: headers(),
+    withCredentials: true,
     params,
   });
   return res.data.data;
@@ -34,21 +27,21 @@ async function get<T>(path: string, params?: Record<string, string>) {
 
 async function post<T>(path: string, body: unknown) {
   const res = await axios.post<ApiResponse<T>>(`${adminBase}${path}`, body, {
-    headers: headers(),
+    withCredentials: true,
   });
   return res.data.data;
 }
 
 async function put<T>(path: string, body: unknown) {
   const res = await axios.put<ApiResponse<T>>(`${adminBase}${path}`, body, {
-    headers: headers(),
+    withCredentials: true,
   });
   return res.data.data;
 }
 
 async function del<T>(path: string) {
   const res = await axios.delete<ApiResponse<T>>(`${adminBase}${path}`, {
-    headers: headers(),
+    withCredentials: true,
   });
   return res.data.data;
 }
@@ -99,9 +92,21 @@ export const adminApi = {
     const res = await axios.post<ApiResponse<{ filename: string; path: string }>>(
       `${adminBase}/upload`,
       form,
-      { headers: { ...headers(), "Content-Type": "multipart/form-data" } }
+      { 
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" } 
+      }
     );
     return res.data.data;
+  },
+
+  createAdmin: async (data: any) => {
+    const res = await axios.post<{ success: boolean; message: string }>(
+      `${BaseUrl}/admin-auth/register`,
+      data,
+      { withCredentials: true }
+    );
+    return res.data;
   },
 };
 

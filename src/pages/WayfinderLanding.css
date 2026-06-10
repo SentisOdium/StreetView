@@ -4,6 +4,19 @@
    ═══════════════════════════════════════════════ */
 
 /* ── Base ──────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+html {
+  scrollbar-width: none;
+}
+
 .wayfinder-landing {
   --wf-maroon: #800000;
   --wf-maroon-light: #9a1515;
@@ -49,7 +62,8 @@
    NAVBAR
    ═════════════════════════════════════════════ */
 .wf-nav {
-  position: relative;
+  position: absolute;
+  z-index: 50;
   top: 0;
   left: 0;
   right: 0;
@@ -183,6 +197,50 @@
   color: var(--wf-maroon);
   margin: 12px 0 32px;
   letter-spacing: -0.03em;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wf-hero__text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.wf-hero__cursor {
+  font-weight: 600;
+  font-style: italic;
+  margin: 0 4px;
+}
+
+.wf-hero__cursor.typing {
+  animation: wfCursorBlink 1s step-end infinite;
+}
+
+.wf-hero__cursor.finished {
+  animation: wfCursorBlinkFinish 1s step-end 3 forwards;
+}
+
+@keyframes wfCursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes wfCursorBlinkFinish {
+  0% {
+    opacity: 1;
+  }
+
+  40% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .wf-hero__cta {
@@ -240,7 +298,7 @@
    VIDEO TEASER
    ═════════════════════════════════════════════ */
 .wf-video-section {
-  padding: 80px 24px 100px;
+  padding: 120px 24px 140px;
   display: flex;
   justify-content: center;
 }
@@ -248,16 +306,19 @@
 .wf-video-card {
   position: relative;
   width: 100%;
-  max-width: 920px;
+  max-width: 1200px;
+  /* bigger */
   aspect-ratio: 16 / 9;
-  border-radius: 24px;
+
+  border-radius: 32px;
   overflow: hidden;
   background: #0a0a0a;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 24px 80px -16px rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  transform: translateY(48px);
+
+  will-change: transform, opacity;
+}
+
+.wf-video-card.wf-reveal {
+  animation: wfVideoReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .wf-video-player {
@@ -270,12 +331,14 @@
 .wf-video-placeholder {
   position: absolute;
   inset: 0;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+
+
   pointer-events: none;
 }
 
@@ -474,7 +537,7 @@
   font-weight: 900;
   letter-spacing: -0.06em;
   line-height: 0.85;
-  color: var(--wf-dark);
+  color: var(--wf-maroon);
   white-space: nowrap;
   user-select: none;
   width: 100%;

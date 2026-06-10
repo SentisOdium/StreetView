@@ -8,11 +8,22 @@ import RoomsPage from "./pages/RoomsPage";
 import RouteTestingPage from "./pages/RouteTestingPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import SettingsPage from "./pages/SettingsPage";
+import AdminLogin from "../pages/admin/AdminLogin";
+import AdminAccountsPage from "./pages/AdminAccountsPage";
+import { useAuthStore } from "./store/authStore";
+import { Navigate } from "react-router-dom";
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) return <Navigate to="/admin/login" replace />;
+  return <>{children}</>;
+};
 
 export default function AdminRoutes() {
   return (
     <Routes>
-      <Route element={<AdminLayout />}>
+      <Route path="login" element={<AdminLogin />} />
+      <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="locations" element={<LocationsPage />} />
         <Route path="hotspot-editor" element={<HotspotEditorPage />} />
@@ -20,6 +31,7 @@ export default function AdminRoutes() {
         <Route path="rooms" element={<RoomsPage />} />
         <Route path="route-testing" element={<RouteTestingPage />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route path="accounts" element={<AdminAccountsPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

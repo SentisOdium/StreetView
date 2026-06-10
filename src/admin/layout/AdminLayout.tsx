@@ -11,6 +11,7 @@ import RouteIcon from "@mui/icons-material/Route";
 import HistoryIcon from "@mui/icons-material/History";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: DashboardIcon, end: true },
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/admin/rooms", label: "Rooms", icon: MeetingRoomIcon },
   { to: "/admin/route-testing", label: "Route Testing", icon: RouteIcon },
   { to: "/admin/audit-logs", label: "Audit Logs", icon: HistoryIcon },
+  { to: "/admin/accounts", label: "Admin Accounts", icon: PersonAddIcon },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];
 
