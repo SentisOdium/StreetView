@@ -217,7 +217,6 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
         }}
 
       >
-        {/* <CameraLogger /> */}
 
         <TransitionController
           prevMaterialRef={prevMaterialRef}
@@ -248,8 +247,7 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
             onHotspotClick={handleHotspotClick}
           />
         )}
-        {/* <gridHelper args={[50, 50]} position={[0, -0.01, 0]} /> */}
-        <axesHelper args={[5]} />
+
         {/* Current panorama scene (fades in) */}
         {currentScene && (
           <Scene

@@ -71,9 +71,8 @@ function DraggableHotspot({
       </mesh>
       <Html center distanceFactor={80}>
         <div
-          className={`pointer-events-none rounded px-2 py-0.5 text-xs font-bold text-white shadow-lg ${
-            selected ? "bg-yellow-600" : "bg-[#800000]"
-          }`}
+          className={`pointer-events-none rounded px-2 py-0.5 text-xs font-bold text-white shadow-lg ${selected ? "bg-yellow-600" : "bg-[#800000]"
+            }`}
         >
           {hotspot.hotspot_label}
           <div className="text-[10px] font-normal opacity-80">
@@ -139,60 +138,60 @@ function HotspotEditorCanvas({
       : { yaw, pitch };
 
   return (
-  <div className="relative w-full h-full">
+    <div className="relative w-full h-full">
 
-    {/* COMPASS UI OVERLAY (TOP RIGHT) */}
-    <div className="absolute top-4 right-4 bg-white p-3 rounded-md shadow-lg z-10">
-      <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-        Compass Reference
+      {/* COMPASS UI OVERLAY (TOP RIGHT) */}
+      <div className="absolute top-4 right-4 bg-white p-3 rounded-md shadow-lg z-10">
+        <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          Compass Reference
+        </div>
+
+        <img
+          src="/logo/compassForDumbass.png"
+          alt="Compass Guide"
+          className="w-32 object-contain opacity-70"
+        />
       </div>
 
-      <img
-        src="/logo/compassForDumbass.png"
-        alt="Compass Guide"
-        className="w-32 object-contain opacity-70"
-      />
+      <Canvas camera={{ position: [0.3, 0, 0], fov: 75, near: 0.1, far: 2000 }}>
+        <ambientLight intensity={1} />
+        <OrbitControls enableZoom enablePan maxDistance={55} />
+
+        <Suspense fallback={null}>
+          <MainNode
+            radius={PANORAMA_RADIUS}
+            geometry={geometry}
+            textureUrl={panoramaUrl}
+            position={[0, 0, 0]}
+            opacity={1}
+          />
+
+          <PanoramaClickHandler
+            onClick={(yaw, pitch) => {
+              const s = applySnap(yaw, pitch);
+              onPanoramaClick(s.yaw, s.pitch);
+            }}
+          />
+
+          {hotspots.map((h) => {
+            const id = h.id ?? h.tempId!;
+            return (
+              <DraggableHotspot
+                key={id}
+                hotspot={h}
+                selected={selectedId === id}
+                onSelect={() => onSelect(id)}
+                onDrag={(yaw, pitch) => {
+                  const s = applySnap(yaw, pitch);
+                  onDrag(id, s.yaw, s.pitch);
+                }}
+              />
+            );
+          })}
+        </Suspense>
+      </Canvas>
     </div>
-
-    <Canvas camera={{ position: [0.3, 0, 0], fov: 75, near: 0.1, far: 2000 }}>
-      <ambientLight intensity={1} />
-      <OrbitControls enableZoom enablePan maxDistance={55} />
-
-      <Suspense fallback={null}>
-        <MainNode
-          radius={PANORAMA_RADIUS}
-          geometry={geometry}
-          textureUrl={panoramaUrl}
-          position={[0, 0, 0]}
-          opacity={1}
-        />
-
-        <PanoramaClickHandler
-          onClick={(yaw, pitch) => {
-            const s = applySnap(yaw, pitch);
-            onPanoramaClick(s.yaw, s.pitch);
-          }}
-        />
-
-        {hotspots.map((h) => {
-          const id = h.id ?? h.tempId!;
-          return (
-            <DraggableHotspot
-              key={id}
-              hotspot={h}
-              selected={selectedId === id}
-              onSelect={() => onSelect(id)}
-              onDrag={(yaw, pitch) => {
-                const s = applySnap(yaw, pitch);
-                onDrag(id, s.yaw, s.pitch);
-              }}
-            />
-          );
-        })}
-      </Suspense>
-    </Canvas>
-  </div>
-);
+  );
 }
 
 export default function HotspotEditorPage() {
@@ -209,7 +208,7 @@ export default function HotspotEditorPage() {
   const { clearCacheRef } = useLocationCache();
 
   useEffect(() => {
-    adminApi.getLocations().then(setLocations).catch(() => {});
+    adminApi.getLocations().then(setLocations).catch(() => { });
   }, []);
 
   const loadNode = useCallback(async (nodeId: number) => {
@@ -451,9 +450,8 @@ export default function HotspotEditorPage() {
               return (
                 <li
                   key={id}
-                  className={`cursor-pointer rounded px-2 py-1 ${
-                    store.selectedId === id ? "bg-[#800000] text-white" : "hover:bg-slate-200 dark:hover:bg-slate-800"
-                  }`}
+                  className={`cursor-pointer rounded px-2 py-1 ${store.selectedId === id ? "bg-[#800000] text-white" : "hover:bg-slate-200 dark:hover:bg-slate-800"
+                    }`}
                   onClick={() => store.selectHotspot(id)}
                 >
                   {h.hotspot_label} → {h.destination_name}

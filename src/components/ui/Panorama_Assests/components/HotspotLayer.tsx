@@ -16,10 +16,10 @@ function directionToPosition(direction: string | undefined): [number, number, nu
   const r = HOTSPOT_DISTANCE;
   const diag = r * Math.SQRT1_2;
   const positions: Record<string, [number, number, number]> = {
-    N: [0, 0, r],
-    S: [0, 0, -r],
-    E: [-r, 0, 0],
-    W: [r, 0, 0],
+    N: [0, 0, -r],
+    S: [0, 0, r],
+    E: [r, 0, 0],
+    W: [-r, 0, 0],
     NE: [diag, 0, -diag],
     NW: [-diag, 0, -diag],
     SE: [diag, 0, diag],
@@ -34,7 +34,7 @@ function yawPitchToPosition(yawDeg: number, pitchDeg: number): [number, number, 
   const r = HOTSPOT_DISTANCE;
   const x = r * Math.cos(pitch) * Math.sin(yaw);
   const y = r * Math.sin(pitch);
-  const z = r * Math.cos(pitch) * Math.cos(yaw);
+  const z = -r * Math.cos(pitch) * Math.cos(yaw);
   return [x, y, z];
 }
 

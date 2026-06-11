@@ -1,13 +1,12 @@
 import { forwardRef } from "react";
 import * as THREE from "three";
-import CompassMarkers from "../utils/compass";
 type PanoramaSphereProps = {
   texture: THREE.Texture;
   opacity?: number;
 };
 
-const X_ROTATION = -3;
-const Y_ROTATION = -90; // north correction
+const X_ROTATION = 3;
+const Y_ROTATION = 81; // north correction
 const Z_ROTATION = 0;
 
 const PanoramaSphere = forwardRef<THREE.MeshBasicMaterial, PanoramaSphereProps>(
@@ -22,8 +21,6 @@ const PanoramaSphere = forwardRef<THREE.MeshBasicMaterial, PanoramaSphereProps>(
         ]}
       >
         <sphereGeometry args={[60, 64, 32]} />
-        <axesHelper args={[60]} />
-        <CompassMarkers />
         <meshBasicMaterial
           ref={ref}
           map={texture}

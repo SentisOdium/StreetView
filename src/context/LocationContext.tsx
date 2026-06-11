@@ -153,6 +153,11 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     if (id !== undefined) {
       // Clear specific node
       detailsCacheRef.current.delete(id);
+      setNodeDetails((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       setNodeDetailsLoading((prev) => {
         const next = { ...prev };
         delete next[id];
@@ -167,6 +172,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
       // Clear all
       detailsCacheRef.current.clear();
       listCacheRef.current.clear();
+      setNodeDetails({});
       setNodeDetailsLoading({});
       setNodeDetailsError({});
     }
