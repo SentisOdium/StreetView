@@ -21,6 +21,9 @@ type SceneState = {
   nodeId: number;
   texture: THREE.Texture;
   hotspots: HotspotData[];
+  rotationOffset?: number;
+  rotationOffsetX?: number;
+  rotationOffsetZ?: number;
 };
 
 const easeInOutCubic = (t: number): number => {
@@ -133,6 +136,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
           nodeId: current.id,
           texture,
           hotspots: details?.Hotspots || [],
+          rotationOffset: current.img?.rotation_offset,
+          rotationOffsetX: current.img?.rotation_offset_x,
+          rotationOffsetZ: current.img?.rotation_offset_z,
         };
 
         setCurrentScene((prev) => {
@@ -242,6 +248,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
             ref={prevMaterialRef}
             texture={previousScene.texture}
             opacity={1}
+            rotationOffset={previousScene.rotationOffset}
+            rotationOffsetX={previousScene.rotationOffsetX}
+            rotationOffsetZ={previousScene.rotationOffsetZ}
             showHotspots={false}
             hotspotsDisabled={true}
             onHotspotClick={handleHotspotClick}
@@ -254,6 +263,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
             ref={currMaterialRef}
             texture={currentScene.texture}
             opacity={animatingTransition ? 0 : 1}
+            rotationOffset={currentScene.rotationOffset}
+            rotationOffsetX={currentScene.rotationOffsetX}
+            rotationOffsetZ={currentScene.rotationOffsetZ}
             hotspots={currentScene.hotspots}
             showHotspots={true}
             hotspotsDisabled={isTransitioning}

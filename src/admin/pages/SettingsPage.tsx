@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { adminApi, exportToCsv, exportToJson } from "../api/adminApi";
 import type { ValidationResult } from "../api/types";
-import { useThemeStore } from "../store/themeStore";
 import PageHeader, {
   AdminButton,
   AdminInput,
@@ -9,7 +8,6 @@ import PageHeader, {
 } from "../components/shared/AdminUI";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useThemeStore();
   const [token, setToken] = useState(localStorage.getItem("admin_token") || "");
   const [user, setUser] = useState(localStorage.getItem("admin_user") || "admin");
   const [validation, setValidation] = useState<ValidationResult | null>(null);
@@ -93,23 +91,6 @@ export default function SettingsPage() {
           <AdminButton onClick={saveAuth}>Save Credentials</AdminButton>
         </div>
 
-        <div className="admin-card space-y-4 rounded-xl border p-6 shadow-sm">
-          <h2 className="font-semibold">Appearance</h2>
-          <div className="flex gap-2">
-            <AdminButton
-              variant={theme === "light" ? "primary" : "secondary"}
-              onClick={() => setTheme("light")}
-            >
-              Light Mode
-            </AdminButton>
-            <AdminButton
-              variant={theme === "dark" ? "primary" : "secondary"}
-              onClick={() => setTheme("dark")}
-            >
-              Dark Mode
-            </AdminButton>
-          </div>
-        </div>
 
         <div className="admin-card space-y-4 rounded-xl border p-6 shadow-sm">
           <h2 className="font-semibold">Data Validation</h2>

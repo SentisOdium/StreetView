@@ -17,7 +17,7 @@ export default function NodeLocationDetails({
 
   if (loading && !details) {
     return (
-      <div className="ml-10 flex h-screen w-110 items-center justify-center border-gray-600 bg-white shadow-lg">
+      <div className="flex h-screen w-110 items-center justify-center border-gray-600 bg-white shadow-lg">
         <Loading loading message="Loading location details..." />
       </div>
     );
@@ -25,7 +25,7 @@ export default function NodeLocationDetails({
 
   if (error && !details) {
     return (
-      <div className="ml-10 w-110 border-gray-600 bg-white p-4 shadow-lg">
+      <div className="w-110 border-gray-600 bg-white p-4 shadow-lg">
         <Error error={error} />
       </div>
     );
@@ -33,7 +33,7 @@ export default function NodeLocationDetails({
 
   if (!details) {
     return (
-      <div className="ml-10 flex h-screen w-110 items-center justify-center border-gray-600 bg-white p-6 text-center text-sm text-gray-600 shadow-lg">
+      <div className="flex h-screen w-110 items-center justify-center border-gray-600 bg-white p-6 text-center text-sm text-gray-600 shadow-lg">
         No details available for this location.
       </div>
     );
@@ -43,7 +43,7 @@ export default function NodeLocationDetails({
     panoramaImageUrl(details.Current?.img?.src) ?? WayfinderLogo1;
 
   return (
-    <div className="ml-10 h-screen w-110 overflow-y-auto border-gray-600 bg-white shadow-lg animate-slideDown">
+    <div className="h-screen w-110 overflow-y-auto border-gray-600 bg-white shadow-lg animate-slideDown">
       {loading && (
         <div className="px-4 pt-2">
           <Loading loading message="Updating..." />

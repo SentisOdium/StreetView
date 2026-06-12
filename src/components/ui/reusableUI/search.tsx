@@ -1,4 +1,4 @@
-import { useMemo, useState, useId, useRef, type RefObject } from "react";
+import { useMemo, useState, useId, useRef, useEffect, type RefObject } from "react";
 import Modal from "./modal";
 import { Loading, Error } from "./emptySearchUi";
 import { EmptySearchUi } from "./emptySearchUi";
@@ -17,6 +17,8 @@ type SearchProps<T> = {
   disabled?: boolean;
   inputRef?: RefObject<HTMLInputElement | null>;
   noModal?: boolean;
+  onDropdownVisibilityChange?: (visible: boolean) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export default function Search<T>(props: SearchProps<T>) {
@@ -34,12 +36,36 @@ export default function Search<T>(props: SearchProps<T>) {
     disabled,
     inputRef,
     noModal,
+    onDropdownVisibilityChange,
   } = props;
 
   const [showModal, setShowModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const localInputRef = useRef<HTMLInputElement>(null);
   const resolvedInputRef = inputRef ?? localInputRef;
   const listboxId = useId();
+  const activeItemRef = useRef<HTMLLIElement>(null);
+
+  const isDropdownOpen = showModal && value.length > 0 && !disabled;
+
+  useEffect(() => {
+    onDropdownVisibilityChange?.(isDropdownOpen);
+  }, [isDropdownOpen, onDropdownVisibilityChange]);
+
+  // Reset activeIndex when query or list size changes
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [value, items.length]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIndex >= 0 && activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth"
+      });
+    }
+  }, [activeIndex]);
 
   const filteredList = useMemo(() => {
     const query = value.trim().toLowerCase();
@@ -56,17 +82,22 @@ export default function Search<T>(props: SearchProps<T>) {
 
       {!loading && !error && filteredList.length > 0 && (
         <ul>
-          {filteredList.map((item) => {
+          {filteredList.map((item, index) => {
             const key = getKey?.(item) ?? getLabel(item);
+            const isActive = index === activeIndex;
             return (
               <li
                 key={key}
+                ref={isActive ? activeItemRef : null}
                 role="option"
+                aria-selected={isActive}
                 onClick={() => {
                   onSelect(item);
                   setShowModal(false);
                 }}
-                className="cursor-pointer rounded-xl p-2 hover:bg-gray-100"
+                className={`cursor-pointer rounded-xl p-2 transition-colors ${
+                  isActive ? "bg-gray-100 font-semibold text-[#800000]" : "hover:bg-gray-100"
+                }`}
               >
                 {getLabel(item)}
               </li>
@@ -106,7 +137,29 @@ export default function Search<T>(props: SearchProps<T>) {
             setShowModal(true);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Escape") setShowModal(false);
+            if (e.key === "Escape") {
+              setShowModal(false);
+              setActiveIndex(-1);
+            } else if (e.key === "ArrowDown") {
+              if (!isDropdownOpen) {
+                setShowModal(true);
+              } else if (filteredList.length > 0) {
+                e.preventDefault();
+                setActiveIndex((prev) => (prev < filteredList.length - 1 ? prev + 1 : 0));
+              }
+            } else if (e.key === "ArrowUp") {
+              if (isDropdownOpen && filteredList.length > 0) {
+                e.preventDefault();
+                setActiveIndex((prev) => (prev > 0 ? prev - 1 : filteredList.length - 1));
+              }
+            } else if (e.key === "Enter") {
+              if (isDropdownOpen && activeIndex >= 0 && activeIndex < filteredList.length) {
+                e.preventDefault();
+                onSelect(filteredList[activeIndex]);
+                setShowModal(false);
+              }
+            }
+            props.onKeyDown?.(e);
           }}
         />
         {noModal && showModal && value.length > 0 && !disabled && (

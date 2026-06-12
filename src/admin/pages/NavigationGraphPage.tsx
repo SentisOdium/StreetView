@@ -55,6 +55,7 @@ export default function NavigationGraphPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [treeText, setTreeText] = useState("");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -74,7 +75,7 @@ export default function NavigationGraphPage() {
       const rfNodes: Node[] = graph.nodes.map((n, i) => ({
         id: String(n.id),
         data: { label: `${n.node_name}\n${n.floor || ""}` },
-        position: { x: (i % 5) * 220, y: Math.floor(i / 5) * 120 },
+        position: { x: (i % 4) * 280, y: Math.floor(i / 4) * 200 },
         style: {
           background: "#800000",
           color: "#fff",
@@ -114,11 +115,53 @@ export default function NavigationGraphPage() {
     [validation]
   );
 
+  const styledNodes = useMemo(() => {
+    if (!selectedNodeId) return nodes;
+
+    const connectedIds = new Set<string>([selectedNodeId]);
+    edges.forEach((e) => {
+      if (e.source === selectedNodeId) connectedIds.add(e.target);
+      if (e.target === selectedNodeId) connectedIds.add(e.source);
+    });
+
+    return nodes.map((node) => {
+      const isSelected = node.id === selectedNodeId;
+      const isConnected = connectedIds.has(node.id);
+
+      return {
+        ...node,
+        style: {
+          ...node.style,
+          opacity: isConnected ? 1 : 0.25,
+          border: isSelected ? "3px solid #ffd700" : "none",
+          boxShadow: isSelected ? "0 0 15px #ffd700" : "none",
+        },
+      };
+    });
+  }, [nodes, edges, selectedNodeId]);
+
+  const styledEdges = useMemo(() => {
+    if (!selectedNodeId) return edges;
+
+    return edges.map((edge) => {
+      const isConnected = edge.source === selectedNodeId || edge.target === selectedNodeId;
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          opacity: isConnected ? 1 : 0.08,
+          strokeWidth: isConnected ? 3 : 1,
+        },
+        animated: isConnected,
+      };
+    });
+  }, [edges, selectedNodeId]);
+
   return (
     <div className="flex h-screen flex-col p-8">
       <PageHeader
         title="Navigation Graph"
-        subtitle="Visualize and analyze location connections"
+        subtitle="Visualize and analyze location connections (Click a node to highlight connections)"
         actions={<AdminButton variant="secondary" onClick={load}>Refresh</AdminButton>}
       />
 
@@ -129,10 +172,12 @@ export default function NavigationGraphPage() {
         <div className="grid flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-3">
           <div className="admin-card overflow-hidden rounded-xl border lg:col-span-2" style={{ minHeight: 500 }}>
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
+              nodes={styledNodes}
+              edges={styledEdges}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
+              onNodeClick={(_event, node) => setSelectedNodeId(node.id === selectedNodeId ? null : node.id)}
+              onPaneClick={() => setSelectedNodeId(null)}
               fitView
               nodesDraggable
               nodesConnectable={false}

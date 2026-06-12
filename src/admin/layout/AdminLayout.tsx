@@ -1,7 +1,4 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
-import { useThemeStore } from "../store/themeStore";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PlaceIcon from "@mui/icons-material/Place";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
@@ -12,6 +9,10 @@ import HistoryIcon from "@mui/icons-material/History";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useAuthStore } from "../store/authStore";
+import axios from "axios";
+import { BaseUrl } from "../../components/objects/baseUrl";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: DashboardIcon, end: true },
@@ -26,20 +27,21 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
-  const { theme, toggleTheme } = useThemeStore();
-  const dark = theme === "dark";
+  const logout = useAuthStore((s) => s.logout);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${BaseUrl}/admin-auth/logout`, {}, { withCredentials: true });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      logout();
+    }
+  };
 
   return (
-    <div
-      className={`admin-root flex min-h-screen ${
-        dark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
-      }`}
-    >
-      <aside
-        className={`fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r ${
-          dark ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white"
-        }`}
-      >
+    <div className="admin-root flex min-h-screen bg-slate-50 text-slate-900">
+      <aside className="fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-slate-200 bg-white">
         <div className="flex items-center gap-3 border-b border-inherit px-5 py-5">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#800000] text-sm font-bold text-white">
             WF
@@ -57,12 +59,9 @@ export default function AdminLayout() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                  isActive
-                    ? "bg-[#800000] text-white"
-                    : dark
-                      ? "text-slate-300 hover:bg-slate-800"
-                      : "text-slate-600 hover:bg-slate-100"
+                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive
+                  ? "bg-[#800000] text-white"
+                  : "text-slate-600 hover:bg-slate-100"
                 }`
               }
             >
@@ -75,26 +74,18 @@ export default function AdminLayout() {
         <div className="space-y-2 border-t border-inherit p-3">
           <Link
             to="/"
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-              dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"
-            }`}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-100"
           >
             <HomeIcon sx={{ fontSize: 18 }} />
             Back to Viewer
           </Link>
           <button
             type="button"
-            onClick={toggleTheme}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-              dark ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"
-            }`}
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[#800000] hover:bg-[#800000] hover:text-white transition-colors"
           >
-            {dark ? (
-              <LightModeIcon sx={{ fontSize: 18 }} />
-            ) : (
-              <DarkModeIcon sx={{ fontSize: 18 }} />
-            )}
-            {dark ? "Light Mode" : "Dark Mode"}
+            <LogoutIcon sx={{ fontSize: 18 }} />
+            Logout
           </button>
         </div>
       </aside>

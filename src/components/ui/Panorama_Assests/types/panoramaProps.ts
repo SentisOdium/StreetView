@@ -10,6 +10,9 @@ export type SphereProps = {
     geometry?: THREE.SphereGeometry;
     textureUrl?: string
     opacity?: number;
+    rotationOffset?: number;
+    rotationOffsetX?: number;
+    rotationOffsetZ?: number;
 }
 
 export type PanoramaProps  = {

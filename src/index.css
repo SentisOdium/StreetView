@@ -90,3 +90,9 @@
 .custom-cursor {
     cursor: url("../public/logo/arrow-up-circle-svgrepo-com.svg") 16 16, auto;
 }
+
+/* Hide native search cancel button */
+input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}

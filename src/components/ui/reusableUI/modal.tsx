@@ -5,8 +5,9 @@ type ModalProps = {
   onClose: () => void;
   isVisible: boolean;
   design?: String;
+  style?: React.CSSProperties;
 }
-const Modal = ({ children, onClose, isVisible, design }: ModalProps) => {
+const Modal = ({ children, onClose, isVisible, design, style }: ModalProps) => {
     if(!isVisible) return null;
 
     const handleClose = (e: React.MouseEvent<HTMLDivElement>) =>{
@@ -22,7 +23,8 @@ const Modal = ({ children, onClose, isVisible, design }: ModalProps) => {
                 <div 
                     role="dialog"
                     aria-modal="true"
-                    className={`flex flex-col rounded-b-xl bg-white p-4 shadow-lg ${design}`}
+                    className={`flex flex-col rounded-b-xl bg-white p-4 shadow-lg ${design || ""}`}
+                    style={style}
                     onClick={(e) => e.stopPropagation()}>
                         {children}
                 </div>  

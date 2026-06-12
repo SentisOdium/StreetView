@@ -13,7 +13,7 @@ export default function HotspotArrow({ position, onClick, disabled }: HotspotMar
     // Calculate rotation to face the direction of the hotspot (from 0,0,0)
     // The SVG texture arrow points to the right (+X) by default.
     // So the angle around the Z axis is Math.atan2(z, x).
-    const angle = Math.atan2(position[2], position[0]);
+    const angle = Math.atan2(-position[2], position[0]);
 
     return (
         <group position={position}>

@@ -3,21 +3,20 @@ import * as THREE from "three";
 type PanoramaSphereProps = {
   texture: THREE.Texture;
   opacity?: number;
+  rotationOffset?: number;
+  rotationOffsetX?: number;
+  rotationOffsetZ?: number;
 };
 
-const X_ROTATION = 3;
-const Y_ROTATION = 81; // north correction
-const Z_ROTATION = 0;
-
 const PanoramaSphere = forwardRef<THREE.MeshBasicMaterial, PanoramaSphereProps>(
-  ({ texture, opacity = 1 }, ref) => {
+  ({ texture, opacity = 1, rotationOffset = 81, rotationOffsetX = 0, rotationOffsetZ = 0 }, ref) => {
     return (
       <mesh
         position={[0, 0, 0]}
         rotation={[
-          THREE.MathUtils.degToRad(X_ROTATION),
-          THREE.MathUtils.degToRad(Y_ROTATION),
-          THREE.MathUtils.degToRad(Z_ROTATION),
+          THREE.MathUtils.degToRad(3 + rotationOffsetX),
+          THREE.MathUtils.degToRad(rotationOffset),
+          THREE.MathUtils.degToRad(rotationOffsetZ),
         ]}
       >
         <sphereGeometry args={[60, 64, 32]} />

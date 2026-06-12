@@ -7,6 +7,9 @@ export type AdminLocation = {
   description?: string;
   node_details_id?: number;
   image_alt?: string;
+  rotation_offset?: number;
+  rotation_offset_x?: number;
+  rotation_offset_z?: number;
 };
 
 export type AdminHotspot = {

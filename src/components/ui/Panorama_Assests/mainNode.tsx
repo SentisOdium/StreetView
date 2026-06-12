@@ -11,6 +11,9 @@ export default function MainNode({
     geometry,
     textureUrl,
     opacity = 1,
+    rotationOffset = 81,
+    rotationOffsetX = 0,
+    rotationOffsetZ = 0,
 }: SphereProps) {
 
     const [texture, setTexture] = useState<THREE.Texture | null>(null);
@@ -85,7 +88,15 @@ export default function MainNode({
     }
 
     return (
-        <mesh position={position} geometry={geometry}>
+        <mesh
+            position={position}
+            geometry={geometry}
+            rotation={[
+                THREE.MathUtils.degToRad(3 + rotationOffsetX),
+                THREE.MathUtils.degToRad(rotationOffset),
+                THREE.MathUtils.degToRad(rotationOffsetZ),
+            ]}
+        >
             {!geometry && (
                 <sphereGeometry
                     args={[

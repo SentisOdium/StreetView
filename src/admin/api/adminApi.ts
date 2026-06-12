@@ -84,7 +84,11 @@ export const adminApi = {
   routeTest: (source: string, destination: string) =>
     get<RouteTestResult>("/route-test", { source, destination }),
   exportAll: () => get<Record<string, unknown>>("/export"),
-  getAuditLogs: () => get<AuditLogEntry[]>("/audit-logs"),
+  getAuditLogs: (limit?: number, offset?: number) =>
+    get<{ logs: AuditLogEntry[]; total: number }>("/audit-logs", {
+      limit: limit !== undefined ? String(limit) : undefined,
+      offset: offset !== undefined ? String(offset) : undefined,
+    } as any),
 
   uploadFile: async (file: File) => {
     const form = new FormData();
@@ -107,6 +111,14 @@ export const adminApi = {
       { withCredentials: true }
     );
     return res.data;
+  },
+
+  getAdmins: async () => {
+    const res = await axios.get<{ success: boolean; data: any[] }>(
+      `${BaseUrl}/admin-auth/admins`,
+      { withCredentials: true }
+    );
+    return res.data.data;
   },
 };
 

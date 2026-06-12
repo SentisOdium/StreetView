@@ -24,6 +24,9 @@ export type NodeDetails = {
         img: {
             src: string;
             alt: string;
+            rotation_offset?: number;
+            rotation_offset_x?: number;
+            rotation_offset_z?: number;
         }
     }
 

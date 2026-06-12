@@ -24,6 +24,8 @@ export function SearchSection() {
 
   const errorMessage = error || null;
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const handleSelect = (node: MapNode) => {
     setSearch(node.node_name);
     navigate("/tour", {
@@ -108,7 +110,7 @@ export function SearchSection() {
 
           <div className="relative flex w-full max-w-2xl flex-col items-center">
             <div
-              className={`flex h-16 w-full items-center justify-between bg-white px-4 py-1 transition-all duration-700 ${search.length > 0
+              className={`flex h-16 w-full items-center justify-between bg-white px-4 py-1 transition-all duration-700 ${isDropdownOpen
                 ? "rounded-t-2xl"
                 : "rounded-2xl shadow-2xl"
                 } ${isGlowing ? "scale-[1.03] ring-4 ring-[#800000]/40 shadow-[0_0_32px_rgba(128,0,0,0.3)]" : "scale-100"}`}
@@ -128,6 +130,7 @@ export function SearchSection() {
                   getKey={(node: MapNode) => node.id}
                   onSelect={handleSelect}
                   noModal={true}
+                  onDropdownVisibilityChange={setIsDropdownOpen}
                   modalDesign="
                     max-h-[300px]
                     -ml-4

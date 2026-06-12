@@ -46,7 +46,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
 
     return (
         <>
-            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto ml-10 animate-slideDown bg-white p-4">
+            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto animate-slideDown bg-white p-4">
                     <div className="grid grid-cols-3 gap-4">
                         <button
                             type="button"
@@ -73,7 +73,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 getKey={(node: any) => node?.id}
                                                 onSelect={handleLocationASelect} 
                                                 disabled={activeField !== "A"}
-                                                modalDesign="mt-32 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
+                                                modalDesign="mt-32 ml-4 mr-auto w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
                             </div>
                         </div>
@@ -105,7 +105,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
                                                 getKey={(node: any) => node?.id}
                                                 onSelect={handleLocationBSelect} 
                                                 disabled={activeField !== "B"}
-                                                modalDesign="mt-47 ml-auto mr-4 w-66.5 shadow-xl animate-slideDown rounded-xl"
+                                                modalDesign="mt-47 ml-4 mr-auto w-66.5 shadow-xl animate-slideDown rounded-xl"
                                             />
                             </div>
                         </div>

@@ -39,9 +39,10 @@ function yawPitchToPosition(yawDeg: number, pitchDeg: number): [number, number, 
 }
 
 export function getHotspotPosition(hotspot: HotspotData): [number, number, number] {
-  if (hotspot.yaw != null && hotspot.pitch != null) {
-    return yawPitchToPosition(hotspot.yaw, hotspot.pitch);
-  }
+  // yaw and pitch coordinate placement is deprecated in favor of direction-based placement
+  // if (hotspot.yaw != null && hotspot.pitch != null) {
+  //   return yawPitchToPosition(hotspot.yaw, hotspot.pitch);
+  // }
 
   const fromDirection =
     directionToPosition(hotspot.hotspot_label) ??

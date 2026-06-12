@@ -15,7 +15,7 @@ export default function SearchUI2(props: SearchUiProps) {
         : null;
 
   return (
-    <div className="ml-14.75">
+    <div className="">
       <div
         className={`z-20 m-4 flex h-12 w-90 items-center justify-between bg-white px-4 pt-1 pb-1 ${
           search.length > 0 ? "rounded-2xl" : "rounded-2xl shadow-xl"
@@ -35,7 +35,7 @@ export default function SearchUI2(props: SearchUiProps) {
             props.onSelect(node);
             setSearch(node.node_name);
           }}
-          modalDesign="mt-[64.6px] ml-auto mr-4 w-90 max-h-[300px] overflow-y-auto shadow-xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          modalDesign="mt-[64.6px] ml-4 mr-auto w-90 max-h-[300px] overflow-y-auto shadow-xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         />
 
         <div className="ml-2 flex space-x-2">

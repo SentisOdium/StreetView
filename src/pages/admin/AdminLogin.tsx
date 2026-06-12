@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { BaseUrl } from '../../components/objects/baseUrl';
 import { useAuthStore } from '../../admin/store/authStore';
-import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -44,87 +44,137 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-900 relative overflow-hidden font-sans">
-      {/* Dynamic Background Effects */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-[#800000] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute top-10 right-10 w-96 h-96 bg-gray-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-[#800000] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white font-sans text-slate-900">
 
-      <div className="z-10 w-full max-w-md p-8 m-4 bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100">
-        <div className="text-center mb-8">
-          <div className="mx-auto bg-[#800000]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(128,0,0,0.1)]">
-            <FaLock className="text-3xl text-[#800000]" />
-          </div>
-          <h2 className="text-3xl font-bold text-[#800000] tracking-tight">Admin Portal</h2>
-          <p className="text-gray-500 mt-2 text-sm font-medium">Authenticate to access the dashboard</p>
+      {/* Left Split Panel (Brand Graphic - Maroon Theme) */}
+      <div className="hidden lg:flex lg:col-span-5 relative overflow-hidden flex-col justify-between p-12 bg-gradient-to-br from-[#4a0000] via-[#800000] to-[#b31919] items-end text-right">
+        {/* Organic curved wave lines pattern overlay */}
+        <div className="absolute inset-0 opacity-15 pointer-events-none">
+          <svg className="w-full h-full" viewBox="0 0 400 800" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-50,150 Q100,50 250,200 T550,150" fill="none" stroke="white" strokeWidth="2" />
+            <path d="M-50,250 Q120,130 280,320 T550,250" fill="none" stroke="white" strokeWidth="2" />
+            <path d="M-50,350 Q140,210 310,440 T550,350" fill="none" stroke="white" strokeWidth="2" />
+            <path d="M-50,450 Q160,290 340,560 T550,450" fill="none" stroke="white" strokeWidth="2" />
+            <path d="M-50,550 Q180,370 370,680 T550,550" fill="none" stroke="white" strokeWidth="2" />
+          </svg>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium text-center shadow-sm transition-all duration-300">
-            {error}
-          </div>
-        )}
+        {/* Top Section spacer for layout balance */}
+        <div className="z-10 h-16" />
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FaEnvelope className="text-gray-400 group-focus-within:text-[#800000] transition-colors" />
-              </div>
+        {/* Middle Section - Brand Logo & Tagline */}
+        <div className="z-10 flex flex-col items-end space-y-6">
+          <img
+            src="/logo/pup wayfinder logo 3.png"
+            alt="PUP Wayfinder Logo"
+            className="h-36 w-auto object-contain rounded-lg"
+          />
+          <h2
+            className="text-3xl xl:text-4xl font-extrabold text-white tracking-tight leading-tight max-w-sm"
+            style={{ fontFamily: '"Lucida Fax", Georgia, serif' }}
+          >
+            Digitizing your campus experience
+          </h2>
+        </div>
+
+        {/* Bottom Section - Copyright Info */}
+        <div className="z-10">
+          <p className="text-white/60 text-xs font-semibold tracking-wide">
+            &copy; {new Date().getFullYear()} Wayfinder. All rights reserved.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Split Panel (Minimalist Sign-in Form - Forced White Background) */}
+      <div className="lg:col-span-7 flex flex-col justify-between p-8 md:p-16 lg:p-24 bg-white text-slate-900 dark:bg-white dark:text-slate-900">
+
+        {/* Top Logo / App Name */}
+        <div className="text-2xl font-black tracking-wider uppercase text-[#800000]">
+          Wayfinder
+        </div>
+
+        {/* Form Container */}
+        <div className="max-w-md w-full mx-auto my-auto py-12 space-y-8">
+
+          {/* Header */}
+          <div className="space-y-2.5">
+            <h2 className="text-4xl font-black text-slate-950 tracking-tight">Welcome Back!</h2>
+            <p className="text-xs xl:text-sm text-slate-500 font-medium">
+              Accidentally landed here?{" "}
+              <Link to="/" className="text-[#800000] font-bold hover:underline cursor-pointer">
+                Return to the homepage
+              </Link>
+              .
+            </p>
+          </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-700 text-xs font-semibold text-center animate-slideDown">
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-7">
+
+            {/* Email Field */}
+            <div className="relative border-b border-slate-200 focus-within:border-[#800000] transition-colors py-3">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#800000]/30 focus:border-[#800000] transition-all duration-300 placeholder-gray-400"
-                placeholder="admin@wayfinder.com"
+                className="w-full bg-transparent text-sm xl:text-base text-slate-900 outline-none placeholder-slate-400 py-1"
+                placeholder="Email Address"
                 required
               />
             </div>
-          </div>
 
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FaLock className="text-gray-400 group-focus-within:text-[#800000] transition-colors" />
-              </div>
+            {/* Password Field */}
+            <div className="relative border-b border-slate-200 focus-within:border-[#800000] transition-colors py-3">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl pl-11 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#800000]/30 focus:border-[#800000] transition-all duration-300 placeholder-gray-400"
-                placeholder="••••••••"
+                className="w-full bg-transparent text-sm xl:text-base text-slate-900 outline-none placeholder-slate-400 py-1 pr-10"
+                placeholder="Password"
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-[#800000] transition-colors"
+                className="absolute right-0 bottom-4 text-slate-400 hover:text-slate-700 transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 px-4 bg-[#800000] hover:bg-[#a00000] text-white font-bold rounded-xl shadow-[0_4px_14px_rgba(128,0,0,0.3)] hover:shadow-[0_6px_20px_rgba(128,0,0,0.4)] transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center disabled:transform-none"
-          >
-            {loading ? (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              'Log In to Dashboard'
-            )}
-          </button>
-        </form>
+            {/* Submit Button (Maroon styled) */}
+            <div className="pt-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 bg-[#800000] hover:bg-[#680000] text-white font-bold rounded-xl transition-all duration-300 disabled:opacity-50 flex items-center justify-center cursor-pointer shadow-md hover:shadow-lg active:scale-[0.99] disabled:pointer-events-none text-base xl:text-lg"
+              >
+                {loading ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  'Login Now'
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Footer Utility Link */}
+          <div className="text-center text-xs xl:text-sm text-slate-400 font-medium">
+            Forgot password? <span className="font-semibold text-slate-700 hover:underline cursor-pointer">Click here</span>
+          </div>
+        </div>
+
+        {/* Empty bottom element for layout balance */}
+        <div className="hidden lg:block h-6" />
       </div>
+
     </div>
   );
 }
