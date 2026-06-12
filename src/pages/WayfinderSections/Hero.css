@@ -1,0 +1,168 @@
+/* ═════════════════════════════════════════════
+   HERO
+   ═════════════════════════════════════════════ */
+.wf-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wf-white);
+  overflow: hidden;
+}
+
+.wf-hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: wfHeroIn 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+@keyframes wfHeroIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.wf-hero__logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 14px;
+  margin-bottom: 0;
+  filter: drop-shadow(0 4px 24px rgba(128, 0, 0, 0.12));
+}
+
+.wf-hero__title {
+  font-size: clamp(20px, 4vw, 36px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--wf-maroon);
+  margin: 0;
+}
+
+.wf-hero__tagline {
+  font-size: clamp(22px, 6vw, 96px);
+  font-family: "Lucida Fax", serif;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--wf-maroon);
+  margin: 12px 0 32px;
+  letter-spacing: -0.03em;
+
+  display: block;
+  text-align: center;
+  position: relative;
+  max-width: 100%;
+  width: 100%;
+}
+
+.wf-hero__text {
+  display: inline-block;
+}
+
+.wf-hero__cursor {
+  font-weight: 600;
+  font-style: italic;
+  margin: 0 4px;
+}
+
+.wf-hero__cursor.typing {
+  animation: wfCursorBlink 1s step-end infinite;
+}
+
+.wf-hero__cursor.finished {
+  animation: wfCursorBlinkFinish 1s step-end 3 forwards;
+}
+
+@keyframes wfCursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes wfCursorBlinkFinish {
+  0% {
+    opacity: 1;
+  }
+
+  40% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.wf-hero__cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.wf-hero__branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .wf-hero__content {
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .wf-hero__tagline {
+    font-size: 38px !important;
+    line-height: 1.25;
+    padding: 0 10px;
+    margin: 16px 0 28px;
+    display: block;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .wf-hero__text {
+    display: inline !important;
+    padding-right: 0 !important;
+    text-align: center;
+  }
+
+  .wf-hero__spacer {
+    display: none !important;
+  }
+
+  .wf-hero__overlay {
+    position: relative !important;
+    display: inline !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .wf-hero__cta {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .wf-hero__cta .wf-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px 24px;
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import './VideoSection.css';
 
 export function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -23,7 +24,9 @@ export function VideoSection() {
         1 - distance / maxDistance
       );
 
-      setScale(0.8 + progress * 0.4);
+      const isMobile = window.innerWidth <= 768;
+      const maxScale = isMobile ? 1.0 : 1.2;
+      setScale(0.8 + progress * (maxScale - 0.8));
     };
 
     window.addEventListener("scroll", handleScroll);

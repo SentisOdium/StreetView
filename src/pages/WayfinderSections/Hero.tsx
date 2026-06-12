@@ -1,10 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import './Hero.css';
 import { scrollTo } from "./utils";
 import { ParticleCanvas } from "./ParticleCanvas";
 import { useState, useEffect } from "react";
 
 export function Hero() {
-  const navigate = useNavigate();
   const [typedIndex, setTypedIndex] = useState(0);
   const fullText = "Digitizing your campus experience.";
 
@@ -20,8 +19,8 @@ export function Hero() {
       }
     };
 
-    // Start typing after a short delay
-    timeoutId = setTimeout(typeNext, 600);
+    // Start typing after 1 blink (1000ms)
+    timeoutId = setTimeout(typeNext, 1000);
 
     return () => clearTimeout(timeoutId);
   }, []);
@@ -45,14 +44,14 @@ export function Hero() {
         )}
 
         <p className="wf-hero__tagline">
-          <span className="wf-hero__text" style={{ position: "relative", display: "inline-block" }}>
+          <span className="wf-hero__text" style={{ position: "relative", display: "inline-block", maxWidth: "100%", paddingRight: "32px" }}>
             {/* Invisible full text pre-allocates the exact unbroken width to stop all shaking */}
-            <span style={{ visibility: "hidden" }}>{fullText}</span>
+            <span className="wf-hero__spacer" style={{ visibility: "hidden", display: "block", width: "100%" }}>{fullText}</span>
 
             {/* Absolute overlay for the actual typing effect */}
-            <span style={{ position: "absolute", left: 0, top: 0, display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
+            <span className="wf-hero__overlay" style={{ position: "absolute", left: 0, top: 0, width: "calc(100% + 32px)", height: "100%", display: "block" }}>
               <span>{fullText.substring(0, typedIndex)}</span>
-              <span className={`wf-hero__cursor ${isTypingFinished ? 'finished' : 'typing'}`}>/</span>
+              <span className={`wf-hero__cursor ${isTypingFinished ? 'finished' : 'typing'}`} style={{ display: "inline-block" }}>|</span>
             </span>
           </span>
         </p>

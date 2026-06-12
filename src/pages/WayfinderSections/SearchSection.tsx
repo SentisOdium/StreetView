@@ -76,7 +76,7 @@ export function SearchSection() {
     <section
       id="search-section"
       ref={reveal.ref}
-      className={`relative flex items-center justify-center min-h-[1000px] transition-all duration-700 ${reveal.visible
+      className={`relative flex items-center justify-center min-h-screen transition-all duration-700 ${reveal.visible
         ? "opacity-100 translate-y-0"
         : "opacity-0 translate-y-12"
         }`}
@@ -87,7 +87,7 @@ export function SearchSection() {
           transform: `scale(${scale})`,
           transformOrigin: "center center",
         }}
-        className="relative w-full max-w-[calc(90%-192px)] h-[82vh] overflow-hidden rounded-[32px] transition-transform duration-300 ease-out will-change-transform"      >
+        className="relative w-[92%] md:max-w-[calc(90%-192px)] h-[70vh] md:h-[82vh] overflow-hidden rounded-[24px] md:rounded-[32px] transition-transform duration-300 ease-out will-change-transform"      >
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -101,8 +101,8 @@ export function SearchSection() {
         <div className={`absolute inset-0 transition-colors duration-700 ${isGlowing ? "bg-black/70" : "bg-black/40"}`} />
 
         {/* Content */}
-        <div className="relative z-10 flex min-h-[880px] flex-col items-center justify-center px-6">
-          <h2 className="mb-8 text-center text-4xl font-bold text-white drop-shadow-lg md:text-5xl">
+        <div className="relative z-10 flex min-h-[50vh] flex-col items-center justify-center px-4 md:px-6">
+          <h2 className="mb-8 text-center text-3xl md:text-5xl font-bold text-white drop-shadow-lg">
             Where would <span className={`transition-colors duration-700 ${isGlowing ? "text-[#800000] delay-[900ms]" : "delay-0"}`}>you</span> like to go?
           </h2>
 
@@ -113,12 +113,12 @@ export function SearchSection() {
                 : "rounded-2xl shadow-2xl"
                 } ${isGlowing ? "scale-[1.03] ring-4 ring-[#800000]/40 shadow-[0_0_32px_rgba(128,0,0,0.3)]" : "scale-100"}`}
             >
-              <div className="flex-1 w-full text-lg">
+              <div className="flex-1 w-full text-base md:text-lg">
                 <Search
                   inputRef={inputRef}
                   value={search}
                   onChange={setSearch}
-                  placeholder="Search for a building or facility..."
+                  placeholder="Search for a building..."
                   items={list || []}
                   loading={loading}
                   error={errorMessage}
@@ -129,10 +129,11 @@ export function SearchSection() {
                   onSelect={handleSelect}
                   noModal={true}
                   modalDesign="
-                    max-h-[350px]
+                    max-h-[300px]
                     -ml-4
                     mt-2.5
-                    w-168
+                    w-[calc(100%+32px)]
+                    md:w-[672px]
                     overflow-y-auto
                     bg-white
                     shadow-2xl

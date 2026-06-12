@@ -1,3 +1,4 @@
+import './Footer.css';
 import { useNavigate } from "react-router-dom";
 import { scrollTo, useReveal } from "./utils";
 
@@ -35,7 +36,7 @@ export function Footer() {
       </div>
 
       <div className="wf-footer__wordmark-container">
-        <span className="wf-footer__wordmark">Wayfinder</span>
+        <span className="wf-footer__wordmark">Wayfinder. </span>
       </div>
 
       <div className="wf-footer__bottom">

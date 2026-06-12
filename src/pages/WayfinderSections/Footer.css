@@ -1,0 +1,102 @@
+/* ═════════════════════════════════════════════
+   FOOTER
+   ═════════════════════════════════════════════ */
+.wf-footer {
+  background: var(--wf-white);
+  border-top: 1px solid var(--wf-gray-200);
+  padding: 72px 32px 32px;
+  opacity: 0;
+  transform: translateY(48px);
+}
+
+.wf-footer__top {
+  max-width: 1200px;
+  margin: 0 auto 64px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.wf-footer__heading {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wf-gray-400);
+  margin: 0 0 20px;
+}
+
+.wf-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wf-footer__link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--wf-gray-600);
+  text-align: left;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: color var(--wf-transition);
+}
+
+.wf-footer__link:hover {
+  color: var(--wf-dark);
+}
+
+.wf-footer__link--admin {
+  color: var(--wf-maroon);
+  font-weight: 600;
+}
+
+.wf-footer__link--admin:hover {
+  color: var(--wf-maroon-light);
+}
+
+.wf-footer__text {
+  font-size: 14px;
+  color: var(--wf-gray-600);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Giant Wordmark ──────────────────────── */
+.wf-footer__wordmark-container {
+  overflow: hidden;
+  padding: 0 0 32px;
+}
+
+.wf-footer__wordmark {
+  display: block;
+  font-size: clamp(44px, 15vw, 220px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  color: var(--wf-maroon);
+  white-space: nowrap;
+  user-select: none;
+  width: 100%;
+  text-align: center;
+}
+
+.wf-footer__bottom {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--wf-gray-200);
+  text-align: center;
+  font-size: 13px;
+  color: var(--wf-gray-400);
+}
+
+@media (max-width: 768px) {
+  .wf-footer__top {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
