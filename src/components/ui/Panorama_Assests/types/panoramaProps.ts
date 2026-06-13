@@ -27,9 +27,14 @@ export type hotspotProps = {
     onclick?: () => void;
 }
 
+import type React from "react";
+
 export type HotspotMarkerProps = {
   position: [number, number, number];
-  label: string;
+  label: React.ReactNode;
   onClick: () => void;
   disabled: boolean;
+  selected?: boolean;
+  onSingleClick?: () => void;
+  isEditor?: boolean;
 };

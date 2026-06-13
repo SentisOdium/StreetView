@@ -41,7 +41,7 @@ export default function HotspotArrow({ position, onClick, disabled }: HotspotMar
                 <meshBasicMaterial
                     map={texture}
                     transparent={true}
-                    color={hovered ? "#ff4d4d" : "#800000"}
+                    color={hovered ? "#b30000" : "#800000"}
                     side={THREE.DoubleSide}
                     depthTest={false}
                     depthWrite={false}

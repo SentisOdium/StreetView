@@ -11,6 +11,7 @@ import type {
   GraphNode,
   RouteTestResult,
   ValidationResult,
+  S3Object,
 } from "./types";
 
 const adminBase = `${BaseUrl}/admin`;
@@ -47,10 +48,11 @@ async function del<T>(path: string) {
 }
 
 export const adminApi = {
-  getUploadPresignedUrl: (filename: string, contentType: string) =>
+  getUploadPresignedUrl: (filename: string, contentType: string, key?: string) =>
     get<{ presignedUrl: string; uniqueKey: string }>("/upload-presigned", {
       filename,
       contentType,
+      key: key || "",
     }),
 
   getDashboard: () => get<DashboardStats>("/dashboard"),
@@ -143,6 +145,7 @@ export const adminApi = {
     );
     return res.data.data;
   },
+  getS3Objects: () => get<S3Object[]>("/s3-objects"),
 };
 
 export function exportToJson(data: unknown, filename: string) {

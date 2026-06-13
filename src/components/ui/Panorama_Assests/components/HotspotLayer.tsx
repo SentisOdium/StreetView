@@ -4,7 +4,7 @@ import HotspotArrow from "./HotspotArrow";
 import { directionToYaw } from "../../../../admin/utils/hotspotMath";
 
 const HOTSPOT_DISTANCE = 25;
-const HOTSPOT_ARROW_Y_POS = 15
+const HOTSPOT_ARROW_Y_POS = 10
 function directionToPosition(direction: string | undefined): [number, number, number] | null {
   if (!direction?.trim()) return null;
   const d = direction.trim().toUpperCase();

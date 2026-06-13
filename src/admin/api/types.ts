@@ -100,3 +100,9 @@ export type ApiResponse<T> = {
   message: string;
   data: T;
 };
+
+export type S3Object = {
+  key: string;
+  size: number;
+  lastModified: string;
+};

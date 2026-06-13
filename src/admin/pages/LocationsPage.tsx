@@ -13,6 +13,8 @@ import PageHeader, {
   ErrorBanner,
 } from "../components/shared/AdminUI";
 import { uploadFileToS3 } from "../utils/uploadFileToS3";
+import S3AssetBrowser from "../components/S3AssetBrowser";
+import { generateThumbnail } from "../utils/thumbnailGenerator";
 
 const emptyForm: Partial<AdminLocation> = {
   node_name: "",
@@ -36,6 +38,7 @@ export default function LocationsPage() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isS3BrowserOpen, setIsS3BrowserOpen] = useState(false);
 
   useEffect(() => {
     if (msg) {
@@ -93,6 +96,18 @@ export default function LocationsPage() {
       if (pendingFile) {
         const uniqueKey = await uploadFileToS3(pendingFile);
         finalForm.panorama_image = uniqueKey;
+
+        // Generate and upload thumbnail
+        try {
+          const thumbnailFile = await generateThumbnail(pendingFile);
+          const extIndex = uniqueKey.lastIndexOf(".");
+          const thumbKey = extIndex !== -1 
+            ? `${uniqueKey.substring(0, extIndex)}_thumb.webp` 
+            : `${uniqueKey}_thumb.webp`;
+          await uploadFileToS3(thumbnailFile, thumbKey);
+        } catch (thumbErr) {
+          console.warn("Failed to generate or upload thumbnail, proceeding without it", thumbErr);
+        }
       }
 
       if (mode === "create") {
@@ -253,15 +268,47 @@ export default function LocationsPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </label>
-
             <label className="block text-sm">
               <span className="mb-1 block opacity-70">Panorama Image</span>
-              <AdminInput
-                value={form.panorama_image || ""}
-                onChange={(e) => setForm({ ...form, panorama_image: e.target.value })}
-                placeholder="GRNDS_ENTRANCE-EXIT.webp"
-              />
-              <input type="file" accept="image/*" onChange={handleUpload} className="mt-2 text-xs" />
+              <div className="flex gap-2">
+                <AdminInput
+                  value={form.panorama_image || ""}
+                  onChange={(e) => setForm({ ...form, panorama_image: e.target.value })}
+                  placeholder="GRNDS_ENTRANCE-EXIT.webp"
+                  className="flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsS3BrowserOpen(true)}
+                  className="rounded-lg bg-[#800000] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#a30000] disabled:opacity-50 shrink-0"
+                >
+                  Browse S3 Assets
+                </button>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept="image/*"
+                  onChange={handleUpload}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-[#800000]/30 bg-[#800000]/5 px-4 py-2 text-xs font-semibold text-[#800000] transition-colors hover:bg-[#800000]/10 active:scale-[0.98]"
+                >
+                  Choose Local Image File
+                </label>
+                {pendingFile ? (
+                  <span className="text-xs font-medium text-slate-600 truncate max-w-xs">
+                    Selected: {pendingFile.name}
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-400">
+                    No local file chosen
+                  </span>
+                )}
+              </div>
             </label>
 
             <div className="flex gap-2 pt-2">
@@ -309,6 +356,18 @@ export default function LocationsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {isS3BrowserOpen && (
+        <S3AssetBrowser
+          isOpen={isS3BrowserOpen}
+          onClose={() => setIsS3BrowserOpen(false)}
+          onSelect={(key) => {
+            setPendingFile(null);
+            setLocalPreview(null);
+            setForm((f) => ({ ...f, panorama_image: key }));
+          }}
+        />
       )}
     </div>
   );

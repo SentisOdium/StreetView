@@ -6,10 +6,11 @@ import { adminApi } from "../api/adminApi";
  * @returns The S3 key/path of the uploaded file
  */
 
-export async function uploadFileToS3(file: File): Promise<string> {
+export async function uploadFileToS3(file: File, key?: string): Promise<string> {
     const { presignedUrl, uniqueKey } = await adminApi.getUploadPresignedUrl(
         file.name,
-        file.type
+        file.type,
+        key
     );
 
     await axios.put(presignedUrl, file, {

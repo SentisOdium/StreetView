@@ -1,9 +1,11 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { FaMapMarkerAlt, FaLink, FaCompass, FaPlus } from "react-icons/fa";
 import MainNode from "../../components/ui/Panorama_Assests/mainNode";
+import HotspotMarker from "../../components/ui/Panorama_Assests/components/HotspotMarker";
+import HotspotArrow from "../../components/ui/Panorama_Assests/components/HotspotArrow";
 import { adminApi } from "../api/adminApi";
 import {
   useHotspotEditorStore,
@@ -51,33 +53,39 @@ function PreviewHotspot({
   };
 
   const pos = getDirectionPos(hotspot.hotspot_label);
+  const arrowScale = (25 + 15) / 25;
+  const arrowPos: [number, number, number] = [
+    pos[0] * arrowScale,
+    pos[1],
+    pos[2] * arrowScale,
+  ];
+
+  const labelNode = (
+    <div className="text-center font-bold text-xs">
+      {hotspot.hotspot_label}
+      <div className="text-[9px] font-normal opacity-85 mt-0.5 border-t border-white/20 pt-0.5 whitespace-nowrap">
+        → {hotspot.destination_name}
+      </div>
+    </div>
+  );
 
   return (
-    <group position={pos}>
-      <mesh
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect();
-        }}
-      >
-        <sphereGeometry args={[2.5, 16, 16]} />
-        <meshStandardMaterial
-          color={selected ? "#ffd700" : "#800000"}
-          emissive={selected ? "#ffd700" : "#800000"}
-          emissiveIntensity={selected ? 0.5 : 0.2}
-        />
-      </mesh>
-      <Html center distanceFactor={80}>
-        <div
-          className={`pointer-events-none rounded px-2 py-0.5 text-xs font-bold text-white shadow-lg ${selected ? "bg-yellow-600" : "bg-[#800000]"
-            }`}
-        >
-          {hotspot.hotspot_label}
-          <div className="text-[10px] font-normal opacity-80">
-            → {hotspot.destination_name}
-          </div>
-        </div>
-      </Html>
+    <group>
+      <HotspotMarker
+        position={pos}
+        label={labelNode}
+        onClick={onSelect}
+        onSingleClick={onSelect}
+        disabled={false}
+        selected={selected}
+        isEditor={true}
+      />
+      <HotspotArrow
+        position={arrowPos}
+        label={hotspot.hotspot_label}
+        onClick={onSelect}
+        disabled={false}
+      />
     </group>
   );
 }
@@ -166,6 +174,7 @@ export default function HotspotEditorPage() {
   const [rotationOffset, setRotationOffset] = useState<number>(81);
   const [rotationOffsetX, setRotationOffsetX] = useState<number>(0);
   const [rotationOffsetZ, setRotationOffsetZ] = useState<number>(0);
+  const [showHotspots, setShowHotspots] = useState(true);
 
   const store = useHotspotEditorStore();
   const { clearCacheRef } = useLocationCache();
@@ -267,6 +276,12 @@ export default function HotspotEditorPage() {
               <AdminButton variant="secondary" onClick={() => store.reset(originalHotspots)}>
                 Reset
               </AdminButton>
+              <AdminButton
+                variant="secondary"
+                onClick={() => setShowHotspots(!showHotspots)}
+              >
+                {showHotspots ? "Hide Hotspots" : "Show Hotspots"}
+              </AdminButton>
               <AdminButton onClick={handleSave} disabled={!store.dirty || saving}>
                 {saving ? "Saving..." : "Save Changes"}
               </AdminButton>
@@ -364,7 +379,7 @@ export default function HotspotEditorPage() {
           ) : store.panoramaUrl ? (
             <HotspotEditorCanvas
               panoramaUrl={store.panoramaUrl}
-              hotspots={store.hotspots}
+              hotspots={showHotspots ? store.hotspots : []}
               selectedId={store.selectedId}
               rotationOffset={rotationOffset}
               rotationOffsetX={rotationOffsetX}

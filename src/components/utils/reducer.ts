@@ -40,20 +40,25 @@ export const initialState: State = {
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "SELECT_NODE":
+    case "SELECT_NODE": {
+      const locationPanel = {
+        type: "location" as const,
+        nodeId: action.payload.id,
+        nodeName: action.payload.name,
+      };
+      const top = state.stack[state.stack.length - 1];
+      const stack =
+        top?.type === "location"
+          ? [...state.stack.slice(0, -1), locationPanel]
+          : [...state.stack, locationPanel];
+
       return {
         ...state,
         activeNodeName: action.payload.name,
         activeNodeId: action.payload.id,
-        stack: [
-          ...state.stack,
-          {
-            type: "location",
-            nodeId: action.payload.id,
-            nodeName: action.payload.name,
-          },
-        ],
+        stack,
       };
+    }
 
     case "NAVIGATE_NODE": {
       const locationPanel = {
