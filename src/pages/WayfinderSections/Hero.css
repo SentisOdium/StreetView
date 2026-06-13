@@ -35,11 +35,11 @@
 }
 
 .wf-hero__logo {
-  width: 46px;
-  height: 46px;
+  width: 100x;
+  height: 100px;
   object-fit: contain;
-  border-radius: 14px;
-  margin-bottom: 0;
+  border-radius: 20px;
+  margin-bottom: 8px;
   filter: drop-shadow(0 4px 24px rgba(128, 0, 0, 0.12));
 }
 

@@ -6,6 +6,7 @@ import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exp
 
 export default function SearchUI2(props: SearchUiProps) {
   const [search, setSearch] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const errorMessage =
     typeof props.error === "string"
@@ -17,8 +18,12 @@ export default function SearchUI2(props: SearchUiProps) {
   return (
     <div className="">
       <div
-        className={`z-20 m-4 flex h-12 w-90 items-center justify-between bg-white px-4 pt-1 pb-1 ${
-          search.length > 0 ? "rounded-2xl" : "rounded-2xl shadow-xl"
+        className={`z-20 mx-8 mt-4 flex h-12 w-[calc(100%-64px)] items-center justify-between bg-white px-4 pt-1 pb-1 transition-all duration-300 ${
+          isDropdownOpen
+            ? "rounded-t-2xl rounded-b-none shadow-xl"
+            : search.length > 0
+              ? "rounded-2xl"
+              : "rounded-2xl shadow-xl"
         }`}
       >
         <Search
@@ -35,7 +40,8 @@ export default function SearchUI2(props: SearchUiProps) {
             props.onSelect(node);
             setSearch(node.node_name);
           }}
-          modalDesign="mt-[64.6px] ml-4 mr-auto w-90 max-h-[300px] overflow-y-auto shadow-xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          onDropdownVisibilityChange={setIsDropdownOpen}
+          modalDesign="mt-[64.6px] ml-8 mr-8 w-[calc(100%-64px)] max-h-[300px] overflow-y-auto bg-white shadow-xl rounded-b-2xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         />
 
         <div className="ml-2 flex space-x-2">

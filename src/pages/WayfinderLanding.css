@@ -89,7 +89,7 @@ html {
 }
 
 .wf-btn--primary:hover {
-  background: #222;
+  background: #9e0808;
   box-shadow: 0 4px 28px rgba(0, 0, 0, 0.22);
   transform: translateY(-2px);
 }

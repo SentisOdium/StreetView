@@ -3,23 +3,14 @@ import { adminApi, exportToCsv, exportToJson } from "../api/adminApi";
 import type { ValidationResult } from "../api/types";
 import PageHeader, {
   AdminButton,
-  AdminInput,
   ErrorBanner,
 } from "../components/shared/AdminUI";
 
 export default function SettingsPage() {
-  const [token, setToken] = useState(localStorage.getItem("admin_token") || "");
-  const [user, setUser] = useState(localStorage.getItem("admin_user") || "admin");
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [importJson, setImportJson] = useState("");
-
-  function saveAuth() {
-    localStorage.setItem("admin_token", token);
-    localStorage.setItem("admin_user", user);
-    setMsg("Credentials saved");
-  }
 
   async function runValidation() {
     try {
@@ -70,26 +61,6 @@ export default function SettingsPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="admin-card space-y-4 rounded-xl border p-6 shadow-sm">
-          <h2 className="font-semibold">Authentication</h2>
-          <p className="text-sm opacity-60">
-            Set admin token if backend requires ADMIN_TOKEN env variable
-          </p>
-          <label className="block text-sm">
-            <span className="mb-1 block opacity-70">Admin User</span>
-            <AdminInput value={user} onChange={(e) => setUser(e.target.value)} />
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block opacity-70">Admin Token</span>
-            <AdminInput
-              type="password"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Optional"
-            />
-          </label>
-          <AdminButton onClick={saveAuth}>Save Credentials</AdminButton>
-        </div>
 
 
         <div className="admin-card space-y-4 rounded-xl border p-6 shadow-sm">

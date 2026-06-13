@@ -1,3 +1,7 @@
+import React, { useState, useRef, useEffect } from "react";
+import Search from "../../../components/ui/reusableUI/search";
+import { FaChevronDown } from "react-icons/fa";
+
 type PageHeaderProps = {
   title: string;
   subtitle?: string;
@@ -95,8 +99,95 @@ export function LoadingSpinner() {
 
 export function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+    <div className="rounded-lg bg-[#DAA520] px-4 py-3 text-sm font-semibold text-white shadow-md">
       {message}
+    </div>
+  );
+}
+
+export interface CustomSelectProps {
+  value: string | number;
+  onChange: (value: any) => void;
+  options: { value: string | number; label: string }[];
+  placeholder: string;
+  icon: React.ReactNode;
+  disabled?: boolean;
+}
+
+export function CustomSelect({ value, onChange, options, placeholder, icon, disabled }: CustomSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const triggerRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery(selectedOption ? selectedOption.label : "");
+    }
+  }, [value, selectedOption, isOpen]);
+
+  const handleOpen = () => {
+    if (disabled) return;
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setSearchQuery(selectedOption ? selectedOption.label : "");
+  };
+
+  return (
+    <div
+      ref={triggerRef}
+      className={`group relative flex items-center w-full pl-10 pr-10 py-1.5 text-sm bg-white border border-slate-200 rounded-xl transition-all font-semibold text-slate-800 shadow-sm ${disabled ? "bg-slate-50 text-slate-400 cursor-not-allowed opacity-60" : "hover:border-[#800000]/40 focus-within:border-[#800000] focus-within:ring-4 focus-within:ring-[#800000]/10"}`}
+    >
+      <span className={`absolute left-3.5 pointer-events-none transition-colors z-10 ${disabled ? "text-slate-300" : "text-[#800000]/75"
+        }`}>
+        {icon}
+      </span>
+
+      <Search
+        items={options}
+        value={searchQuery}
+        onChange={(query) => {
+          setSearchQuery(query);
+          handleOpen();
+        }}
+        onSelect={(opt) => {
+          onChange(opt.value);
+          setIsOpen(false);
+          setSearchQuery(opt.label);
+        }}
+        getLabel={(opt) => opt.label}
+        getKey={(opt) => opt.value}
+        placeholder={placeholder}
+        disabled={disabled}
+        noModal={true}
+        showOnFocusEmpty={true}
+        noRelativeWrapper={true}
+        modalDesign="rounded-xl border border-slate-200/80 bg-white p-2 shadow-xl animate-fadeIn max-h-[200px] overflow-y-auto w-full"
+        onDropdownVisibilityChange={(visible) => {
+          if (!visible && isOpen) {
+            handleClose();
+          } else if (visible && !isOpen) {
+            handleOpen();
+          }
+        }}
+      />
+
+      <span
+        onClick={() => {
+          if (!disabled) {
+            if (isOpen) handleClose();
+            else handleOpen();
+          }
+        }}
+        className={`absolute right-3.5 cursor-pointer transition-all duration-200 z-10 ${disabled ? "text-slate-300 pointer-events-none" : "text-[#800000]/60 hover:text-[#800000]"
+        } ${isOpen ? "transform rotate-180 text-[#800000]" : ""}`}
+      >
+        <FaChevronDown className="w-3.5 h-3.5" />
+      </span>
     </div>
   );
 }

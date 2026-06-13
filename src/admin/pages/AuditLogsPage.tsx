@@ -12,7 +12,6 @@ function renderLogDetails(log: AuditLogEntry) {
       node_name: "Location Name",
       floor: "Floor / Level",
       type: "Type",
-      coordinates: "Coordinates",
       panorama_image: "Panorama Image",
       src: "Image Source",
       rotation_offset: "Yaw Offset (Y)",
@@ -180,7 +179,9 @@ export default function AuditLogsPage() {
               <p className="text-sm opacity-50">No audit logs found</p>
             ) : (
               logs.map((log) => (
-                <div key={log.id} className="admin-card rounded-xl border p-4 shadow-sm text-black">
+                <div key={log.id} className="relative overflow-hidden admin-card rounded-xl border p-4 shadow-sm text-black">
+                  {/* Decorative Top Accent Glow */}
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#800000]" />
                   <div className="mb-2 flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
                     <div className="flex items-center gap-2">
                       <span className="rounded-full bg-[#800000]/10 px-3 py-0.5 text-xs font-semibold text-[#800000] capitalize">

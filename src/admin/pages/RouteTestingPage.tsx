@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { adminApi } from "../api/adminApi";
 import type { AdminLocation, RouteTestResult } from "../api/types";
+import { FaMapMarkerAlt, FaFlagCheckered } from "react-icons/fa";
 import PageHeader, {
   AdminButton,
-  AdminSelect,
   ErrorBanner,
+  CustomSelect,
 } from "../components/shared/AdminUI";
 
 export default function RouteTestingPage() {
@@ -52,24 +53,26 @@ export default function RouteTestingPage() {
       {error && <ErrorBanner message={error} />}
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 max-w-2xl">
-        <label className="text-sm">
-          <span className="mb-1 block opacity-70">Start Location</span>
-          <AdminSelect value={source} onChange={(e) => setSource(e.target.value)}>
-            <option value="">Select start...</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>{l.node_name}</option>
-            ))}
-          </AdminSelect>
-        </label>
-        <label className="text-sm">
-          <span className="mb-1 block opacity-70">Destination</span>
-          <AdminSelect value={destination} onChange={(e) => setDestination(e.target.value)}>
-            <option value="">Select destination...</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>{l.node_name}</option>
-            ))}
-          </AdminSelect>
-        </label>
+        <div className="text-sm">
+          <span className="mb-2 block opacity-70 font-semibold">Start Location</span>
+          <CustomSelect
+            value={source}
+            onChange={(val) => setSource(val ? String(val) : "")}
+            options={locations.map((l) => ({ value: l.id, label: l.node_name }))}
+            placeholder="Select start..."
+            icon={<FaMapMarkerAlt className="w-4 h-4" />}
+          />
+        </div>
+        <div className="text-sm">
+          <span className="mb-2 block opacity-70 font-semibold">Destination</span>
+          <CustomSelect
+            value={destination}
+            onChange={(val) => setDestination(val ? String(val) : "")}
+            options={locations.map((l) => ({ value: l.id, label: l.node_name }))}
+            placeholder="Select destination..."
+            icon={<FaFlagCheckered className="w-4 h-4" />}
+          />
+        </div>
       </div>
 
       {result && (

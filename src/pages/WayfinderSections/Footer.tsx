@@ -30,7 +30,8 @@ export function Footer() {
         <div className="wf-footer__col">
           <h4 className="wf-footer__heading">About</h4>
           <p className="wf-footer__text">
-            Wayfinder is a 360° virtual tour and wayfinding system for PUP Sta. Mesa campus.
+            PUP Wayfinder is a Navigation Tool designed to enhance and digitize your campus experience.
+            <br /> Tailored for PUP Sta. Mesa | Institute of Technology.
           </p>
         </div>
       </div>

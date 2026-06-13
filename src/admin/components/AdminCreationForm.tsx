@@ -86,7 +86,7 @@ export default function AdminCreationForm({ onSuccess }: AdminCreationFormProps)
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-md">
       {/* Top decorative gradient glow */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-[#800000] to-red-800" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#800000]" />
       
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -248,7 +248,7 @@ export default function AdminCreationForm({ onSuccess }: AdminCreationFormProps)
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#800000] to-[#b30000] px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:from-[#900000] hover:to-[#c40000] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#800000] px-6 py-3 text-sm font-bold text-white shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-[#660000] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
           >
             {loading ? (
               <>

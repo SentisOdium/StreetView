@@ -12,12 +12,12 @@ import PageHeader, {
   LoadingSpinner,
   ErrorBanner,
 } from "../components/shared/AdminUI";
+import { uploadFileToS3 } from "../utils/uploadFileToS3";
 
 const emptyForm: Partial<AdminLocation> = {
   node_name: "",
-  coordinates: "",
   panorama_image: "",
-  floor: "",
+  floor: "main",
   description: "",
 };
 
@@ -33,10 +33,20 @@ export default function LocationsPage() {
   const [mode, setMode] = useState<"list" | "create" | "edit">("list");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (msg) {
+      const timer = setTimeout(() => setMsg(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [msg]);
 
   const load = useCallback(() => {
     fetchLocations({ floor: floorFilter || undefined, search: search || undefined });
-    adminApi.getFloors().then(setFloors).catch(() => {});
+    adminApi.getFloors().then(setFloors).catch(() => { });
   }, [fetchLocations, floorFilter, search]);
 
   useEffect(() => {
@@ -52,6 +62,8 @@ export default function LocationsPage() {
   }, [searchParams, locations]);
 
   async function openEdit(loc: AdminLocation) {
+    setPendingFile(null);
+    setLocalPreview(null);
     setSelected(loc);
     setForm({ ...loc, description: loc.floor });
     setMode("edit");
@@ -64,6 +76,8 @@ export default function LocationsPage() {
   }
 
   function openCreate() {
+    setPendingFile(null);
+    setLocalPreview(null);
     setSelected(null);
     setForm(emptyForm);
     setHotspots([]);
@@ -73,18 +87,27 @@ export default function LocationsPage() {
   async function handleSave() {
     setSaving(true);
     setMsg(null);
+    setLocalError(null);
     try {
+      let finalForm = { ...form };
+      if (pendingFile) {
+        const uniqueKey = await uploadFileToS3(pendingFile);
+        finalForm.panorama_image = uniqueKey;
+      }
+
       if (mode === "create") {
-        await adminApi.createLocation(form);
+        await adminApi.createLocation(finalForm);
         setMsg("Location created successfully");
       } else if (selected) {
-        await adminApi.updateLocation(selected.id, form);
+        await adminApi.updateLocation(selected.id, finalForm);
         setMsg("Location updated successfully");
       }
+      setPendingFile(null);
+      setLocalPreview(null);
       setMode("list");
       load();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Save failed");
+      setLocalError(e instanceof Error ? e.message : "Save failed");
     } finally {
       setSaving(false);
     }
@@ -92,28 +115,31 @@ export default function LocationsPage() {
 
   async function handleDelete() {
     if (!selected || !confirm(`Delete "${selected.node_name}"?`)) return;
+    setMsg(null);
+    setLocalError(null);
     try {
       await adminApi.deleteLocation(selected.id);
       setMode("list");
       setSelected(null);
       load();
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Delete failed");
+      setLocalError(e instanceof Error ? e.message : "Delete failed");
     }
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const result = await adminApi.uploadFile(file);
-      setForm((f) => ({ ...f, panorama_image: result.filename }));
-    } catch {
-      setMsg("Upload failed");
-    }
+    setMsg(null);
+    setLocalError(null);
+    
+    setPendingFile(file);
+    const localUrl = URL.createObjectURL(file);
+    setLocalPreview(localUrl);
+    setForm((f) => ({ ...f, panorama_image: file.name }));
   }
 
-  const previewUrl = panoramaImageUrl(form.panorama_image);
+  const previewUrl = localPreview || panoramaImageUrl(form.panorama_image);
 
   return (
     <div className="p-8">
@@ -124,7 +150,11 @@ export default function LocationsPage() {
           mode === "list" ? (
             <AdminButton onClick={openCreate}>+ Create Location</AdminButton>
           ) : (
-            <AdminButton variant="secondary" onClick={() => setMode("list")}>
+            <AdminButton variant="secondary" onClick={() => {
+              setPendingFile(null);
+              setLocalPreview(null);
+              setMode("list");
+            }}>
               Back to List
             </AdminButton>
           )
@@ -132,6 +162,7 @@ export default function LocationsPage() {
       />
 
       {error && <ErrorBanner message={error} />}
+      {localError && <ErrorBanner message={localError} />}
       {msg && (
         <div className="mb-4 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
           {msg}
@@ -152,9 +183,9 @@ export default function LocationsPage() {
               onChange={(e) => setFloorFilter(e.target.value)}
               className="max-w-xs"
             >
-              <option value="">All Floors</option>
+              <option value="">All Types</option>
               {floors.map((f) => (
-                <option key={f} value={f}>{f}</option>
+                <option key={f} value={f} className="capitalize">{f}</option>
               ))}
             </AdminSelect>
             <AdminButton variant="secondary" onClick={load}>Search</AdminButton>
@@ -168,8 +199,7 @@ export default function LocationsPage() {
                 <thead className="admin-card border-b">
                   <tr>
                     <th className="px-4 py-3 font-medium">Name</th>
-                    <th className="px-4 py-3 font-medium">Floor</th>
-                    <th className="px-4 py-3 font-medium">Coordinates</th>
+                    <th className="px-4 py-3 font-medium">Type</th>
                     <th className="px-4 py-3 font-medium">Panorama</th>
                     <th className="px-4 py-3 font-medium">Actions</th>
                   </tr>
@@ -178,8 +208,7 @@ export default function LocationsPage() {
                   {locations.map((loc) => (
                     <tr key={loc.id} className="border-b border-inherit last:border-0">
                       <td className="px-4 py-3 font-medium">{loc.node_name}</td>
-                      <td className="px-4 py-3 opacity-70">{loc.floor || "—"}</td>
-                      <td className="px-4 py-3 font-mono text-xs opacity-70">{loc.coordinates || "—"}</td>
+                      <td className="px-4 py-3 opacity-70 capitalize">{loc.floor || "—"}</td>
                       <td className="px-4 py-3 text-xs opacity-70 truncate max-w-32">{loc.panorama_image || "—"}</td>
                       <td className="px-4 py-3">
                         <AdminButton variant="ghost" onClick={() => openEdit(loc)}>Edit</AdminButton>
@@ -207,21 +236,14 @@ export default function LocationsPage() {
             </label>
 
             <label className="block text-sm">
-              <span className="mb-1 block opacity-70">Floor</span>
-              <AdminInput
-                value={form.floor || ""}
+              <span className="mb-1 block opacity-70">Location Type</span>
+              <AdminSelect
+                value={form.floor || "main"}
                 onChange={(e) => setForm({ ...form, floor: e.target.value })}
-                placeholder="Ground Floor"
-              />
-            </label>
-
-            <label className="block text-sm">
-              <span className="mb-1 block opacity-70">Coordinates</span>
-              <AdminInput
-                value={form.coordinates || ""}
-                onChange={(e) => setForm({ ...form, coordinates: e.target.value })}
-                placeholder="1,1"
-              />
+              >
+                <option value="main">Main</option>
+                <option value="transitional">Transitional</option>
+              </AdminSelect>
             </label>
 
             <label className="block text-sm">

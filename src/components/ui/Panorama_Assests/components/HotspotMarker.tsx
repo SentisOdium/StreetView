@@ -35,13 +35,12 @@ export default function HotspotMarker({ position, label, onClick, disabled }: Ho
         rotation={[0, 0, 0]}
       >
         <planeGeometry args={[30, 55]} />
-        <meshBasicMaterial color="maroon" />
+        <meshBasicMaterial />
       </mesh>
       <Html center pointerEvents="none">
         <div
-          className={`pointer-events-none select-none rounded px-2.5 py-1 text-xs font-bold tracking-wide text-white border border-white/20 shadow-lg backdrop-blur-sm transition-all duration-200 ${
-            hovered ? "bg-[#b30000] scale-110" : "bg-[#800000]/85 scale-100"
-          }`}
+          className={`pointer-events-none select-none rounded px-2.5 py-1 text-xs font-bold tracking-wide text-white border border-white/20 shadow-lg backdrop-blur-sm transition-all duration-200 ${hovered ? "bg-[#b30000] scale-110" : "bg-[#800000]/85 scale-100"
+            }`}
         >
           {label}
         </div>

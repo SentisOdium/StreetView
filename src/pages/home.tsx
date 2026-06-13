@@ -50,10 +50,10 @@ export default function HomePage() {
     return (
         <>
             {/* Unified Sliding Container */}
-            <div className={`absolute top-0 left-0 h-screen z-10 w-110 transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
+            <div className={`absolute top-0 left-0 h-screen z-10 w-120 transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
                 {/* Search Bar Panel (z-20) */}
 
-                <div className="absolute top-0 left-0 z-20">
+                <div className="absolute top-0 left-0 z-20 w-full">
                     {currentPanel.type !== "directions" && (
                         <SearchUI2
                             list={list}
@@ -128,8 +128,8 @@ export default function HomePage() {
                             active:scale-95 transition-all duration-300
                             flex items-center justify-center cursor-pointer z-30
                             ${isCollapsed
-                                ? "bg-white text-[#800000] "
-                                : "bg-[#800000] text-white border-white/10 hover:bg-[#660000]"
+                                ? "bg-[#800000] text-white border-white/10 hover:bg-[#660000]"
+                                : "bg-white text-[#800000] border-gray-200 hover:bg-gray-50"
                             }
                         `}
                         style={{ height: "50px", width: "40px" }}

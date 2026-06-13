@@ -4,12 +4,7 @@ import HotspotArrow from "./HotspotArrow";
 import { directionToYaw } from "../../../../admin/utils/hotspotMath";
 
 const HOTSPOT_DISTANCE = 25;
-const HOTSPOT_ARROW_Y_POS = -10
-function convertCoordinates(coord: string): [number, number, number] {
-  const [x, y] = coord.split(",").map(Number);
-  return [x * 5, 0, y * -5];
-}
-
+const HOTSPOT_ARROW_Y_POS = 15
 function directionToPosition(direction: string | undefined): [number, number, number] | null {
   if (!direction?.trim()) return null;
   const d = direction.trim().toUpperCase();
@@ -39,28 +34,12 @@ function yawPitchToPosition(yawDeg: number, pitchDeg: number): [number, number, 
 }
 
 export function getHotspotPosition(hotspot: HotspotData): [number, number, number] {
-  // yaw and pitch coordinate placement is deprecated in favor of direction-based placement
-  // if (hotspot.yaw != null && hotspot.pitch != null) {
-  //   return yawPitchToPosition(hotspot.yaw, hotspot.pitch);
-  // }
-
-  const fromDirection =
-    directionToPosition(hotspot.hotspot_label) ??
-    directionToPosition(hotspot.coordinates?.node_Direction);
+  const fromDirection = directionToPosition(hotspot.hotspot_label);
 
   if (fromDirection) return fromDirection;
 
   const labelYaw = directionToYaw(hotspot.hotspot_label);
   if (labelYaw != null) return yawPitchToPosition(labelYaw, 0);
-
-  const coord = hotspot.coordinates?.node_Coordinates;
-  if (coord?.trim()) {
-    const parts = coord.split(",").map(Number);
-    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]) && Math.abs(parts[0]) <= 360) {
-      return yawPitchToPosition(parts[0], parts[1]);
-    }
-    return convertCoordinates(coord);
-  }
 
   return [0, 0, -HOTSPOT_DISTANCE];
 }

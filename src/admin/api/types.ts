@@ -1,7 +1,6 @@
 export type AdminLocation = {
   id: number;
   node_name: string;
-  coordinates: string;
   panorama_image: string;
   floor: string;
   description?: string;

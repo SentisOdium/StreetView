@@ -10,17 +10,12 @@ export type Hotspot = {
     hotspot_label: string;
     yaw?: number | null;
     pitch?: number | null;
-    coordinates: {
-        node_Coordinates: string;
-        node_Direction: string;
-    };
 };
 
 export type NodeDetails = {
     Current?: {
         id: number;
         node_name: string;
-        coordinates: string;
         img: {
             src: string;
             alt: string;

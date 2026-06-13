@@ -46,7 +46,7 @@ export default function NodeDirections({  list, onBack, onSelectedRouteNode, dir
 
     return (
         <>
-            <div className="w-110 h-screen border-gray-600 shadow-lg overflow-y-auto animate-slideDown bg-white p-4">
+            <div className="w-120 h-screen border-gray-600 shadow-lg overflow-y-auto animate-slideDown bg-white p-4">
                     <div className="grid grid-cols-3 gap-4">
                         <button
                             type="button"

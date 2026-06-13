@@ -47,48 +47,71 @@ async function del<T>(path: string) {
 }
 
 export const adminApi = {
+  getUploadPresignedUrl: (filename: string, contentType: string) =>
+    get<{ presignedUrl: string; uniqueKey: string }>("/upload-presigned", {
+      filename,
+      contentType,
+    }),
+
   getDashboard: () => get<DashboardStats>("/dashboard"),
+
   getFloors: () => get<string[]>("/floors"),
+
   getLocations: (params?: { floor?: string; search?: string }) =>
     get<AdminLocation[]>("/locations", params),
+
   getLocation: (id: number) =>
     get<AdminLocation & { hotspots: AdminHotspot[]; rooms: AdminRoom[] }>(
       `/locations/${id}`
     ),
+
   createLocation: (data: Partial<AdminLocation>) =>
     post<{ id: number }>("/locations", data),
+
   updateLocation: (id: number, data: Partial<AdminLocation>) =>
     put<AdminLocation>(`/locations/${id}`, data),
+
   deleteLocation: (id: number) => del(`/locations/${id}`),
+
 
   getHotspots: (nodeId?: number) =>
     get<AdminHotspot[]>(
       nodeId ? `/hotspots/node/${nodeId}` : "/hotspots"
     ),
+
   createHotspot: (nodeId: number, data: Partial<AdminHotspot>) =>
     post<{ id: number }>(`/hotspots/node/${nodeId}`, data),
+
   updateHotspot: (id: number, data: Partial<AdminHotspot>) =>
     put(`/hotspots/${id}`, data),
+
   deleteHotspot: (id: number) => del(`/hotspots/${id}`),
+
 
   getRooms: (nodeId: number) => get<AdminRoom[]>(`/rooms/node/${nodeId}`),
   createRoom: (nodeId: number, data: Partial<AdminRoom>) =>
     post<{ id: number }>(`/rooms/node/${nodeId}`, data),
+
   updateRoom: (id: number, data: Partial<AdminRoom>) =>
     put(`/rooms/${id}`, data),
+
   deleteRoom: (id: number) => del(`/rooms/${id}`),
+
 
   getGraph: () =>
     get<{ nodes: GraphNode[]; edges: GraphEdge[] }>("/graph"),
   validate: () => get<ValidationResult>("/validate"),
+
   routeTest: (source: string, destination: string) =>
     get<RouteTestResult>("/route-test", { source, destination }),
   exportAll: () => get<Record<string, unknown>>("/export"),
+
   getAuditLogs: (limit?: number, offset?: number) =>
     get<{ logs: AuditLogEntry[]; total: number }>("/audit-logs", {
       limit: limit !== undefined ? String(limit) : undefined,
       offset: offset !== undefined ? String(offset) : undefined,
     } as any),
+
 
   uploadFile: async (file: File) => {
     const form = new FormData();
@@ -96,9 +119,9 @@ export const adminApi = {
     const res = await axios.post<ApiResponse<{ filename: string; path: string }>>(
       `${adminBase}/upload`,
       form,
-      { 
+      {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" } 
+        headers: { "Content-Type": "multipart/form-data" }
       }
     );
     return res.data.data;

@@ -36,10 +36,9 @@ export function Hero() {
           <div className="wf-hero__branding animate-[wfRevealUp_0.8s_ease-out_forwards]">
             <img
               src="/logo/WayfinderLogo1.png"
-              alt="Wayfinder"
+              alt="Wayfinder logo"
               className="wf-hero__logo"
             />
-            <h1 className="wf-hero__title">Wayfinder</h1>
           </div>
         )}
 

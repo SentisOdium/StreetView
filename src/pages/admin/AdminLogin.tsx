@@ -110,7 +110,7 @@ export default function AdminLogin() {
 
           {/* Error Banner */}
           {error && (
-            <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-700 text-xs font-semibold text-center animate-slideDown">
+            <div className="p-4 bg-[#DAA520] rounded-xl text-white text-xs font-bold text-center shadow-md animate-slideDown">
               {error}
             </div>
           )}

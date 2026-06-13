@@ -1,9 +1,8 @@
-import { Suspense, useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
-import { FaMapMarkerAlt, FaLink, FaCompass, FaPlus, FaChevronDown } from "react-icons/fa";
-import Modal from "../../components/ui/reusableUI/modal";
+import { FaMapMarkerAlt, FaLink, FaCompass, FaPlus } from "react-icons/fa";
 import MainNode from "../../components/ui/Panorama_Assests/mainNode";
 import { adminApi } from "../api/adminApi";
 import {
@@ -15,8 +14,10 @@ import { panoramaImageUrl } from "../../components/utils/imageUrl";
 import PageHeader, {
   AdminButton,
   AdminSelect,
+  AdminInput,
   LoadingSpinner,
   ErrorBanner,
+  CustomSelect,
 } from "../components/shared/AdminUI";
 import type { AdminLocation } from "../api/types";
 import { useLocationCache } from "../../context/LocationContext";
@@ -153,107 +154,6 @@ function HotspotEditorCanvas({
   );
 }
 
-interface CustomSelectProps {
-  value: string | number;
-  onChange: (value: any) => void;
-  options: { value: string | number; label: string }[];
-  placeholder: string;
-  icon: React.ReactNode;
-  disabled?: boolean;
-}
-
-function CustomSelect({ value, onChange, options, placeholder, icon, disabled }: CustomSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [modalStyle, setModalStyle] = useState<React.CSSProperties>({});
-
-  const handleOpen = () => {
-    if (disabled) return;
-    const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) {
-      // Position right underneath the input trigger box, matching its width
-      setModalStyle({
-        position: "fixed",
-        top: `${rect.bottom + 4}px`,
-        left: `${rect.left}px`,
-        width: `${rect.width}px`,
-      });
-    }
-    setIsOpen(true);
-  };
-
-  const selectedOption = options.find((opt) => opt.value === value);
-
-  return (
-    <>
-      <div
-        ref={triggerRef}
-        onClick={handleOpen}
-        className={`group relative flex items-center w-full cursor-pointer pl-10 pr-10 py-2.5 text-sm bg-white border border-slate-200 rounded-xl transition-all font-semibold text-slate-800 shadow-sm ${
-          disabled ? "bg-slate-50 text-slate-400 cursor-not-allowed opacity-60" : "hover:border-[#800000]/40"
-        } ${isOpen ? "border-[#800000] ring-4 ring-[#800000]/10" : ""}`}
-      >
-        <span className={`absolute left-3.5 pointer-events-none transition-colors ${
-          disabled ? "text-slate-300" : "text-[#800000]/75 group-hover:text-[#800000]"
-        }`}>
-          {icon}
-        </span>
-        
-        <span className="truncate">
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-
-        <span className={`absolute right-3.5 pointer-events-none transition-all duration-200 ${
-          disabled ? "text-slate-300" : "text-[#800000]/60 group-hover:text-[#800000]"
-        } ${isOpen ? "transform rotate-180" : ""}`}>
-          <FaChevronDown className="w-3.5 h-3.5" />
-        </span>
-      </div>
-
-      <Modal
-        isVisible={isOpen}
-        onClose={() => setIsOpen(false)}
-        design="rounded-xl border border-slate-200/80 bg-white p-1.5 shadow-xl animate-fadeIn z-50"
-        style={modalStyle}
-      >
-        <div className="flex flex-col w-full text-slate-700 text-sm max-h-[240px] overflow-y-auto">
-          {options.length === 0 ? (
-            <div className="px-3 py-2.5 text-slate-400 italic text-center text-xs">
-              No options available
-            </div>
-          ) : (
-            options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(opt.value);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors font-semibold flex items-center justify-between cursor-pointer ${
-                    isSelected
-                      ? "bg-[#800000] text-white"
-                      : "hover:bg-slate-50 hover:text-[#800000]"
-                  }`}
-                >
-                  <span className="truncate">{opt.label}</span>
-                  {isSelected && (
-                    <span className="text-white text-[10px] bg-white/20 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">
-                      Selected
-                    </span>
-                  )}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </Modal>
-    </>
-  );
-}
-
 export default function HotspotEditorPage() {
   const [locations, setLocations] = useState<AdminLocation[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<number | "">("");
@@ -320,6 +220,7 @@ export default function HotspotEditorPage() {
       hotspot_label: newLabel || "E",
       yaw: 0,
       pitch: 0,
+      path_weight: 1,
     });
   }
 
@@ -375,7 +276,7 @@ export default function HotspotEditorPage() {
 
         <div className="mt-5 p-6 bg-white border border-[#800000]/20 border-t-4 border-t-[#800000] rounded-2xl shadow-lg shadow-slate-100/50 w-full animate-fadeIn">
           <div className="flex flex-col lg:flex-row lg:items-end gap-5">
-            
+
             {/* Active Location Dropdown */}
             <div className="flex-1 min-w-[200px]">
               <label className="block text-xs font-bold text-[#800000] uppercase tracking-wider mb-2">
@@ -396,7 +297,7 @@ export default function HotspotEditorPage() {
 
             {/* Hotspot Creator Controls */}
             <div className="flex-[2] flex flex-col md:flex-row items-end gap-4 w-full">
-              
+
               {/* Destination Selector */}
               <div className="flex-[2] w-full min-w-[200px]">
                 <label className="block text-xs font-bold text-[#800000] uppercase tracking-wider mb-2">
@@ -515,6 +416,18 @@ export default function HotspotEditorPage() {
                     <option key={l.id} value={l.id}>{l.node_name}</option>
                   ))}
                 </AdminSelect>
+              </label>
+              <label className="block">
+                <span className="opacity-70">Distance from the main location</span>
+                <AdminInput
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={selectedHotspot.path_weight ?? 1}
+                  onChange={(e) =>
+                    store.updateHotspot(store.selectedId!, { path_weight: Math.max(1, Number(e.target.value) || 1) })
+                  }
+                />
               </label>
               <AdminButton
                 variant="danger"

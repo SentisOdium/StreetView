@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminApi } from "../api/adminApi";
 import type { AdminLocation, AdminRoom } from "../api/types";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import PageHeader, {
   AdminButton,
   AdminInput,
-  AdminSelect,
   AdminTextarea,
   LoadingSpinner,
   ErrorBanner,
+  CustomSelect,
 } from "../components/shared/AdminUI";
+import { uploadFileToS3 } from "../utils/uploadFileToS3";
 
 const emptyRoom: Partial<AdminRoom> = {
   room_number: 1,
@@ -25,9 +27,10 @@ export default function RoomsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   useEffect(() => {
-    adminApi.getLocations().then(setLocations).catch(() => {});
+    adminApi.getLocations().then(setLocations).catch(() => { });
   }, []);
 
   const loadRooms = useCallback(async (nodeId: number) => {
@@ -49,13 +52,20 @@ export default function RoomsPage() {
   async function handleSave() {
     if (!selectedNodeId) return;
     try {
+      let finalForm = { ...form };
+      if (pendingFile) {
+        const uniqueKey = await uploadFileToS3(pendingFile);
+        finalForm.room_img = uniqueKey;
+      }
+
       if (editingId) {
-        await adminApi.updateRoom(editingId, form);
+        await adminApi.updateRoom(editingId, finalForm);
       } else {
-        await adminApi.createRoom(selectedNodeId, form);
+        await adminApi.createRoom(selectedNodeId, finalForm);
       }
       setForm(emptyRoom);
       setEditingId(null);
+      setPendingFile(null);
       loadRooms(selectedNodeId);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
@@ -71,8 +81,8 @@ export default function RoomsPage() {
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const result = await adminApi.uploadFile(file);
-    setForm((f) => ({ ...f, room_img: result.filename }));
+    setPendingFile(file);
+    setForm((f) => ({ ...f, room_img: file.name }));
   }
 
   return (
@@ -84,20 +94,17 @@ export default function RoomsPage() {
 
       {error && <ErrorBanner message={error} />}
 
-      <div className="mb-6">
-        <label className="text-sm">
-          <span className="mb-1 block opacity-70">Location</span>
-          <AdminSelect
+      <div className="mb-6 max-w-md">
+        <div className="text-sm">
+          <span className="mb-2 block opacity-70 font-semibold">Location</span>
+          <CustomSelect
             value={selectedNodeId}
-            onChange={(e) => setSelectedNodeId(Number(e.target.value) || "")}
-            className="max-w-md"
-          >
-            <option value="">Select location...</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>{l.node_name}</option>
-            ))}
-          </AdminSelect>
-        </label>
+            onChange={(val) => setSelectedNodeId(Number(val) || "")}
+            options={locations.map((l) => ({ value: l.id, label: l.node_name }))}
+            placeholder="Select location..."
+            icon={<FaMapMarkerAlt className="w-4 h-4" />}
+          />
+        </div>
       </div>
 
       {selectedNodeId && (
@@ -149,6 +156,7 @@ export default function RoomsPage() {
                 <AdminButton
                   variant="secondary"
                   onClick={() => {
+                    setPendingFile(null);
                     setEditingId(null);
                     setForm(emptyRoom);
                   }}
@@ -178,6 +186,7 @@ export default function RoomsPage() {
                         <AdminButton
                           variant="ghost"
                           onClick={() => {
+                            setPendingFile(null);
                             setEditingId(room.id!);
                             setForm(room);
                           }}

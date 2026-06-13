@@ -41,7 +41,7 @@ function Error({ error, message }: LoadingErrorProps) {
   const text = typeof error === "string" ? error : message ?? "Something went wrong.";
   return (
     <div
-      className="mx-2 my-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      className="mx-2 my-2 rounded-lg bg-[#DAA520] px-3 py-2 text-sm font-semibold text-white shadow-md"
       role="alert"
     >
       {text}

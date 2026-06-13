@@ -38,7 +38,7 @@ export default function AdminAccountsPage() {
         <div className="lg:col-span-5 space-y-6">
           <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg">
             {/* Decorative Top Accent Glow */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#800000] via-[#c0392b] to-[#800000]" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#800000]" />
 
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">

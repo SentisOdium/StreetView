@@ -169,6 +169,7 @@ export async function saveHotspotEditorChanges(
       hotspot_label: h.hotspot_label,
       yaw: h.yaw,
       pitch: h.pitch,
+      path_weight: h.path_weight ?? 1,
     };
     if (h.id) {
       const orig = original.find((o) => o.id === h.id);

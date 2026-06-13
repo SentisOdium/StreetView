@@ -19,6 +19,8 @@ type SearchProps<T> = {
   noModal?: boolean;
   onDropdownVisibilityChange?: (visible: boolean) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  showOnFocusEmpty?: boolean;
+  noRelativeWrapper?: boolean;
 };
 
 export default function Search<T>(props: SearchProps<T>) {
@@ -37,6 +39,7 @@ export default function Search<T>(props: SearchProps<T>) {
     inputRef,
     noModal,
     onDropdownVisibilityChange,
+    noRelativeWrapper,
   } = props;
 
   const [showModal, setShowModal] = useState(false);
@@ -46,7 +49,7 @@ export default function Search<T>(props: SearchProps<T>) {
   const listboxId = useId();
   const activeItemRef = useRef<HTMLLIElement>(null);
 
-  const isDropdownOpen = showModal && value.length > 0 && !disabled;
+  const isDropdownOpen = showModal && (props.showOnFocusEmpty || value.length > 0) && !disabled;
 
   useEffect(() => {
     onDropdownVisibilityChange?.(isDropdownOpen);
@@ -117,7 +120,7 @@ export default function Search<T>(props: SearchProps<T>) {
 
   return (
     <>
-      <div className="min-w-0 flex-1 relative">
+      <div className={`min-w-0 flex-1 ${noRelativeWrapper ? "" : "relative"}`}>
         <input
           ref={resolvedInputRef}
           type="search"
@@ -125,7 +128,7 @@ export default function Search<T>(props: SearchProps<T>) {
           value={value}
           placeholder={placeholder}
           disabled={disabled}
-          aria-expanded={showModal && value.length > 0}
+          aria-expanded={showModal && (props.showOnFocusEmpty || value.length > 0)}
           aria-controls={listboxId}
           autoComplete="off"
           onChange={(e) => {
@@ -162,11 +165,11 @@ export default function Search<T>(props: SearchProps<T>) {
             props.onKeyDown?.(e);
           }}
         />
-        {noModal && showModal && value.length > 0 && !disabled && (
+        {noModal && showModal && (props.showOnFocusEmpty || value.length > 0) && !disabled && (
           <>
             {/* Invisible backdrop to catch clicks outside when noModal is true */}
             <div className="fixed inset-0 z-40" onClick={() => setShowModal(false)} />
-            <div className="absolute top-full mt-2 w-full z-50">
+            <div className="absolute top-full left-0 mt-2 w-full z-50">
               {dropdownContent}
             </div>
           </>
@@ -175,7 +178,7 @@ export default function Search<T>(props: SearchProps<T>) {
 
       {!noModal && (
         <Modal
-          isVisible={showModal && value.length > 0 && !disabled}
+          isVisible={showModal && (props.showOnFocusEmpty || value.length > 0) && !disabled}
           onClose={() => setShowModal(false)}
           design={modalDesign ?? ""}
         >
