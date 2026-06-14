@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { adminApi } from "../api/adminApi";
 import type { S3Object } from "../api/types";
 import { panoramaImageUrl } from "../../components/utils/imageUrl";
 import { FaSearch, FaTimes, FaCloudDownloadAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { debounce } from "../../components/utils/debounce";
 
 type S3AssetBrowserProps = {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function S3AssetBrowser({ isOpen, onClose, onSelect }: S3AssetBro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -39,9 +41,18 @@ export default function S3AssetBrowser({ isOpen, onClose, onSelect }: S3AssetBro
     }
   }, [isOpen]);
 
+  const updateDebouncedSearch = useMemo(
+    () => debounce((val: string) => setDebouncedQuery(val), 200),
+    []
+  );
+
+  useEffect(() => {
+    updateDebouncedSearch(searchQuery);
+  }, [searchQuery, updateDebouncedSearch]);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [debouncedQuery]);
 
   if (!isOpen) return null;
 
@@ -50,7 +61,7 @@ export default function S3AssetBrowser({ isOpen, onClose, onSelect }: S3AssetBro
   const mainObjects = objects.filter((obj) => !obj.key.toLowerCase().includes("_thumb."));
 
   const filteredObjects = mainObjects.filter((obj) =>
-    obj.key.toLowerCase().includes(searchQuery.toLowerCase())
+    obj.key.toLowerCase().includes(debouncedQuery.toLowerCase())
   );
 
   const getThumbnailOrOriginalUrl = (key: string) => {

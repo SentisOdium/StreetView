@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { Html } from "@react-three/drei";
 import type { HotspotMarkerProps } from "../types/panoramaProps";
 
-export default function HotspotMarker({ position, label, onClick, disabled, selected, onSingleClick, isEditor }: HotspotMarkerProps) {
+export default function HotspotMarker({ position, label, onClick, disabled, selected, onSingleClick, isEditor, index }: HotspotMarkerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -38,23 +38,28 @@ export default function HotspotMarker({ position, label, onClick, disabled, sele
         }}
         rotation={[0, 0, 0]}
       >
-        <planeGeometry args={[30, 55]} />
+        <planeGeometry args={[35, 55]} />
         <meshBasicMaterial
-          color={isEditor ? "gray" : "#800000"}
+          color={isEditor ? ((index ?? 0) % 2 === 0 ? "gray" : "#800000") : "#800000"}
+          transparent={!isEditor}
+          opacity={isEditor ? 1 : 0}
+          depthWrite={!!isEditor}
         />
       </mesh>
-      <Html center pointerEvents="none">
-        <div
-          className={`pointer-events-none select-none rounded px-2.5 py-1 text-xs font-bold tracking-wide text-white border shadow-lg backdrop-blur-sm transition-all duration-200 ${selected
-            ? "bg-[#ffd700] text-[#800000] border-[#ffd700]/40 scale-110 shadow-[0_0_15px_rgba(255,215,0,0.5)] font-extrabold"
-            : hovered
-              ? "bg-[#b30000] border-white/20 scale-110"
-              : "bg-[#800000]/85 border-white/20 scale-100"
-            }`}
-        >
-          {label}
-        </div>
-      </Html>
+      {isEditor && (
+        <Html center pointerEvents="none">
+          <div
+            className={`pointer-events-none select-none rounded px-2.5 py-1 text-xs font-bold tracking-wide text-white border shadow-lg backdrop-blur-sm transition-all duration-200 ${selected
+              ? "bg-[#ffd700] text-[#800000] border-[#ffd700]/40 scale-110 shadow-[0_0_15px_rgba(255,215,0,0.5)] font-extrabold"
+              : hovered
+                ? "bg-[#b30000] border-white/20 scale-110"
+                : "bg-[#800000]/85 border-white/20 scale-100"
+              }`}
+          >
+            {label}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

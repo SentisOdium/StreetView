@@ -96,3 +96,12 @@ input[type="search"]::-webkit-search-cancel-button {
     -webkit-appearance: none;
     appearance: none;
 }
+
+/* Panorama cursor utility */
+.panorama-pointer-container canvas {
+    cursor: pointer !important;
+}
+
+.panorama-pointer-container canvas:active {
+    cursor: default !important;
+}

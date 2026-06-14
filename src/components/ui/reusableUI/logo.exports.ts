@@ -43,6 +43,15 @@ import
 import 
     ExpandCircleDownOutlinedIcon 
         from '@mui/icons-material/ExpandCircleDownOutlined';
+import 
+    ArrowBackIcon 
+        from '@mui/icons-material/ArrowBack';
+import 
+    AccessTimeFilledIcon 
+        from '@mui/icons-material/AccessTimeFilled';
+import 
+    ContactPhoneIcon 
+        from '@mui/icons-material/ContactPhone';
 export {
     WayfinderLogo1, 
 
@@ -60,5 +69,8 @@ export {
     TurnRightIcon,
     TurnSlightLeftRoundedIcon,
     TurnSlightRightIcon,
-    ExpandCircleDownOutlinedIcon
+    ExpandCircleDownOutlinedIcon,
+    ArrowBackIcon,
+    AccessTimeFilledIcon,
+    ContactPhoneIcon
 };

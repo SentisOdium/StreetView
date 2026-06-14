@@ -30,10 +30,12 @@ function PreviewHotspot({
   hotspot,
   selected,
   onSelect,
+  index,
 }: {
   hotspot: EditorHotspot;
   selected: boolean;
   onSelect: () => void;
+  index: number;
 }) {
   const getDirectionPos = (label: string): [number, number, number] => {
     const d = label.trim().toUpperCase();
@@ -79,6 +81,7 @@ function PreviewHotspot({
         disabled={false}
         selected={selected}
         isEditor={true}
+        index={index}
       />
       <HotspotArrow
         position={arrowPos}
@@ -145,7 +148,7 @@ function HotspotEditorCanvas({
             rotationOffsetZ={rotationOffsetZ}
           />
 
-          {hotspots.map((h) => {
+          {hotspots.map((h, idx) => {
             const id = h.id ?? h.tempId!;
             return (
               <PreviewHotspot
@@ -153,6 +156,7 @@ function HotspotEditorCanvas({
                 hotspot={h}
                 selected={selectedId === id}
                 onSelect={() => onSelect(id)}
+                index={idx}
               />
             );
           })}

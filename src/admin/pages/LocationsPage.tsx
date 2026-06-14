@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { adminApi } from "../api/adminApi";
 import type { AdminHotspot, AdminLocation } from "../api/types";
@@ -15,6 +15,7 @@ import PageHeader, {
 import { uploadFileToS3 } from "../utils/uploadFileToS3";
 import S3AssetBrowser from "../components/S3AssetBrowser";
 import { generateThumbnail } from "../utils/thumbnailGenerator";
+import { debounce } from "../../components/utils/debounce";
 
 const emptyForm: Partial<AdminLocation> = {
   node_name: "",
@@ -47,10 +48,21 @@ export default function LocationsPage() {
     }
   }, [msg]);
 
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  const updateDebouncedSearch = useMemo(
+    () => debounce((val: string) => setDebouncedSearchQuery(val), 300),
+    []
+  );
+
+  useEffect(() => {
+    updateDebouncedSearch(search);
+  }, [search, updateDebouncedSearch]);
+
   const load = useCallback(() => {
-    fetchLocations({ floor: floorFilter || undefined, search: search || undefined });
+    fetchLocations({ floor: floorFilter || undefined, search: debouncedSearchQuery || undefined });
     adminApi.getFloors().then(setFloors).catch(() => { });
-  }, [fetchLocations, floorFilter, search]);
+  }, [fetchLocations, floorFilter, debouncedSearchQuery]);
 
   useEffect(() => {
     load();

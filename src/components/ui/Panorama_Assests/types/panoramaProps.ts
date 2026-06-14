@@ -37,4 +37,5 @@ export type HotspotMarkerProps = {
   selected?: boolean;
   onSingleClick?: () => void;
   isEditor?: boolean;
+  index?: number;
 };

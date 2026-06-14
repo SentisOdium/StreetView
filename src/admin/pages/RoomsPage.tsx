@@ -17,6 +17,8 @@ const emptyRoom: Partial<AdminRoom> = {
   room_type: "grounds",
   room_img: "",
   room_description: "",
+  phone: "",
+  hours: "",
 };
 
 export default function RoomsPage() {
@@ -148,6 +150,24 @@ export default function RoomsPage() {
               />
             </label>
 
+            <label className="block text-sm">
+              <span className="mb-1 block opacity-70">Contact (Phone or Email)</span>
+              <AdminInput
+                value={form.phone || ""}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="(555) 123-4567 or [EMAIL_ADDRESS]"
+              />
+            </label>
+
+            <label className="block text-sm">
+              <span className="mb-1 block opacity-70">Today's Hours</span>
+              <AdminInput
+                value={form.hours || ""}
+                onChange={(e) => setForm({ ...form, hours: e.target.value })}
+                placeholder="7:00 AM - 11:00 PM"
+              />
+            </label>
+
             <div className="flex gap-2">
               <AdminButton onClick={handleSave}>
                 {editingId ? "Update Room" : "Add Room"}
@@ -201,6 +221,12 @@ export default function RoomsPage() {
                     <p className="mt-2 text-sm opacity-80">{room.room_description}</p>
                     {room.room_img && (
                       <p className="mt-1 font-mono text-xs opacity-50">{room.room_img}</p>
+                    )}
+                    {(room.phone || room.hours) && (
+                      <div className="mt-2 flex gap-4 text-xs opacity-70">
+                        {room.phone && <span>📞 {room.phone}</span>}
+                        {room.hours && <span>⏰ {room.hours}</span>}
+                      </div>
                     )}
                   </div>
                 ))}

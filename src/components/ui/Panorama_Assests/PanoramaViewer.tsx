@@ -8,6 +8,7 @@ import type { Hotspot as HotspotData } from "../../api/types/types_api";
 import { useLocation } from "../../../context/LocationContext";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
 import Scene from "./components/Scene";
+import GroundCursorFollower from "./components/GroundCursorFollower";
 import PanoramaStatus from "../reusableUI/PanoramaStatus";
 import { panoramaImageUrl } from "../../utils/imageUrl";
 import { loadTexture } from "./utils/textureCache";
@@ -212,7 +213,7 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
   }
 
   return (
-    <div className="relative h-full w-full bg-black">
+    <div className="relative h-full w-full bg-black panorama-pointer-container">
       <Canvas
         style={{ width: "100vw", height: "100vh" }}
         camera={{
@@ -241,6 +242,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
         />
 
         <ambientLight intensity={1} />
+
+        {/* Ground cursor follower projecting arrow SVG */}
+        <GroundCursorFollower />
 
         {/* Previous panorama scene (fades out) */}
         {previousScene && (

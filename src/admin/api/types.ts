@@ -27,6 +27,8 @@ export type AdminRoom = {
   room_type: string;
   room_img: string;
   room_description: string;
+  phone?: string;
+  hours?: string;
 };
 
 export type DashboardStats = {

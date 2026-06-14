@@ -32,6 +32,8 @@ export type NodeDetails = {
         room_type: string;
         room_img: string;
         room_description: string;
+        phone?: string;
+        hours?: string;
     }[]
 }
 

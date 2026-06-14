@@ -34,7 +34,27 @@ export default function HomePage() {
         }
     }, [location.state]);
 
-
+    useEffect(() => {
+        if (list && list.length > 0) {
+            const queryParams = new URLSearchParams(window.location.search);
+            const nodeIdParam = queryParams.get("nodeId");
+            if (nodeIdParam) {
+                const node = list.find((item) => String(item.id) === nodeIdParam);
+                if (node) {
+                    dispatch({
+                        type: "SELECT_NODE",
+                        payload: {
+                            id: node.id,
+                            name: node.node_name,
+                        },
+                    });
+                }
+                // Silently clear the query params from the URL address bar
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        }
+    }, [list]);
 
     const currentPanel = stack.at(-1);
 
@@ -144,8 +164,6 @@ export default function HomePage() {
                 )}
 
             </div>
-
-
 
             <div className="absolute inset-0 z-0">
                 {activeNodeId != null && (

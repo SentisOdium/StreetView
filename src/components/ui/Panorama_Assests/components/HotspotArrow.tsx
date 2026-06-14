@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { useTexture } from "@react-three/drei";
 import type { HotspotMarkerProps } from "../types/panoramaProps";
@@ -6,6 +6,18 @@ import type { HotspotMarkerProps } from "../types/panoramaProps";
 export default function HotspotArrow({ position, onClick, disabled }: HotspotMarkerProps) {
     const meshRef = useRef<THREE.Mesh>(null);
     const [hovered, setHovered] = useState(false);
+
+    // Sync hover state to window global to let GroundCursorFollower know to hide
+    useEffect(() => {
+        if (hovered && !disabled) {
+            (window as any).isHoveringHotspotArrow = true;
+        } else {
+            (window as any).isHoveringHotspotArrow = false;
+        }
+        return () => {
+            (window as any).isHoveringHotspotArrow = false;
+        };
+    }, [hovered, disabled]);
 
     // Load texture from the SVG
     const texture = useTexture("/logo/arrow-open-end-svgrepo-com.svg");

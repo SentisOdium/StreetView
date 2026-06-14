@@ -26,19 +26,17 @@ export default function RouteCardComponent({
         <Loading loading message="Calculating route..." />
       </div>
     );
-  }
-
-  if (error) {
+  }  if (error) {
     return (
-      <div className="mt-10 rounded-2xl bg-white p-4 shadow-sm">
-        <Error error={error} />
+      <div className="mt-10 rounded-2xl bg-white p-6 shadow-sm">
+        <Error error={error} message="Failed to calculate route." />
       </div>
     );
   }
-
   if (!route?.length) {
     return (
       <div className="mt-10 rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+        <EmptySearchUi />
         No route found between these locations.
       </div>
     );

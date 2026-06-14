@@ -2,6 +2,7 @@ import { useMemo, useState, useId, useRef, useEffect, type RefObject } from "rea
 import Modal from "./modal";
 import { Loading, Error } from "./emptySearchUi";
 import { EmptySearchUi } from "./emptySearchUi";
+import { debounce } from "../../utils/debounce";
 
 type SearchProps<T> = {
   items: T[];
@@ -55,10 +56,21 @@ export default function Search<T>(props: SearchProps<T>) {
     onDropdownVisibilityChange?.(isDropdownOpen);
   }, [isDropdownOpen, onDropdownVisibilityChange]);
 
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  const updateDebouncedValue = useMemo(
+    () => debounce((val: string) => setDebouncedValue(val), 150),
+    []
+  );
+
+  useEffect(() => {
+    updateDebouncedValue(value);
+  }, [value, updateDebouncedValue]);
+
   // Reset activeIndex when query or list size changes
   useEffect(() => {
     setActiveIndex(-1);
-  }, [value, items.length]);
+  }, [debouncedValue, items.length]);
 
   // Scroll active item into view
   useEffect(() => {
@@ -71,12 +83,12 @@ export default function Search<T>(props: SearchProps<T>) {
   }, [activeIndex]);
 
   const filteredList = useMemo(() => {
-    const query = value.trim().toLowerCase();
+    const query = debouncedValue.trim().toLowerCase();
     if (!query) return items;
     return items.filter((item) =>
       getLabel(item).toLowerCase().includes(query)
     );
-  }, [items, value, getLabel]);
+  }, [items, debouncedValue, getLabel]);
 
   const dropdownContent = (
     <div id={listboxId} role="listbox" className={noModal ? modalDesign : undefined}>
