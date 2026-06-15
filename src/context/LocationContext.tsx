@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { MapNode, NodeDetails } from "../components/api/types/types_api";
 import { fetchNodeList as apiFetchNodeList } from "../components/api/fetchNodeList";
 import { fetchNodeDetails as apiFetchNodeDetails } from "../components/api/fetchNodeDetails";
 
 interface LocationContextProps {
   nodeList: MapNode[];
+  mainNodeList: MapNode[];
   nodeListLoading: boolean;
   nodeListError: string | null;
   nodeDetails: Record<number, NodeDetails>;
@@ -46,6 +47,7 @@ interface LocationProviderProps {
 
 export const LocationProvider = ({ children }: LocationProviderProps) => {
   const [nodeList, setNodeList] = useState<MapNode[]>([]);
+  const mainNodeList = useMemo(() => nodeList.filter((n) => n.type !== "transitional"), [nodeList]);
   const [nodeListLoading, setNodeListLoading] = useState<boolean>(false);
   const [nodeListError, setNodeListError] = useState<string | null>(null);
 
@@ -220,6 +222,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
 
   const value = {
     nodeList,
+    mainNodeList,
     nodeListLoading,
     nodeListError,
     nodeDetails,

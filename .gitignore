@@ -26,4 +26,4 @@ dist-ssr
 /public/panorama/locations 
 .kilo
 .cursor
-.vs
+.vspublic/video/*.mp4

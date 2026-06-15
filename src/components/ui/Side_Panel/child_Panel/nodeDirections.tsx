@@ -6,7 +6,7 @@ import type { NodeDirectionsProps } from "../types/sidePanelProps"
 
 type ActiveField = "A" | "B" | null;
 
-export default function NodeDirections({ list, onBack, onSelectedRouteNode, directionsState, onUpdate }: NodeDirectionsProps) {
+export default function NodeDirections({ list, fullList, activeNodeId, onBack, onSelectedRouteNode, directionsState, onUpdate }: NodeDirectionsProps) {
     const locationA = directionsState.locationA;
     const locationB = directionsState.locationB;
     const [activeField, setActiveField] = useState<ActiveField>(
@@ -17,6 +17,17 @@ export default function NodeDirections({ list, onBack, onSelectedRouteNode, dire
 
     const inputARef = useRef<HTMLInputElement>(null);
     const inputBRef = useRef<HTMLInputElement>(null);
+
+    const activeNode = fullList?.find(n => n.id === activeNodeId);
+    const activeNodeName = activeNode?.node_name ?? "";
+
+    const startingItems = activeNode
+        ? [{ id: -1, node_name: "Current Location", type: "special" }, ...list]
+        : list;
+
+    const destinationItems = activeNode
+        ? [{ id: -1, node_name: "Current Location", type: "special" }, ...list]
+        : list;
 
     useEffect(() => {
         if (activeField === "A") {
@@ -97,7 +108,7 @@ export default function NodeDirections({ list, onBack, onSelectedRouteNode, dire
                                     value={locationA}
                                     onChange={(val: string) => onUpdate({ locationA: val })}
                                     placeholder="Select a starting location"
-                                    items={list || []}
+                                    items={startingItems || []}
                                     getLabel={(node: any) => node?.node_name ?? ""}
                                     getKey={(node: any) => node?.id}
                                     onSelect={handleLocationASelect} 
@@ -122,7 +133,7 @@ export default function NodeDirections({ list, onBack, onSelectedRouteNode, dire
                                     value={locationB}
                                     onChange={(val: string) => onUpdate({ locationB: val })}
                                     placeholder="Select destination"
-                                    items={list || []}
+                                    items={destinationItems || []}
                                     getLabel={(node: any) => node?.node_name ?? ""}
                                     getKey={(node: any) => node?.id}
                                     onSelect={handleLocationBSelect} 
@@ -159,12 +170,26 @@ export default function NodeDirections({ list, onBack, onSelectedRouteNode, dire
                         <RouteCardComponent
                             locA={locationA}
                             locB={locationB}
+                            resolvedLocA={locationA === "Current Location" ? activeNodeName : locationA}
+                            resolvedLocB={locationB === "Current Location" ? activeNodeName : locationB}
                             onSelectedRouteNode={onSelectedRouteNode}
                         />
                     </div>
                 ) : (
                     <div className="space-y-3">
                         <div className="rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            {activeNode && (
+                                <button
+                                    key="current-location"
+                                    onClick={() => handleLocationSelect({ id: -1, node_name: "Current Location", type: "special" })}
+                                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 active:bg-slate-100 rounded-xl transition-all duration-200 group text-slate-700 hover:text-[#800000] border-b border-dashed border-slate-100"
+                                >
+                                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 group-hover:bg-[#800000] transition-colors shrink-0" />
+                                    <span className="text-sm font-bold text-amber-600 transition-colors leading-tight">
+                                        Use Current Location
+                                    </span>
+                                </button>
+                            )}
                             {list?.map((node: any) => (
                                 <button
                                     key={node.id}

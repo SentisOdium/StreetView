@@ -1,6 +1,7 @@
 import type { MapNode, NodeRoute} from "../../../api/types/types_api";
 export type SearchUiProps = {
     list: MapNode[];
+    activeNodeName?: string;
     loading?: boolean;     
     error?: unknown; 
     onSelect: (node: MapNode) => void;
@@ -18,6 +19,8 @@ export type NodeLocationDetailsProps = Pick<SearchUiProps, "onDirections"> & {
 
 export type NodeDirectionsProps = {
   list: MapNode[];
+  fullList: MapNode[];
+  activeNodeId: number | null;
   directionsState: {
     locationA: string;
     locationB: string;

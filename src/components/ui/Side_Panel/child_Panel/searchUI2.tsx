@@ -1,13 +1,22 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Search from "../../reusableUI/search";
 import type { SearchUiProps } from "../types/sidePanelProps";
 import type { MapNode } from "../../../api/types/types_api";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
 
 export default function SearchUI2(props: SearchUiProps) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(props.activeNodeName || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (props.activeNodeName) {
+      setSearch(props.activeNodeName);
+    } else {
+      setSearch("");
+    }
+  }, [props.activeNodeName]);
+
   const errorMessage =
     typeof props.error === "string"
       ? props.error

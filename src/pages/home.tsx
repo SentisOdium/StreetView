@@ -13,12 +13,18 @@ import type { MapNode } from "../components/api/types/types_api"
 
 
 export default function HomePage() {
-    const { list, loading, error } = useAutoCompleteFetch()
+    const { list, fullList, loading, error } = useAutoCompleteFetch()
     const location = useLocation()
 
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { stack, activeNodeId, directionsState } = state;
+    const { stack, activeNodeId, activeNodeName, lastMainNodeId, lastMainNodeName, directionsState } = state;
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const isTransitional = (nodeId: number | null) => {
+        if (nodeId == null || !fullList) return false;
+        const node = fullList.find((n) => n.id === nodeId);
+        return node?.type === "transitional";
+    };
 
     useEffect(() => {
         if (location.state?.targetNode) {
@@ -28,6 +34,7 @@ export default function HomePage() {
                 payload: {
                     id: node.id,
                     name: node.node_name,
+                    type: node.type,
                 },
             });
             window.history.replaceState({}, document.title);
@@ -35,17 +42,18 @@ export default function HomePage() {
     }, [location.state]);
 
     useEffect(() => {
-        if (list && list.length > 0) {
+        if (fullList && fullList.length > 0) {
             const queryParams = new URLSearchParams(window.location.search);
             const nodeIdParam = queryParams.get("nodeId");
             if (nodeIdParam) {
-                const node = list.find((item) => String(item.id) === nodeIdParam);
+                const node = fullList.find((item) => String(item.id) === nodeIdParam);
                 if (node) {
                     dispatch({
                         type: "SELECT_NODE",
                         payload: {
                             id: node.id,
                             name: node.node_name,
+                            type: node.type,
                         },
                     });
                 }
@@ -54,7 +62,7 @@ export default function HomePage() {
                 window.history.replaceState({}, document.title, newUrl);
             }
         }
-    }, [list]);
+    }, [fullList]);
 
     const currentPanel = stack.at(-1);
 
@@ -77,6 +85,11 @@ export default function HomePage() {
                     {currentPanel.type !== "directions" && (
                         <SearchUI2
                             list={list}
+                            activeNodeName={
+                                activeNodeId && isTransitional(activeNodeId)
+                                    ? (lastMainNodeName || "")
+                                    : (activeNodeName || "")
+                            }
                             loading={loading}
                             error={error}
                             onClear={() => dispatch({ type: "RESET_TO_SEARCH" })}
@@ -86,6 +99,7 @@ export default function HomePage() {
                                     payload: {
                                         id: node.id,
                                         name: node.node_name,
+                                        type: node.type,
                                     },
                                 })
                             }
@@ -100,7 +114,11 @@ export default function HomePage() {
                 <div className="absolute top-0 left-0 z-10">
                     {currentPanel.type === "location" && (
                         <NodeLocationDetails
-                            selectedNodeId={currentPanel.nodeId}
+                            selectedNodeId={
+                                isTransitional(currentPanel.nodeId)
+                                    ? (lastMainNodeId ?? currentPanel.nodeId)
+                                    : currentPanel.nodeId
+                            }
                             hasDirectionsPanel={hasDirectionsPanel}
                             canGoBack={stack.length > 2}
                             onDirections={() =>
@@ -115,6 +133,8 @@ export default function HomePage() {
                     {currentPanel.type === "directions" && (
                         <NodeDirections
                             list={list}
+                            fullList={fullList || []}
+                            activeNodeId={activeNodeId}
                             directionsState={directionsState}
                             onBack={() =>
                                 dispatch({ type: "GO_BACK" })
@@ -125,6 +145,7 @@ export default function HomePage() {
                                     payload: {
                                         id: node.id,
                                         name: node.name,
+                                        type: node.type,
                                     },
                                 })
                             }
@@ -170,7 +191,7 @@ export default function HomePage() {
                     <PanoramaViewer
                         nodeId={activeNodeId}
                         onNavigate={(destinationId) => {
-                            const resolvedNode = list.find((n) => n.id === destinationId);
+                            const resolvedNode = fullList?.find((n) => n.id === destinationId);
                             if (!resolvedNode) return;
 
                             dispatch({
@@ -178,6 +199,7 @@ export default function HomePage() {
                                 payload: {
                                     id: resolvedNode.id,
                                     name: resolvedNode.node_name,
+                                    type: resolvedNode.type,
                                 },
                             });
                         }}
