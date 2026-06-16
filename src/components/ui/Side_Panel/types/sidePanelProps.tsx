@@ -15,6 +15,7 @@ export type NodeLocationDetailsProps = Pick<SearchUiProps, "onDirections"> & {
     onBack: () => void;
     hasDirectionsPanel?: boolean;
     canGoBack?: boolean;
+    mobileHeight?: 'hidden' | 'mid' | 'expanded';
 }
 
 export type NodeDirectionsProps = {
@@ -30,5 +31,6 @@ export type NodeDirectionsProps = {
   onUpdate: (data: Partial<NodeDirectionsProps["directionsState"]>) => void;
   onSelectedRouteNode: (node: NodeRoute) => void;
   onBack: () => void;
+  mobileHeight?: 'hidden' | 'mid' | 'expanded';
 };
 

@@ -76,7 +76,7 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
       <div className="relative">
         <span className="absolute -left-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-amber-500 ring-4 ring-amber-500/10" />
         
-        <div className="rounded-2xl p-4 bg-amber-50/5 hover:bg-amber-50/10 transition border border-amber-100/40 shadow-sm flex flex-col gap-2">
+        <div className="rounded-2xl p-4 bg-white hover:bg-slate-50/50 transition shadow-sm flex flex-col gap-2">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider block">Starting Point</span>
@@ -140,7 +140,7 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
       <div className="relative">
         <span className="absolute -left-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-[#800000] ring-4 ring-[#800000]/10" />
         
-        <div className="rounded-2xl p-4 bg-[#800000]/5 hover:bg-[#800000]/10 transition border border-[#800000]/40 shadow-sm flex items-center justify-between gap-4">
+        <div className="rounded-2xl p-4 bg-white hover:bg-slate-50/50 transition shadow-sm flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <span className="text-[10px] font-bold text-[#800000] uppercase tracking-wider block">Destination</span>
             <p className="text-sm font-semibold text-[#800000] mt-0.5">{step.target.name}</p>
@@ -168,7 +168,7 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
     <div className="relative">
       <span className="absolute -left-2.5 top-2.5 h-2 w-2 rounded-full bg-[#800000] ring-4 ring-[#800000]/10" />
       
-      <div className="rounded-2xl p-4 bg-slate-50/50 hover:bg-slate-50/80 transition border border-slate-100/85 shadow-sm flex flex-col gap-2">
+      <div className="rounded-2xl p-4 bg-slate-50/50 hover:bg-slate-50/80 transition shadow-sm flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -297,7 +297,7 @@ export default function RouteCardComponent({
 
   if (loading) {
     return (
-      <div className="mt-10 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="py-8">
         <Loading loading message="Calculating route..." />
       </div>
     );
@@ -305,7 +305,7 @@ export default function RouteCardComponent({
 
   if (error) {
     return (
-      <div className="mt-10 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="py-6">
         <Error error={error} message="Failed to calculate route." />
       </div>
     );
@@ -313,7 +313,7 @@ export default function RouteCardComponent({
 
   if (!route?.length) {
     return (
-      <div className="mt-10 rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+      <div className="py-8 text-center text-sm text-gray-500">
         <EmptySearchUi />
         No route found between these locations.
       </div>
@@ -321,16 +321,16 @@ export default function RouteCardComponent({
   }
 
   return (
-    <div className="mt-6 mx-auto flex w-full max-w-xl rounded-2xl bg-white p-5 shadow-sm">
+    <div className="w-full flex flex-col mt-2">
       <div className="flex-1">
-        <div className="mb-4">
-          <p className="text-xs text-gray-400 font-medium">Route Directions</p>
-          <h2 className="text-base font-bold text-gray-800 tracking-tight">
+        <div className="mb-4 px-1">
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Route Directions</p>
+          <h2 className="text-base font-bold text-slate-800 tracking-tight mt-0.5">
             {locA} → {locB}
           </h2>
         </div>
 
-        <div className="relative space-y-4 border-l border-slate-200 pl-4 ml-1">
+        <div className="relative space-y-4 border-l border-slate-200 pl-4 ml-2.5 mt-4">
           {steps.map((step, index) => (
             <RouteStepCard
               key={step.target.id}

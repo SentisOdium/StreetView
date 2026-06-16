@@ -34,6 +34,7 @@ export function Footer() {
             <br /> Tailored for PUP Sta. Mesa | Institute of Technology.
           </p>
         </div>
+
       </div>
 
       <div className="wf-footer__wordmark-container">

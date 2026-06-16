@@ -11,6 +11,16 @@
   overflow: hidden;
 }
 
+.wf-hero__canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .wf-hero__content {
   position: relative;
   z-index: 2;

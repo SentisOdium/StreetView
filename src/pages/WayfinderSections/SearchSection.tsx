@@ -33,36 +33,39 @@ export function SearchSection() {
     });
   };
 
+  const popularTags = ["ITECH Center", "Dean's Office", "Registrar", "Clinic", "OMIT OFfice"];
+
+  const handleTagClick = (tagName: string) => {
+    const foundNode = list?.find(node =>
+      node.node_name.toLowerCase().includes(tagName.toLowerCase())
+    );
+    if (foundNode) {
+      handleSelect(foundNode);
+    } else {
+      setSearch(tagName);
+      inputRef.current?.focus();
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
 
       const rect = sectionRef.current.getBoundingClientRect();
-
       const elementCenter = rect.top + rect.height / 2;
       const viewportCenter = window.innerHeight / 2;
-
-      const distance = Math.abs(
-        viewportCenter - elementCenter
-      );
-
+      const distance = Math.abs(viewportCenter - elementCenter);
       const maxDistance = window.innerHeight * 0.75;
+      const progress = Math.max(0, 1 - distance / maxDistance);
 
-      const progress = Math.max(
-        0,
-        1 - distance / maxDistance
-      );
-
-      // Scale from 0.95 → 1.05
-      setScale(0.95 + progress * 0.1);
+      // Scale from 0.95 → 1.03 for a smoother effect
+      setScale(0.95 + progress * 0.08);
     };
 
     window.addEventListener("scroll", handleScroll);
-
     handleScroll();
 
-    return () =>
-      window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -78,9 +81,7 @@ export function SearchSection() {
     <section
       id="search-section"
       ref={reveal.ref}
-      className={`relative flex items-center justify-center min-h-screen transition-all duration-700 ${reveal.visible
-        ? "opacity-100 translate-y-0"
-        : "opacity-0 translate-y-12"
+      className={`relative flex items-center justify-center min-h-[80vh] sm:min-h-screen py-16 transition-all duration-700 ${reveal.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
         }`}
     >
       <div
@@ -89,33 +90,36 @@ export function SearchSection() {
           transform: `scale(${scale})`,
           transformOrigin: "center center",
         }}
-        className="relative w-[92%] md:max-w-[calc(90%-192px)] h-[70vh] md:h-[82vh] overflow-hidden rounded-[24px] md:rounded-[32px] transition-transform duration-300 ease-out will-change-transform"      >
-        {/* Background Image */}
+        className="relative w-[92%] md:max-w-7xl h-[65vh] sm:h-[75vh] overflow-hidden rounded-[32px] border border-slate-200/50 shadow-2xl transition-transform duration-500 ease-out will-change-transform bg-white flex flex-col"
+      >
+        {/* Background Image with Blur Overlay */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 scale-105"
           style={{
-            backgroundImage:
-              "url('/landingPanorama/ITECH_CENTER.webp')",
+            backgroundImage: "url('/landingPanorama/ITECH_CENTER.webp')",
           }}
         />
 
-        {/* Dark Overlay */}
-        <div className={`absolute inset-0 transition-colors duration-700 ${isGlowing ? "bg-black/70" : "bg-black/40"}`} />
+        {/* Backdrop Glass Layer */}
+        <div className={`absolute inset-0 backdrop-blur-[3px] transition-colors duration-700 ${isGlowing ? "bg-black/60" : "bg-black/45"
+          }`} />
 
-        {/* Content */}
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 md:px-6">
-          <h2 className="mb-8 text-center text-3xl md:text-5xl font-bold text-white drop-shadow-lg">
-            Where would <span className={`transition-colors duration-700 ${isGlowing ? "text-[#800000] delay-[900ms]" : "delay-0"}`}>you</span> like to go?
+        {/* Content Panel */}
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 sm:px-12 text-center">
+          <h2 className="mb-6 text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-md">
+            Where would <span className={`transition-colors duration-700 ${isGlowing ? "text-[#b31919] drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]" : "text-white"}`}>you</span> like to go?
           </h2>
+          <p className="mb-8 text-slate-200/90 text-sm sm:text-base max-w-lg leading-relaxed hidden sm:block">
+            Search for campus facilities, classrooms, or office locations to start your virtual walkthrough.
+          </p>
 
-          <div className="relative flex w-full max-w-2xl flex-col items-center">
+          <div className="relative flex w-full max-w-4xl flex-col items-center gap-4">
+            {/* Search Input Box */}
             <div
-              className={`flex h-16 w-full items-center justify-between bg-white px-4 py-1 transition-all duration-700 ${isDropdownOpen
-                ? "rounded-t-2xl"
-                : "rounded-2xl shadow-2xl"
-                } ${isGlowing ? "scale-[1.03] ring-4 ring-[#800000]/40 shadow-[0_0_32px_rgba(128,0,0,0.3)]" : "scale-100"}`}
+              className={`relative flex h-14 sm:h-16 w-full items-center justify-between bg-white/95 backdrop-blur px-4 py-1 transition-all duration-300 border border-slate-200 ${isDropdownOpen ? "rounded-t-2xl border-b-slate-100" : "rounded-2xl shadow-lg"
+                } ${isGlowing ? "scale-[1.02] ring-4 ring-[#800000]/40 shadow-[0_0_32px_rgba(128,0,0,0.3)]" : "scale-100"}`}
             >
-              <div className="flex-1 w-full text-base md:text-lg">
+              <div className="flex-1 w-full text-base sm:text-lg">
                 <Search
                   inputRef={inputRef}
                   value={search}
@@ -124,22 +128,18 @@ export function SearchSection() {
                   items={list || []}
                   loading={loading}
                   error={errorMessage}
-                  getLabel={(node: MapNode) =>
-                    node.node_name
-                  }
+                  getLabel={(node: MapNode) => node.node_name}
                   getKey={(node: MapNode) => node.id}
                   onSelect={handleSelect}
                   noModal={true}
+                  noRelativeWrapper={true}
                   onDropdownVisibilityChange={setIsDropdownOpen}
                   modalDesign="
                     max-h-[200px]
                     md:max-h-[240px]
-                    -ml-4
-                    mt-2.5
-                    w-[calc(100%+32px)]
-                    md:w-[672px]
                     overflow-y-auto
-                    bg-white
+                    bg-white/98
+                    backdrop-blur-md
                     shadow-2xl
                     rounded-b-2xl
                     [&::-webkit-scrollbar]:hidden
@@ -152,16 +152,14 @@ export function SearchSection() {
                 />
               </div>
 
-              <div className="ml-2 flex space-x-2">
+              <div className="ml-2 flex space-x-1 sm:space-x-2">
                 <button
                   type="button"
                   aria-label="Focus search"
-                  onClick={() =>
-                    inputRef.current?.focus()
-                  }
-                  className="cursor-pointer rounded-2xl p-2 transition-colors hover:bg-gray-100"
+                  onClick={() => inputRef.current?.focus()}
+                  className="cursor-pointer rounded-xl p-2 transition-colors hover:bg-slate-100 text-[#800000]"
                 >
-                  <SearchIcon sx={{ color: "#800000" }} />
+                  <SearchIcon />
                 </button>
 
                 {search && (
@@ -169,13 +167,28 @@ export function SearchSection() {
                     type="button"
                     aria-label="Clear search"
                     onClick={() => setSearch("")}
-                    className="cursor-pointer rounded-2xl p-2 transition-colors hover:bg-gray-100"
+                    className="cursor-pointer rounded-xl p-2 transition-colors hover:bg-slate-100 text-[#800000]"
                   >
-                    <ClearIcon sx={{ color: "#800000" }} />
+                    <ClearIcon />
                   </button>
                 )}
               </div>
             </div>
+
+            {/* Popular/Quick Navigation Tags */}
+            <div className="flex flex-wrap justify-center items-center gap-2 mt-2 w-full">
+              <span className="text-slate-300 text-xs mr-1 font-medium select-none">Popular:</span>
+              {popularTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => handleTagClick(tag)}
+                  className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all duration-300 cursor-pointer active:scale-95"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
           </div>
         </div>
       </div>

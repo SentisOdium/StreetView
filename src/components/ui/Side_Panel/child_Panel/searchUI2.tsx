@@ -27,7 +27,7 @@ export default function SearchUI2(props: SearchUiProps) {
   return (
     <div className="">
       <div
-        className={`z-20 mx-8 mt-4 flex h-12 w-[calc(100%-64px)] items-center justify-between bg-white px-4 pt-1 pb-1 transition-all duration-300 ${
+        className={`z-20 mx-4 md:mx-8 mt-6 md:mt-4 flex h-12 w-[calc(100%-32px)] md:w-[calc(100%-64px)] items-center justify-between bg-white px-4 pt-1 pb-1 transition-all duration-300 ${
           isDropdownOpen
             ? "rounded-t-2xl rounded-b-none shadow-xl"
             : search.length > 0
@@ -50,7 +50,7 @@ export default function SearchUI2(props: SearchUiProps) {
             setSearch(node.node_name);
           }}
           onDropdownVisibilityChange={setIsDropdownOpen}
-          modalDesign="mt-[64.6px] ml-8 mr-8 w-[calc(100%-64px)] max-h-[300px] overflow-y-auto bg-white shadow-xl rounded-b-2xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          modalDesign="mt-[64.6px] ml-4 mr-4 md:ml-8 md:mr-8 w-[calc(100%-32px)] md:w-[calc(100%-64px)] max-h-[300px] overflow-y-auto bg-white shadow-xl rounded-b-2xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         />
 
         <div className="ml-2 flex space-x-2">

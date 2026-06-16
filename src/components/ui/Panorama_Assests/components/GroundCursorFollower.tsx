@@ -27,9 +27,19 @@ export default function GroundCursorFollower() {
     // Raycast onto the ground plane
     const intersects = raycaster.ray.intersectPlane(groundPlane.current, intersection);
 
-    let dist = 0;
+    const finalIntersection = intersection.clone();
     if (intersects) {
-      dist = camera.position.distanceTo(intersection);
+      // Calculate distance on the XZ plane from camera to intersection
+      const camXZ = new THREE.Vector2(camera.position.x, camera.position.z);
+      const intersectXZ = new THREE.Vector2(intersection.x, intersection.z);
+      const distXZ = camXZ.distanceTo(intersectXZ);
+
+      const maxHorizontalDist = 45;
+      if (distXZ > maxHorizontalDist) {
+        const directionXZ = new THREE.Vector2().subVectors(intersectXZ, camXZ).normalize();
+        const clampedXZ = new THREE.Vector2().copy(camXZ).addScaledVector(directionXZ, maxHorizontalDist);
+        finalIntersection.set(clampedXZ.x, groundHeight, clampedXZ.y);
+      }
     }
 
     // Determine if the cursor is hovering over the canvas viewport container.
@@ -39,9 +49,9 @@ export default function GroundCursorFollower() {
     // Hide the ground cursor if the pointer is specifically hovering over a hotspot arrow
     const isHoveringHotspotArrow = !!(window as any).isHoveringHotspotArrow;
 
-    // Only show the ground follower if there is a valid intersection, it's not too far,
+    // Only show the ground follower if there is a valid intersection,
     // the mouse pointer is active over the canvas, and we are not hovering on a hotspot arrow.
-    const isValidIntersection = intersects && dist < 45;
+    const isValidIntersection = !!intersects;
     const targetOpacity = (isValidIntersection && isCanvasHovered && !isHoveringHotspotArrow) ? 0.8 : 0;
 
     // Smoothly interpolate opacity
@@ -51,10 +61,10 @@ export default function GroundCursorFollower() {
     if (isValidIntersection) {
       // If previously hidden/faded out, snap directly to intersection to prevent trailing slide-in
       if (materialRef.current.opacity < 0.05) {
-        currentPos.current.copy(intersection);
+        currentPos.current.copy(finalIntersection);
       } else {
         // Otherwise, smoothly lerp to the new position
-        currentPos.current.lerp(intersection, 0.2);
+        currentPos.current.lerp(finalIntersection, 0.2);
       }
 
       // Update position of the mesh

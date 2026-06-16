@@ -27,7 +27,8 @@ type Action =
   | {
       type: "UPDATE_DIRECTIONS_STATE";
       payload: Partial<State["directionsState"]>;
-    };
+    }
+  | { type: "SET_ACTIVE_NODE"; payload: { id: number; name: string } };
 
 export const initialState: State = {
   stack: [{ type: "search" }],
@@ -157,6 +158,13 @@ export function reducer(state: State, action: Action): State {
         lastMainNodeId: null,
         lastMainNodeName: "",
         stack: [{ type: "search" }],
+      };
+
+    case "SET_ACTIVE_NODE":
+      return {
+        ...state,
+        activeNodeId: action.payload.id,
+        activeNodeName: action.payload.name,
       };
 
     default:

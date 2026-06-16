@@ -20,7 +20,7 @@ export function ParticleCanvas() {
 
     let animId: number;
     const particles: Particle[] = [];
-    const COLORS = ["#800000", "#b30000", "#3b82f6", "#6366f1", "#111111", "#aaaaaa"];
+    const COLORS = ["#800000", "#b30000", "#daa520", "#6366f1", "#111111", "#aaaaaa"];
 
     const resize = () => {
       canvas.width = canvas.offsetWidth * devicePixelRatio;
@@ -82,7 +82,7 @@ export function ParticleCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="wf-hero__canvas"
       aria-hidden="true"
     />
   );

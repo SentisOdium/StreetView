@@ -11,6 +11,7 @@ export default function NodeLocationDetails({
   onBack,
   hasDirectionsPanel = false,
   canGoBack = false,
+  mobileHeight,
 }: NodeLocationDetailsProps) {
   const { details, loading, error } = useNodeDetailsFetch(selectedNodeId);
   const [copied, setCopied] = useState(false);
@@ -59,7 +60,7 @@ export default function NodeLocationDetails({
 
   if (loading && !details) {
     return (
-      <div className="flex h-screen w-120 items-center justify-center border-r border-slate-100 bg-white shadow-2xl rounded-br-[32px]">
+      <div className="flex h-full md:h-screen w-full md:w-120 items-center justify-center bg-white shadow-2xl md:rounded-br-[32px]">
         <Loading loading message="Loading location details..." />
       </div>
     );
@@ -67,7 +68,7 @@ export default function NodeLocationDetails({
 
   if (error && !details) {
     return (
-      <div className="w-120 border-r border-slate-100 bg-white p-4 shadow-2xl rounded-br-[32px]">
+      <div className="w-full md:w-120 bg-white p-4 shadow-2xl md:rounded-br-[32px]">
         <Error error={error} />
       </div>
     );
@@ -75,7 +76,7 @@ export default function NodeLocationDetails({
 
   if (!details) {
     return (
-      <div className="flex h-screen w-120 items-center justify-center border-r border-slate-100 bg-white p-6 text-center text-sm text-gray-600 shadow-2xl rounded-br-[32px]">
+      <div className="flex h-full md:h-screen w-full md:w-120 items-center justify-center bg-white p-6 text-center text-sm text-gray-600 shadow-2xl md:rounded-br-[32px]">
         No details available for this location.
       </div>
     );
@@ -92,7 +93,7 @@ export default function NodeLocationDetails({
 
 
   return (
-    <div className="h-screen w-120 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-r border-slate-100 bg-white shadow-2xl animate-slideDown flex flex-col rounded-br-[32px] overflow-hidden">
+    <div className="h-full md:h-screen w-full md:w-120 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-white shadow-2xl animate-slideDown flex flex-col md:rounded-br-[32px] overflow-hidden">
       {loading && (
         <div className="px-4 pt-2">
           <Loading loading message="Updating..." />
@@ -105,7 +106,7 @@ export default function NodeLocationDetails({
       )}
 
       {/* Hero Image Section */}
-      <div className="relative w-full h-64 shrink-0">
+      <div className={`relative w-full h-64 shrink-0 transition-all duration-300 ${mobileHeight === 'expanded' ? 'block' : 'hidden md:block'}`}>
         <img
           src={heroSrc}
           alt={details.Current?.img?.alt || details.Current?.node_name || "Location"}
@@ -114,17 +115,17 @@ export default function NodeLocationDetails({
       </div>
 
       {/* Title & Metadata */}
-      <div className="px-6 pt-5 pb-2">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+      <div className={`px-6 pb-2 transition-all duration-300 ${mobileHeight === 'hidden' ? 'pt-7' : 'pt-5'}`}>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
           {details.Current?.node_name}
         </h1>
-        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-1">
           {details.Current?.node_name} • Campus Landmark
         </p>
       </div>
 
       {/* Action Buttons */}
-      <div className="px-6 py-3 flex items-center gap-4 shrink-0">
+      <div className={`px-6 py-3 flex items-center gap-4 shrink-0 ${mobileHeight === 'hidden' ? 'hidden md:flex' : 'flex'}`}>
         <button
           type="button"
           className={`flex-1 flex items-center justify-center gap-2 border transition-all duration-300 px-4 py-2.5 rounded-full text-sm font-semibold shadow-sm active:scale-95 cursor-pointer ${copied
@@ -157,7 +158,7 @@ export default function NodeLocationDetails({
       </div>
 
       {/* About Section */}
-      <div className="px-6 py-4 flex-1">
+      <div className={`px-6 py-4 flex-1 ${mobileHeight === 'hidden' ? 'hidden md:block' : 'block'}`}>
         <h2 className="text-lg font-bold text-slate-900 mb-2">About this location</h2>
         <div className="text-sm text-slate-600 leading-relaxed space-y-3">
           {details.Room_Sprite?.length ? (
@@ -174,7 +175,7 @@ export default function NodeLocationDetails({
       </div>
 
       {/* Footer Info Cards */}
-      <div className="px-6 pb-6 pt-2 grid grid-cols-2 gap-4 shrink-0">
+      <div className={`px-6 pb-6 pt-2 grid grid-cols-2 gap-4 shrink-0 ${mobileHeight === 'hidden' ? 'hidden md:grid' : 'grid'}`}>
         {/* Phone Card */}
         <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3">
           <ContactPhoneIcon className="text-[#800000]" sx={{ fontSize: 22 }} />
@@ -196,7 +197,7 @@ export default function NodeLocationDetails({
 
       {/* Back Actions */}
       {canGoBack && !hasDirectionsPanel && (
-        <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm shrink-0">
+        <div className={`sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm shrink-0 ${mobileHeight === 'hidden' ? 'hidden md:block' : 'block'}`}>
           <button
             type="button"
             onClick={onBack}
@@ -208,7 +209,7 @@ export default function NodeLocationDetails({
       )}
 
       {hasDirectionsPanel && (
-        <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm shrink-0">
+        <div className={`sticky bottom-0 border-t border-slate-100 bg-white/95 p-4 backdrop-blur-sm shrink-0 ${mobileHeight === 'hidden' ? 'hidden md:block' : 'block'}`}>
           <button
             type="button"
             onClick={onBack}

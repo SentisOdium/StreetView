@@ -6,7 +6,7 @@ import type { NodeDirectionsProps } from "../types/sidePanelProps"
 
 type ActiveField = "A" | "B" | null;
 
-export default function NodeDirections({ list, fullList, activeNodeId, onBack, onSelectedRouteNode, directionsState, onUpdate }: NodeDirectionsProps) {
+export default function NodeDirections({ list, fullList, activeNodeId, onBack, onSelectedRouteNode, directionsState, onUpdate, mobileHeight }: NodeDirectionsProps) {
     const locationA = directionsState.locationA;
     const locationB = directionsState.locationB;
     const [activeField, setActiveField] = useState<ActiveField>(
@@ -69,21 +69,22 @@ export default function NodeDirections({ list, fullList, activeNodeId, onBack, o
 
 
     return (
-        <div className="w-120 h-screen border-r border-slate-100 shadow-2xl overflow-y-auto animate-slideDown bg-[#fafafa] flex flex-col rounded-br-[32px] overflow-hidden">
+        <div className="w-full md:w-120 h-full md:h-screen shadow-2xl overflow-y-auto animate-slideDown bg-[#fafafa] flex flex-col md:rounded-br-[32px] overflow-hidden">
             {/* Header & Back Button */}
-            <div className="p-5 bg-white border-b border-slate-100 shrink-0">
+            <div className={`px-5 py-4 bg-white border-b border-slate-100 flex items-center gap-3 shrink-0 transition-all duration-300 ${mobileHeight === 'hidden' ? 'pt-6' : 'pt-4'}`}>
                 <button
                     type="button"
                     onClick={onBack}
-                    className="group flex h-11 cursor-pointer items-center justify-start px-4 rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-[#800000]/30 hover:shadow active:scale-[0.98] text-slate-700 hover:text-[#800000] gap-2.5 w-full"
+                    className="p-2 rounded-full border border-slate-200 hover:border-[#800000]/30 hover:bg-slate-50 transition text-[#800000] hover:text-[#660000] cursor-pointer flex items-center justify-center shadow-sm"
+                    title="Back to search"
                 >
-                    <ArrowBackIcon sx={{ color: '#800000', fontSize: 20 }} className="transition-transform group-hover:-translate-x-1" />
-                    <span className="text-sm font-bold tracking-wide uppercase">Back to Search</span>
+                    <ArrowBackIcon sx={{ fontSize: 20 }} />
                 </button>
+                <h2 className="text-base font-bold text-slate-800 tracking-tight">Directions</h2>
             </div>
 
             {/* Inputs Container */}
-            <div className="p-5 bg-white border-b border-slate-100 shadow-sm shrink-0">
+            <div className={`p-5 bg-white border-b border-slate-100 shadow-sm shrink-0 ${mobileHeight === 'hidden' ? 'hidden md:block' : 'block'}`}>
                 <div className="relative flex items-center gap-4">
                     {/* Visual Connector Timeline (Start point to Destination) */}
                     <div className="absolute left-3.5 top-5 bottom-5 w-0.5 flex flex-col items-center justify-between pointer-events-none">
@@ -164,7 +165,7 @@ export default function NodeDirections({ list, fullList, activeNodeId, onBack, o
             </div>
 
             {/* Scrollable Results Area */}
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className={`flex-1 overflow-y-auto p-5 ${mobileHeight === 'hidden' ? 'hidden md:block' : 'block'}`}>
                 {hasBothLocations ? (
                     <div className="animate-fadeIn">
                         <RouteCardComponent

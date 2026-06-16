@@ -47,6 +47,20 @@ html {
   scroll-snap-stop: always;
 }
 
+@media (max-width: 1024px) {
+  html {
+    scroll-snap-type: none !important;
+  }
+  .wf-hero,
+  .wf-video-section,
+  .wf-feature-row,
+  #search-section,
+  .wf-footer {
+    scroll-snap-align: none !important;
+    scroll-snap-stop: unset !important;
+  }
+}
+
 /* ── Reveal animation ─────────────────────── */
 .wf-reveal {
   animation: wfRevealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;

@@ -12,7 +12,13 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
-    host: "0.0.0.0"
-    
+    host: "0.0.0.0",
+    proxy: {
+      '/cloudfront': {
+        target: 'https://d1ljb2x8181qxp.cloudfront.net',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cloudfront/, '')
+      }
+    }
   },
 })
