@@ -30,11 +30,19 @@ export default function HotspotMarker({ position, label, onClick, disabled, sele
         }}
         onClick={(e) => {
           e.stopPropagation();
-          if (!disabled) onSingleClick?.();
+          if (!disabled) {
+            if (isEditor) {
+              onSingleClick?.();
+            } else {
+              onClick();
+            }
+          }
         }}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          if (!disabled) onClick();
+          if (!disabled && isEditor) {
+            onClick();
+          }
         }}
         rotation={[0, 0, 0]}
       >

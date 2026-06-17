@@ -10,7 +10,7 @@ export function MobileFeatures() {
           <div className="flex flex-col gap-4 justify-center">
             <div className="flex items-center gap-2 text-[#800000] font-semibold text-xs sm:text-sm">
               {features.panorama.icon}
-              <span>{features.panorama.subtitle}</span>
+              {features.panorama.subtitle && <span>{features.panorama.subtitle}</span>}
             </div>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
               {features.panorama.title}
@@ -37,7 +37,7 @@ export function MobileFeatures() {
           <div className="flex flex-col gap-4 justify-center">
             <div className="flex items-center gap-2 text-[#800000] font-semibold text-xs sm:text-sm">
               {features.search.icon}
-              <span>{features.search.subtitle}</span>
+              {features.search.subtitle && <span>{features.search.subtitle}</span>}
             </div>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
               {features.search.title}
@@ -64,7 +64,7 @@ export function MobileFeatures() {
           <div className="flex flex-col gap-4 justify-center">
             <div className="flex items-center gap-2 text-[#800000] font-semibold text-xs sm:text-sm">
               {features.directions.icon}
-              <span>{features.directions.subtitle}</span>
+              {features.directions.subtitle && <span>{features.directions.subtitle}</span>}
             </div>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
               {features.directions.title}

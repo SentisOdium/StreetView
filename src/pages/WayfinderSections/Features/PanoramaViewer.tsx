@@ -4,11 +4,17 @@ import { OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
 // The sphere panorama component
-function PanoramaSphere() {
-  const texture = useTexture("/landingPanorama/ITECH_CENTER.webp");
+import { useMemo } from "react";
 
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.repeat.x = -1;
+function PanoramaSphere() {
+  const loadedTexture = useTexture("/landingPanorama/ITECH_CENTER.webp");
+
+  const texture = useMemo(() => {
+    const tex = loadedTexture.clone();
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.repeat.x = -1;
+    return tex;
+  }, [loadedTexture]);
 
   return (
     <mesh>
@@ -77,7 +83,7 @@ function PanoramaController({
     <OrbitControls
       ref={controlsRef}
       enableZoom={false}
-      enablePan={true}
+      enablePan={false}
       minPolarAngle={Math.PI / 2}
       maxPolarAngle={Math.PI / 2}
       autoRotate={!isInteracting && !shouldReset}

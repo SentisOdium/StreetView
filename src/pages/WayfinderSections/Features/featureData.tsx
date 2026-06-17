@@ -4,8 +4,7 @@ import { DirectionsFlow } from "./DirectionsFlow";
 
 export interface FeatureItem {
   id: string;
-  badgeText: string;
-  subtitle: string;
+  subtitle?: string;
   title: React.ReactNode;
   descriptions: string[];
   icon: React.ReactNode;
@@ -15,7 +14,6 @@ export interface FeatureItem {
 export const features = {
   panorama: {
     id: "wayfinder-3d-panorama",
-    badgeText: "Live 3D View",
     subtitle: "3D Campus Tour",
     title: (
       <>

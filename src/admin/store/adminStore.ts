@@ -181,10 +181,10 @@ export async function saveHotspotEditorChanges(
 
   // Clear frontend caches after successful save
   try {
-    if (nodeName) {
-      clearNodeDetailsCache(nodeName);
+    if (nodeId) {
+      clearNodeDetailsCache(nodeId);
     } else {
-      clearNodeDetailsCache(); // Clear all if no name provided
+      clearNodeDetailsCache(); // Clear all if no ID provided
     }
     clearNodeListCache();
   } catch (err) {

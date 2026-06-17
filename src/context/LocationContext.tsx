@@ -105,12 +105,11 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
           currentList = await apiFetchNodeList(undefined);
           setNodeList(currentList);
         }
-        const node = currentList.find((n) => n.id === id);
+                const node = currentList.find((n) => n.id === id);
         if (!node) {
           throw new Error(`Node with ID ${id} not found in nodeList`);
         }
-        const name = node.node_name;
-        const data = await apiFetchNodeDetails(name, signal, forceRefresh);
+        const data = await apiFetchNodeDetails(id, signal, forceRefresh);
       detailsCacheRef.current.set(id, data);
       setNodeDetails((prev) => ({ ...prev, [id]: data }));
       return data;

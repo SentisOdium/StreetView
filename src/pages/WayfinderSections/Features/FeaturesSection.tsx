@@ -14,7 +14,7 @@ export function FeaturesSection() {
             PUP Wayfinder <span className="text-[#800000]">Digitizing your Campus Experience.</span>
           </h2>
           <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-            Enhancing Campus Navigation through 3d Visualization. Explore the campus through immersive
+            Enhancing Campus Navigation through 3D Visualization. Explore the campus through immersive
             visual navigation, intelligent route guidance, and interactive location discovery designed
             to make finding your destination faster and easier.
           </p>

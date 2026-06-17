@@ -21,7 +21,7 @@ export function DesktopFeatures() {
           <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-6 justify-center ${activeTab === 'search' ? 'lg:order-1' : 'lg:order-2'}`}>
             <div className="flex items-center gap-2 text-[#800000] font-semibold text-xs sm:text-sm">
               {active.icon}
-              <span>{active.subtitle}</span>
+              {active.subtitle && <span>{active.subtitle}</span>}
             </div>
             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
               {active.title}

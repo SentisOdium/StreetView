@@ -33,7 +33,7 @@ export function SearchSection() {
     });
   };
 
-  const popularTags = ["ITECH Center", "Dean's Office", "Registrar", "Clinic", "OMIT OFfice"];
+  const popularTags = ["ITECH Center", "Dean's Office", "Registrar", "Clinic", "OMIT Office"];
 
   const handleTagClick = (tagName: string) => {
     const foundNode = list?.find(node =>
