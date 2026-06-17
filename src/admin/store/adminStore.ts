@@ -181,12 +181,7 @@ export async function saveHotspotEditorChanges(
 
   // Clear frontend caches after successful save
   try {
-    if (nodeId) {
-      clearNodeDetailsCache(nodeId);
-    } else {
-      clearNodeDetailsCache(); // Clear all if no ID provided
-    }
-    clearNodeListCache();
+    clearNodeDetailsCache(nodeId); clearNodeListCache();
   } catch (err) {
     console.warn("Failed to clear frontend caches:", err);
     // Don't throw - cache clearing is non-critical optimization
