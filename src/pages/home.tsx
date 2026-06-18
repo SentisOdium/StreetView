@@ -44,10 +44,12 @@ export default function HomePage() {
     const hasDraggedRef = useRef<boolean>(false);
 
     const getTargetTranslation = (state: 'hidden' | 'mid' | 'expanded', height: number) => {
-        const maxHeight = height * 0.85;
+        const maxHeight = height;
         const midHeight = height * 0.45;
         const handleHeight = 32;
-        if (state === 'expanded') return 0;
+        if (state === 'expanded') {
+            return 0;
+        }
         if (state === 'mid') return maxHeight - midHeight;
         return maxHeight - handleHeight;
     };
@@ -69,7 +71,7 @@ export default function HomePage() {
         }
         const nextTranslation = startOffsetRef.current + deltaY;
 
-        const maxHeight = windowDimensions.height * 0.85;
+        const maxHeight = windowDimensions.height;
         const handleHeight = 32;
         const minTranslation = 0;
         const maxTranslation = maxHeight - handleHeight;
@@ -96,13 +98,9 @@ export default function HomePage() {
             return;
         }
 
-        const maxHeight = windowDimensions.height * 0.85;
-        const midHeight = windowDimensions.height * 0.45;
-        const handleHeight = 32;
-
-        const tExpanded = 0;
-        const tMid = maxHeight - midHeight;
-        const tHidden = maxHeight - handleHeight;
+        const tExpanded = getTargetTranslation('expanded', windowDimensions.height);
+        const tMid = getTargetTranslation('mid', windowDimensions.height);
+        const tHidden = getTargetTranslation('hidden', windowDimensions.height);
 
         const dExpanded = Math.abs(finalTranslation - tExpanded);
         const dMid = Math.abs(finalTranslation - tMid);
@@ -175,6 +173,7 @@ export default function HomePage() {
     const hasDirectionsPanel = stack.some(p => p.type === "directions");
     return (
         <>
+            <div id="mobile-directions-input-portal" className="absolute top-0 left-0 w-full z-10 md:hidden" />
             {/* Search Bar Panel (z-20) */}
             {currentPanel.type !== "directions" && (
                 <div className={`absolute top-0 left-0 z-20 w-full md:w-120 transition-transform duration-500 ease-in-out
@@ -208,11 +207,11 @@ export default function HomePage() {
 
             {/* Unified Sliding Container */}
             {currentPanel.type !== "search" && (
-                <div className={`absolute z-10 
+                <div className={`absolute z-20 md:z-10 
                     bottom-0 left-0 w-full md:top-0 md:bottom-auto md:w-120 
                     rounded-t-[32px] md:rounded-t-none md:rounded-r-[32px] 
                     bg-white shadow-2xl flex flex-col 
-                    h-[85vh] md:h-screen
+                    h-screen md:h-screen
                     ${isCollapsed 
                         ? "md:-translate-x-full" 
                         : "md:translate-x-0"

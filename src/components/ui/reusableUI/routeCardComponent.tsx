@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import useRouteDirection from "../../hooks/useRouteDirection";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
 import { EmptySearchUi, Loading, Error } from "./emptySearchUi";
-import { VrpanoIcon } from "./logo.exports";
+import { VrpanoIcon, ArrowBackIcon } from "./logo.exports";
 import { panoramaImageUrl } from "../../utils/imageUrl";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -15,6 +15,7 @@ type RouteCardProps = {
   resolvedLocA?: string;
   resolvedLocB?: string;
   onSelectedRouteNode: (node: NodeRoute) => void;
+  onBack?: () => void;
 };
 
 type DirectionStep = {
@@ -235,6 +236,7 @@ export default function RouteCardComponent({
   resolvedLocA,
   resolvedLocB,
   onSelectedRouteNode,
+  onBack,
 }: RouteCardProps) {
   const { route, loading, error } = useRouteDirection({
     src: resolvedLocA || locA,
@@ -297,7 +299,7 @@ export default function RouteCardComponent({
 
   if (loading) {
     return (
-      <div className="py-8">
+      <div className="py-12 flex flex-col items-center justify-center w-full">
         <Loading loading message="Calculating route..." />
       </div>
     );
@@ -305,8 +307,9 @@ export default function RouteCardComponent({
 
   if (error) {
     return (
-      <div className="py-6">
-        <Error error={error} message="Failed to calculate route." />
+      <div className="py-8 text-center text-sm text-gray-500">
+        <EmptySearchUi />
+        No Valid Route Found
       </div>
     );
   }
@@ -315,7 +318,7 @@ export default function RouteCardComponent({
     return (
       <div className="py-8 text-center text-sm text-gray-500">
         <EmptySearchUi />
-        No route found between these locations.
+        No Valid Route Found
       </div>
     );
   }
@@ -323,11 +326,23 @@ export default function RouteCardComponent({
   return (
     <div className="w-full flex flex-col mt-2">
       <div className="flex-1">
-        <div className="mb-4 px-1">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Route Directions</p>
-          <h2 className="text-base font-bold text-slate-800 tracking-tight mt-0.5">
-            {locA} → {locB}
-          </h2>
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Route Directions</p>
+            <h2 className="text-lg md:text-base font-bold text-slate-800 tracking-tight mt-0.5">
+              {locA} → {locB}
+            </h2>
+          </div>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="md:hidden p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition text-[#800000] cursor-pointer flex items-center justify-center shadow-sm"
+              title="Back"
+            >
+              <ArrowBackIcon sx={{ fontSize: 18 }} />
+            </button>
+          )}
         </div>
 
         <div className="relative space-y-4 border-l border-slate-200 pl-4 ml-2.5 mt-4">

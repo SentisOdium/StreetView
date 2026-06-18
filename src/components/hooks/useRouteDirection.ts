@@ -3,9 +3,9 @@ import useLoadingError from "./useLoadingError";
 import { fetchNodeRoute } from "../api/fetchRouteDetails";
 import type { NodeRoute, RouteReq } from "../api/types/types_api";
 import { debounce } from "../utils/debounce";
-    
-export default function useRouteDirection({src,  dest}: RouteReq){
-    const { error, setError, loading, setLoading} = useLoadingError();
+
+export default function useRouteDirection({ src, dest }: RouteReq) {
+    const { error, setError, loading, setLoading } = useLoadingError();
     const [route, setRoute] = useState<NodeRoute[] | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
 
@@ -16,7 +16,7 @@ export default function useRouteDirection({src,  dest}: RouteReq){
         () => debounce((s: string, d: string) => {
             setDebouncedSrc(s);
             setDebouncedDest(d);
-        }, 300),
+        }, 2000),
         []
     );
 
@@ -24,26 +24,26 @@ export default function useRouteDirection({src,  dest}: RouteReq){
         updateDebounced(src, dest);
     }, [src, dest, updateDebounced]);
 
-    const fetchData = useCallback(async() =>{
+    const fetchData = useCallback(async () => {
         controllerRef.current?.abort();
 
         const controller = new AbortController();
         controllerRef.current = controller;
-        
+
         setLoading(true)
         setError(null)
-        
+
         try {
-            const data = await fetchNodeRoute({src: debouncedSrc, dest: debouncedDest, signal:controller.signal})
+            const data = await fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal: controller.signal })
             setRoute(data)
         } catch (err: unknown) {
             if (err instanceof Error) {
-                if (err.name === "AbortError" || err.message === "canceled") return; 
+                if (err.name === "AbortError" || err.message === "canceled") return;
                 setError(err.message);
             } else {
                 setError("Unknown Error Occurred");
             }
-        }finally {
+        } finally {
             if (!controller.signal?.aborted) {
                 setLoading(false);
             }
@@ -52,14 +52,14 @@ export default function useRouteDirection({src,  dest}: RouteReq){
 
     useEffect(() => {
 
-        if(debouncedSrc && debouncedDest){
+        if (debouncedSrc && debouncedDest) {
             fetchData()
         }
-        return () =>{
+        return () => {
             controllerRef.current?.abort();
         }
-        
-    },[fetchData, debouncedSrc, debouncedDest])
+
+    }, [fetchData, debouncedSrc, debouncedDest])
 
     const refetch = () => {
         fetchData();

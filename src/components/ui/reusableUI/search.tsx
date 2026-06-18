@@ -49,6 +49,15 @@ export default function Search<T>(props: SearchProps<T>) {
   const resolvedInputRef = inputRef ?? localInputRef;
   const listboxId = useId();
   const activeItemRef = useRef<HTMLLIElement>(null);
+  const blurTimeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const isDropdownOpen = showModal && (props.showOnFocusEmpty || value.length > 0) && !disabled;
 
@@ -149,7 +158,15 @@ export default function Search<T>(props: SearchProps<T>) {
           }}
           onFocus={() => {
             if (disabled) return;
+            if (blurTimeoutRef.current) {
+              clearTimeout(blurTimeoutRef.current);
+            }
             setShowModal(true);
+          }}
+          onBlur={() => {
+            blurTimeoutRef.current = setTimeout(() => {
+              setShowModal(false);
+            }, 200);
           }}
           onKeyDown={(e) => {
             if (e.key === "Escape") {
