@@ -32,5 +32,7 @@ export type NodeDirectionsProps = {
   onSelectedRouteNode: (node: NodeRoute) => void;
   onBack: () => void;
   mobileHeight?: 'hidden' | 'mid' | 'expanded';
+  setMobileHeight?: (height: 'hidden' | 'mid' | 'expanded') => void;
+  isMobile?: boolean;
 };
 

@@ -51,6 +51,13 @@ export default function HomePage() {
             return 0;
         }
         if (state === 'mid') return maxHeight - midHeight;
+        
+        const currentType = stack.at(-1)?.type;
+        const hasBothLocations = !!directionsState.locationA && !!directionsState.locationB;
+        if (state === 'hidden' && currentType === 'directions' && hasBothLocations) {
+            return maxHeight;
+        }
+        
         return maxHeight - handleHeight;
     };
 
@@ -267,6 +274,8 @@ export default function HomePage() {
                                     activeNodeId={activeNodeId}
                                     directionsState={directionsState}
                                     mobileHeight={mobileHeight}
+                                    setMobileHeight={setMobileHeight}
+                                    isMobile={windowDimensions.width < 768}
                                     onBack={() =>
                                         dispatch({ type: "GO_BACK" })
                                     }
@@ -324,14 +333,24 @@ export default function HomePage() {
                             const resolvedNode = fullList?.find((n) => n.id === destinationId);
                             if (!resolvedNode) return;
 
-                            dispatch({
-                                type: "NAVIGATE_NODE",
-                                payload: {
-                                    id: resolvedNode.id,
-                                    name: resolvedNode.node_name,
-                                    type: resolvedNode.type,
-                                },
-                            });
+                            if (stack.at(-1)?.type === "directions") {
+                                dispatch({
+                                    type: "SET_ACTIVE_NODE",
+                                    payload: {
+                                        id: resolvedNode.id,
+                                        name: resolvedNode.node_name,
+                                    },
+                                });
+                            } else {
+                                dispatch({
+                                    type: "NAVIGATE_NODE",
+                                    payload: {
+                                        id: resolvedNode.id,
+                                        name: resolvedNode.node_name,
+                                        type: resolvedNode.type,
+                                    },
+                                });
+                            }
                         }}
                     />
                 )}
