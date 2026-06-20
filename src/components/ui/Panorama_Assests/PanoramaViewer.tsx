@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 
 import * as THREE from "three";
@@ -36,6 +36,9 @@ type TransitionControllerProps = {
   currMaterialRef: React.RefObject<THREE.MeshBasicMaterial | null>;
   animatingTransition: boolean;
   onComplete: () => void;
+  transitionTarget: THREE.Vector3 | null;
+  scenesGroupRef: React.RefObject<THREE.Group | null>;
+  currentSceneGroupRef: React.RefObject<THREE.Group | null>;
 };
 
 function TransitionController({
@@ -43,9 +46,14 @@ function TransitionController({
   currMaterialRef,
   animatingTransition,
   onComplete,
+  transitionTarget,
+  scenesGroupRef,
+  currentSceneGroupRef,
 }: TransitionControllerProps) {
   const transitionTime = useRef(0);
-  const duration = 0.9; // 900ms transition
+  const duration = 1.5; // 900ms transition
+  const { camera } = useThree();
+  const hasCompleted = useRef(false);
 
   useFrame((_, delta) => {
     if (animatingTransition) {
@@ -60,9 +68,18 @@ function TransitionController({
         currMaterialRef.current.opacity = eased;
       }
 
-      if (transitionTime.current >= duration) {
+      if (transitionTarget && scenesGroupRef.current && currentSceneGroupRef.current) {
+        // Move the entire world backwards to simulate camera moving forward
+        const moveDist = 20 * eased;
+        scenesGroupRef.current.position.copy(transitionTarget).multiplyScalar(-moveDist);
+
+        // Keep current scene offset forwards so it ends up perfectly at origin
+        currentSceneGroupRef.current.position.copy(transitionTarget).multiplyScalar(20);
+      }
+
+      if (transitionTime.current >= duration && !hasCompleted.current) {
+        hasCompleted.current = true;
         onComplete();
-        transitionTime.current = 0;
       }
     } else {
       if (currMaterialRef.current) {
@@ -71,6 +88,17 @@ function TransitionController({
       if (prevMaterialRef.current) {
         prevMaterialRef.current.opacity = 0;
       }
+
+      // Safe state reset after React re-renders to prevent 1-frame jitter
+      if (scenesGroupRef.current) {
+        scenesGroupRef.current.position.set(0, 0, 0);
+      }
+      if (currentSceneGroupRef.current) {
+        currentSceneGroupRef.current.position.set(0, 0, 0);
+      }
+
+      transitionTime.current = 0;
+      hasCompleted.current = false;
     }
   });
 
@@ -84,9 +112,12 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
   const [currentScene, setCurrentScene] = useState<SceneState | null>(null);
   const [previousScene, setPreviousScene] = useState<SceneState | null>(null);
   const [animatingTransition, setAnimatingTransition] = useState(false);
+  const [transitionTarget, setTransitionTarget] = useState<THREE.Vector3 | null>(null);
 
   const prevMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
   const currMaterialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const scenesGroupRef = useRef<THREE.Group>(null);
+  const currentSceneGroupRef = useRef<THREE.Group>(null);
 
   const isMounted = useRef(true);
   useEffect(() => {
@@ -173,13 +204,22 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
   const handleTransitionComplete = useCallback(() => {
     setPreviousScene(null);
     setAnimatingTransition(false);
+    setTransitionTarget(null);
   }, []);
 
   const handleHotspotClick = useCallback(
-    (destinationId: number) => {
+    (destinationId: number, position?: [number, number, number]) => {
       if (animatingTransition || (currentScene && nodeId !== currentScene.nodeId)) {
         return; // Transition Lock
       }
+
+      if (position) {
+        const targetVec = new THREE.Vector3(...position).normalize();
+        setTransitionTarget(targetVec);
+      } else {
+        setTransitionTarget(null);
+      }
+
       onNavigate(destinationId);
     },
     [animatingTransition, currentScene, nodeId, onNavigate]
@@ -230,6 +270,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
           currMaterialRef={currMaterialRef}
           animatingTransition={animatingTransition}
           onComplete={handleTransitionComplete}
+          transitionTarget={transitionTarget}
+          scenesGroupRef={scenesGroupRef}
+          currentSceneGroupRef={currentSceneGroupRef}
         />
 
 
@@ -246,36 +289,40 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
         {/* Ground cursor follower projecting arrow SVG */}
         <GroundCursorFollower />
 
-        {/* Previous panorama scene (fades out) */}
-        {previousScene && (
-          <Scene
-            ref={prevMaterialRef}
-            texture={previousScene.texture}
-            opacity={1}
-            rotationOffset={previousScene.rotationOffset}
-            rotationOffsetX={previousScene.rotationOffsetX}
-            rotationOffsetZ={previousScene.rotationOffsetZ}
-            showHotspots={false}
-            hotspotsDisabled={true}
-            onHotspotClick={handleHotspotClick}
-          />
-        )}
+        <group ref={scenesGroupRef}>
+          {/* Previous panorama scene (fades out) */}
+          {previousScene && (
+            <Scene
+              ref={prevMaterialRef}
+              texture={previousScene.texture}
+              opacity={1}
+              rotationOffset={previousScene.rotationOffset}
+              rotationOffsetX={previousScene.rotationOffsetX}
+              rotationOffsetZ={previousScene.rotationOffsetZ}
+              showHotspots={false}
+              hotspotsDisabled={true}
+              onHotspotClick={handleHotspotClick}
+            />
+          )}
 
-        {/* Current panorama scene (fades in) */}
-        {currentScene && (
-          <Scene
-            ref={currMaterialRef}
-            texture={currentScene.texture}
-            opacity={animatingTransition ? 0 : 1}
-            rotationOffset={currentScene.rotationOffset}
-            rotationOffsetX={currentScene.rotationOffsetX}
-            rotationOffsetZ={currentScene.rotationOffsetZ}
-            hotspots={currentScene.hotspots}
-            showHotspots={true}
-            hotspotsDisabled={isTransitioning}
-            onHotspotClick={handleHotspotClick}
-          />
-        )}
+          {/* Current panorama scene (fades in) */}
+          {currentScene && (
+            <group ref={currentSceneGroupRef}>
+              <Scene
+                ref={currMaterialRef}
+                texture={currentScene.texture}
+                opacity={animatingTransition ? 0 : 1}
+                rotationOffset={currentScene.rotationOffset}
+                rotationOffsetX={currentScene.rotationOffsetX}
+                rotationOffsetZ={currentScene.rotationOffsetZ}
+                hotspots={currentScene.hotspots}
+                showHotspots={true}
+                hotspotsDisabled={isTransitioning}
+                onHotspotClick={handleHotspotClick}
+              />
+            </group>
+          )}
+        </group>
       </Canvas>
     </div>
   );

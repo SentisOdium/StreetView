@@ -47,7 +47,7 @@ export function getHotspotPosition(hotspot: HotspotData): [number, number, numbe
 type HotspotLayerProps = {
   hotspots: HotspotData[];
   disabled: boolean;
-  onHotspotClick: (destinationId: number) => void;
+  onHotspotClick: (destinationId: number, position: [number, number, number]) => void;
 };
 
 export default function HotspotLayer({
@@ -71,13 +71,13 @@ export default function HotspotLayer({
             <HotspotMarker
               position={position}
               label={h.hotspot_label || h.destination_name}
-              onClick={() => onHotspotClick(h.destination_id)}
+              onClick={() => onHotspotClick(h.destination_id, position)}
               disabled={disabled}
             />
             <HotspotArrow
               position={arrowPosition}
               label={h.hotspot_label || h.destination_name}
-              onClick={() => onHotspotClick(h.destination_id)}
+              onClick={() => onHotspotClick(h.destination_id, position)}
               disabled={disabled}
             />
           </group>

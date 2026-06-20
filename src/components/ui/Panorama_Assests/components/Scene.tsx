@@ -13,7 +13,7 @@ type SceneProps = {
   hotspots?: HotspotData[];
   showHotspots: boolean;
   hotspotsDisabled: boolean;
-  onHotspotClick: (destinationId: number) => void;
+  onHotspotClick: (destinationId: number, position: [number, number, number]) => void;
 };
 
 const Scene = forwardRef<THREE.MeshBasicMaterial, SceneProps>(
