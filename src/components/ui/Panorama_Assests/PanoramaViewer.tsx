@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 
 import * as THREE from "three";
@@ -11,7 +11,7 @@ import Scene from "./components/Scene";
 import GroundCursorFollower from "./components/GroundCursorFollower";
 import PanoramaStatus from "../reusableUI/PanoramaStatus";
 import { panoramaImageUrl } from "../../utils/imageUrl";
-import { loadTexture } from "./utils/textureCache";
+import { loadTexture, preloadTextureLowPriority } from "./utils/textureCache";
 
 export type PanoramaViewerProps = {
   nodeId: number;
@@ -52,7 +52,6 @@ function TransitionController({
 }: TransitionControllerProps) {
   const transitionTime = useRef(0);
   const duration = 1.5; // 900ms transition
-  const { camera } = useThree();
   const hasCompleted = useRef(false);
 
   useFrame((_, delta) => {
@@ -127,7 +126,8 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
     };
   }, []);
 
-  // Preloads the textures/details of adjacent nodes
+  // Smart Preloading: fetches adjacent textures in the background with low network priority.
+  // This downloads the image to the browser cache without clogging the network for active clicks.
   const preloadAdjacent = useCallback(
     async (hotspots: HotspotData[]) => {
       for (const hotspot of hotspots) {
@@ -136,16 +136,17 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
           if (adjDetails?.Current?.img.src) {
             const adjUrl = panoramaImageUrl(adjDetails.Current.img.src);
             if (adjUrl) {
-              void loadTexture(adjUrl);
+              preloadTextureLowPriority(adjUrl);
             }
           }
         } catch (err) {
-          console.warn(`Failed to preload adjacent node details or texture for ID: ${hotspot.destination_id}`, err);
+          console.warn(`Failed to preload adjacent node ID: ${hotspot.destination_id}`, err);
         }
       }
     },
     [fetchNodeDetails]
   );
+
 
   // Load the new node details and texture
   useEffect(() => {
@@ -187,8 +188,9 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
           return prev;
         });
 
-        // Preload adjacent node textures immediately
+        // Preload adjacent node textures using the low-priority smart queue
         void preloadAdjacent(nextScene.hotspots);
+
       } catch (err) {
         console.error("Failed to load scene texture", err);
       }

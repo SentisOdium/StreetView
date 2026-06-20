@@ -5,7 +5,7 @@ import RouteCardComponent from "../../reusableUI/routeCardComponent"
 import type { NodeDirectionsProps } from "../types/sidePanelProps"
 import NodeDirectionsInput from "./nodeDirectionsInput"
 import NodeDirectionsSuggestions from "./nodeDirectionsSuggestions"
-
+import type { MapNode } from "../../../api/types/types_api"
 type ActiveField = "A" | "B" | null;
 
 export default function NodeDirectionsDesktop({ list, fullList, activeNodeId, onBack, onSelectedRouteNode, directionsState, onUpdate, mobileHeight }: NodeDirectionsProps) {
@@ -72,19 +72,19 @@ export default function NodeDirectionsDesktop({ list, fullList, activeNodeId, on
         });
     };
 
-    function handleLocationASelect(node: any) {
+    function handleLocationASelect(node: MapNode) {
         const name = node?.node_name ?? "";
         onUpdate({ locationA: name });
         setActiveField("B");
     }
 
-    function handleLocationBSelect(node: any) {
+    function handleLocationBSelect(node: MapNode) {
         const name = node?.node_name ?? "";
         onUpdate({ locationB: name });
         setActiveField(null);
     }
 
-    function handleLocationSelect(node: any) {
+    function handleLocationSelect(node: MapNode) {
         if (activeField === "B") {
             handleLocationBSelect(node);
             return;
@@ -110,11 +110,11 @@ export default function NodeDirectionsDesktop({ list, fullList, activeNodeId, on
         />
     );
 
-    const initialActiveNodeNameRef = useRef(activeNodeName);
+    const [frozenActiveNodeName, setFrozenActiveNodeName] = useState(activeNodeName);
 
     useEffect(() => {
         if (!hasBothLocations) {
-            initialActiveNodeNameRef.current = activeNodeName;
+            setFrozenActiveNodeName(activeNodeName);
         }
     }, [hasBothLocations, activeNodeName]);
 
@@ -143,8 +143,8 @@ export default function NodeDirectionsDesktop({ list, fullList, activeNodeId, on
                         <RouteCardComponent
                             locA={locationA}
                             locB={locationB}
-                            resolvedLocA={locationA === "Current Location" ? initialActiveNodeNameRef.current : locationA}
-                            resolvedLocB={locationB === "Current Location" ? initialActiveNodeNameRef.current : locationB}
+                            resolvedLocA={locationA === "Current Location" ? frozenActiveNodeName : locationA}
+                            resolvedLocB={locationB === "Current Location" ? frozenActiveNodeName : locationB}
                             onSelectedRouteNode={onSelectedRouteNode}
                             onBack={onBack}
                         />

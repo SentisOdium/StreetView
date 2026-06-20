@@ -242,6 +242,7 @@ export default function HomePage() {
                             onPointerDown={handlePointerDown}
                             onPointerMove={handlePointerMove}
                             onPointerUp={handlePointerUp}
+                            onPointerCancel={handlePointerUp}
                         >
                             <div className="w-12 h-1.5 bg-slate-300 rounded-full mt-2.5 hover:bg-slate-400 transition-colors" />
                         </div>

@@ -56,6 +56,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
   const [nodeDetailsError, setNodeDetailsError] = useState<Record<number, string | null>>({});
   const listCacheRef = useRef<Map<string, MapNode[]>>(new Map());
   const detailsCacheRef = useRef<Map<number, NodeDetails>>(new Map());
+  const activeFetchesRef = useRef<Map<number, Promise<NodeDetails>>>(new Map());
   const preloadGenerationRef = useRef(0);
 
 
@@ -105,25 +106,35 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
           currentList = await apiFetchNodeList(undefined);
           setNodeList(currentList);
         }
-                const node = currentList.find((n) => n.id === id);
+        const node = currentList.find((n) => n.id === id);
         if (!node) {
           throw new Error(`Node with ID ${id} not found in nodeList`);
         }
-        const data = await apiFetchNodeDetails(id, signal, forceRefresh);
-      detailsCacheRef.current.set(id, data);
-      setNodeDetails((prev) => ({ ...prev, [id]: data }));
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setNodeDetailsError((prev) => ({ ...prev, [id]: err.message }));
-      } else {
-        setNodeDetailsError((prev) => ({ ...prev, [id]: "Unknown error" }));
+        
+        let promise = activeFetchesRef.current.get(id);
+        if (!promise || forceRefresh) {
+          promise = apiFetchNodeDetails(id, signal, forceRefresh);
+          activeFetchesRef.current.set(id, promise);
+        }
+
+        const data = await promise;
+        detailsCacheRef.current.set(id, data);
+        setNodeDetails((prev) => ({ ...prev, [id]: data }));
+        return data;
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setNodeDetailsError((prev) => ({ ...prev, [id]: err.message }));
+        } else {
+          setNodeDetailsError((prev) => ({ ...prev, [id]: "Unknown error" }));
+        }
+        return null;
+      } finally {
+        activeFetchesRef.current.delete(id);
+        setNodeDetailsLoading((prev) => ({ ...prev, [id]: false }));
       }
-      return null;
-    } finally {
-      setNodeDetailsLoading((prev) => ({ ...prev, [id]: false }));
-    }
-  }, [nodeList]);
+    },
+    [nodeList]
+  );
 
   const preloadAdjacentNodes = useCallback(
     async (mainNodeId: number) => {

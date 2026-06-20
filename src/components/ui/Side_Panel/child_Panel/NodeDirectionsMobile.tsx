@@ -25,13 +25,20 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
     const hasBothLocations = isValidNodeName(locationA) && isValidNodeName(locationB);
     const [isEditingRoute, setIsEditingRoute] = useState(false);
 
-    // If both locations become valid, we automatically enter route view (not editing)
     useEffect(() => {
-        if (hasBothLocations) {
-            setIsEditingRoute(false);
-            if (setMobileHeight) setMobileHeight('hidden');
+        if (hasBothLocations && setMobileHeight && !isEditingRoute) {
+            setMobileHeight('hidden');
         }
-    }, [hasBothLocations, setMobileHeight]);
+    }, [hasBothLocations, setMobileHeight, isEditingRoute]);
+
+    const handleUpdate = (updateData: Partial<{ locationA: string; locationB: string }>) => {
+        onUpdate(updateData);
+        const nextLocA = updateData.locationA !== undefined ? updateData.locationA : locationA;
+        const nextLocB = updateData.locationB !== undefined ? updateData.locationB : locationB;
+        if (isValidNodeName(nextLocA) && isValidNodeName(nextLocB)) {
+            setIsEditingRoute(false);
+        }
+    };
 
     // When editing route, make sure panel is visible
     useEffect(() => {
@@ -87,7 +94,7 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
 
     const locationSwap = () => {
         if (!locationA || !locationB || locationA === locationB) return;
-        onUpdate({
+        handleUpdate({
             locationA: locationB,
             locationB: locationA,
         });
@@ -95,13 +102,13 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
 
     function handleLocationASelect(node: any) {
         const name = node?.node_name ?? "";
-        onUpdate({ locationA: name });
+        handleUpdate({ locationA: name });
         setActiveField("B");
     }
 
     function handleLocationBSelect(node: any) {
         const name = node?.node_name ?? "";
-        onUpdate({ locationB: name });
+        handleUpdate({ locationB: name });
         setActiveField(null);
     }
 
@@ -117,7 +124,7 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
         <NodeDirectionsInput
             locationA={locationA}
             locationB={locationB}
-            onUpdate={onUpdate}
+            onUpdate={handleUpdate}
             activeField={activeField}
             setActiveField={setActiveField}
             inputARef={inputARef}
@@ -131,11 +138,11 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
         />
     );
 
-    const initialActiveNodeNameRef = useRef(activeNodeName);
+    const [frozenActiveNodeName, setFrozenActiveNodeName] = useState(activeNodeName);
 
     useEffect(() => {
         if (!showRouteCarousel) {
-            initialActiveNodeNameRef.current = activeNodeName;
+            setFrozenActiveNodeName(activeNodeName);
         }
     }, [showRouteCarousel, activeNodeName]);
 
@@ -149,8 +156,8 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
                 <MobileRouteCarousel
                     locA={locationA}
                     locB={locationB}
-                    resolvedLocA={locationA === "Current Location" ? initialActiveNodeNameRef.current : locationA}
-                    resolvedLocB={locationB === "Current Location" ? initialActiveNodeNameRef.current : locationB}
+                    resolvedLocA={locationA === "Current Location" ? frozenActiveNodeName : locationA}
+                    resolvedLocB={locationB === "Current Location" ? frozenActiveNodeName : locationB}
                     onSelectedRouteNode={onSelectedRouteNode}
                     onEditRoute={() => setIsEditingRoute(true)}
                 />,

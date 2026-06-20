@@ -14,7 +14,7 @@ import PageHeader, {
 } from "../components/shared/AdminUI";
 import { uploadFileToS3 } from "../utils/uploadFileToS3";
 import S3AssetBrowser from "../components/S3AssetBrowser";
-import { generateThumbnail } from "../utils/thumbnailGenerator";
+import { generateThumbnail, compressImage } from "../utils/thumbnailGenerator";
 import { debounce } from "../../components/utils/debounce";
 
 const emptyForm: Partial<AdminLocation> = {
@@ -106,7 +106,9 @@ export default function LocationsPage() {
     try {
       let finalForm = { ...form };
       if (pendingFile) {
-        const uniqueKey = await uploadFileToS3(pendingFile);
+        // Compress main panorama image to max 4096px before upload to drastically speed up upload time
+        const compressedMainImage = await compressImage(pendingFile, 4096, 0.85);
+        const uniqueKey = await uploadFileToS3(compressedMainImage);
         finalForm.panorama_image = uniqueKey;
 
         // Generate and upload thumbnail

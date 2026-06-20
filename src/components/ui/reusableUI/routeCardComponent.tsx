@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import useRouteDirection from "../../hooks/useRouteDirection";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
-import { EmptySearchUi, Loading, Error } from "./emptySearchUi";
+import { EmptySearchUi, Loading } from "./emptySearchUi";
 import { VrpanoIcon, ArrowBackIcon } from "./logo.exports";
 import { panoramaImageUrl } from "../../utils/imageUrl";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";

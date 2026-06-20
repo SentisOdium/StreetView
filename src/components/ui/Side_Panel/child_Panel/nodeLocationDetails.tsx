@@ -111,6 +111,7 @@ export default function NodeLocationDetails({
           src={heroSrc}
           alt={details.Current?.img?.alt || details.Current?.node_name || "Location"}
           className="h-full w-full object-cover"
+          crossOrigin="anonymous"
         />
       </div>
 

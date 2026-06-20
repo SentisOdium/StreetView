@@ -152,7 +152,7 @@ export async function saveHotspotEditorChanges(
   nodeId: number,
   current: EditorHotspot[],
   original: EditorHotspot[],
-  nodeName?: string
+  _nodeName?: string
 ) {
   const originalIds = new Set(original.filter((h) => h.id).map((h) => h.id!));
   const currentIds = new Set(current.filter((h) => h.id).map((h) => h.id!));
