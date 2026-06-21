@@ -112,9 +112,10 @@ export interface CustomSelectProps {
   placeholder: string;
   icon: React.ReactNode;
   disabled?: boolean;
+  readOnly?: boolean;
 }
 
-export function CustomSelect({ value, onChange, options, placeholder, icon, disabled }: CustomSelectProps) {
+export function CustomSelect({ value, onChange, options, placeholder, icon, disabled, readOnly }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -140,7 +141,7 @@ export function CustomSelect({ value, onChange, options, placeholder, icon, disa
   return (
     <div
       ref={triggerRef}
-      className={`group relative flex items-center w-full pl-10 pr-10 py-1.5 text-sm bg-white border border-slate-200 rounded-xl transition-all font-semibold text-slate-800 shadow-sm ${disabled ? "bg-slate-50 text-slate-400 cursor-not-allowed opacity-60" : "hover:border-[#800000]/40 focus-within:border-[#800000] focus-within:ring-4 focus-within:ring-[#800000]/10"}`}
+      className={`group relative flex items-center w-full pl-10 pr-10 py-1.5 text-sm bg-white border border-slate-200 rounded-xl transition-all font-semibold text-slate-800 shadow-sm ${disabled ? "bg-slate-50 text-slate-400 cursor-not-allowed opacity-60" : "hover:border-[#800000]/40 focus-within:border-[#800000] focus-within:ring-4 focus-within:ring-[#800000]/10"} ${readOnly ? "cursor-pointer" : ""}`}
     >
       <span className={`absolute left-3.5 pointer-events-none transition-colors z-10 ${disabled ? "text-slate-300" : "text-[#800000]/75"
         }`}>
@@ -151,6 +152,7 @@ export function CustomSelect({ value, onChange, options, placeholder, icon, disa
         items={options}
         value={searchQuery}
         onChange={(query) => {
+          if (readOnly) return;
           setSearchQuery(query);
           handleOpen();
         }}
@@ -163,6 +165,7 @@ export function CustomSelect({ value, onChange, options, placeholder, icon, disa
         getKey={(opt) => opt.value}
         placeholder={placeholder}
         disabled={disabled}
+        readOnly={readOnly}
         noModal={true}
         showOnFocusEmpty={true}
         noRelativeWrapper={true}

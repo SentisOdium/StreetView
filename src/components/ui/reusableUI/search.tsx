@@ -22,6 +22,7 @@ type SearchProps<T> = {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   showOnFocusEmpty?: boolean;
   noRelativeWrapper?: boolean;
+  readOnly?: boolean;
 };
 
 export default function Search<T>(props: SearchProps<T>) {
@@ -41,6 +42,7 @@ export default function Search<T>(props: SearchProps<T>) {
     noModal,
     onDropdownVisibilityChange,
     noRelativeWrapper,
+    readOnly,
   } = props;
 
   const [showModal, setShowModal] = useState(false);
@@ -92,12 +94,13 @@ export default function Search<T>(props: SearchProps<T>) {
   }, [activeIndex]);
 
   const filteredList = useMemo(() => {
+    if (readOnly) return items;
     const query = debouncedValue.trim().toLowerCase();
     if (!query) return items;
     return items.filter((item) =>
       getLabel(item).toLowerCase().includes(query)
     );
-  }, [items, debouncedValue, getLabel]);
+  }, [items, debouncedValue, getLabel, readOnly]);
 
   const dropdownContent = (
     <div id={listboxId} role="listbox" className={noModal ? modalDesign : undefined}>
@@ -145,14 +148,16 @@ export default function Search<T>(props: SearchProps<T>) {
         <input
           ref={resolvedInputRef}
           type="search"
-          className="w-full flex-1 outline-none placeholder:italic disabled:cursor-not-allowed disabled:opacity-60"
+          className={`w-full flex-1 outline-none placeholder:italic disabled:cursor-not-allowed disabled:opacity-60 ${readOnly ? "cursor-pointer select-none" : ""}`}
           value={value}
           placeholder={placeholder}
           disabled={disabled}
+          readOnly={readOnly}
           aria-expanded={showModal && (props.showOnFocusEmpty || value.length > 0)}
           aria-controls={listboxId}
           autoComplete="off"
           onChange={(e) => {
+            if (readOnly) return;
             onChange(e.target.value);
             setShowModal(true);
           }}

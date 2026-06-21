@@ -362,6 +362,7 @@ export default function HotspotEditorPage() {
                   placeholder="Select direction..."
                   icon={<FaCompass className="w-4 h-4" />}
                   disabled={!selectedNodeId}
+                  readOnly={true}
                 />
               </div>
 
