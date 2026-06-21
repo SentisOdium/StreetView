@@ -31,11 +31,13 @@ function PreviewHotspot({
   selected,
   onSelect,
   index,
+  showMarker,
 }: {
   hotspot: EditorHotspot;
   selected: boolean;
   onSelect: () => void;
   index: number;
+  showMarker: boolean;
 }) {
   const getDirectionPos = (label: string): [number, number, number] => {
     const d = label.trim().toUpperCase();
@@ -73,16 +75,18 @@ function PreviewHotspot({
 
   return (
     <group>
-      <HotspotMarker
-        position={pos}
-        label={labelNode}
-        onClick={onSelect}
-        onSingleClick={onSelect}
-        disabled={false}
-        selected={selected}
-        isEditor={true}
-        index={index}
-      />
+      {showMarker && (
+        <HotspotMarker
+          position={pos}
+          label={labelNode}
+          onClick={onSelect}
+          onSingleClick={onSelect}
+          disabled={false}
+          selected={selected}
+          isEditor={true}
+          index={index}
+        />
+      )}
       <HotspotArrow
         position={arrowPos}
         label={hotspot.hotspot_label}
@@ -96,6 +100,7 @@ function PreviewHotspot({
 function HotspotEditorCanvas({
   panoramaUrl,
   hotspots,
+  showMarkers,
   selectedId,
   rotationOffset,
   rotationOffsetX,
@@ -104,6 +109,7 @@ function HotspotEditorCanvas({
 }: {
   panoramaUrl: string;
   hotspots: EditorHotspot[];
+  showMarkers: boolean;
   selectedId: number | string | null;
   rotationOffset: number;
   rotationOffsetX: number;
@@ -157,6 +163,7 @@ function HotspotEditorCanvas({
                 selected={selectedId === id}
                 onSelect={() => onSelect(id)}
                 index={idx}
+                showMarker={showMarkers}
               />
             );
           })}
@@ -178,7 +185,7 @@ export default function HotspotEditorPage() {
   const [rotationOffset, setRotationOffset] = useState<number>(81);
   const [rotationOffsetX, setRotationOffsetX] = useState<number>(0);
   const [rotationOffsetZ, setRotationOffsetZ] = useState<number>(0);
-  const [showHotspots, setShowHotspots] = useState(true);
+  const [showMarkers, setShowMarkers] = useState(true);
 
   const store = useHotspotEditorStore();
   const { clearCacheRef } = useLocationCache();
@@ -282,9 +289,9 @@ export default function HotspotEditorPage() {
               </AdminButton>
               <AdminButton
                 variant="secondary"
-                onClick={() => setShowHotspots(!showHotspots)}
+                onClick={() => setShowMarkers(!showMarkers)}
               >
-                {showHotspots ? "Hide Hotspots" : "Show Hotspots"}
+                {showMarkers ? "Hide Markers" : "Show Markers"}
               </AdminButton>
               <AdminButton onClick={handleSave} disabled={!store.dirty || saving}>
                 {saving ? "Saving..." : "Save Changes"}
@@ -383,7 +390,8 @@ export default function HotspotEditorPage() {
           ) : store.panoramaUrl ? (
             <HotspotEditorCanvas
               panoramaUrl={store.panoramaUrl}
-              hotspots={showHotspots ? store.hotspots : []}
+              hotspots={store.hotspots}
+              showMarkers={showMarkers}
               selectedId={store.selectedId}
               rotationOffset={rotationOffset}
               rotationOffsetX={rotationOffsetX}
