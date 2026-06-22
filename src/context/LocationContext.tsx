@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import type { MapNode, NodeDetails } from "../components/api/types/types_api";
-import { fetchNodeList as apiFetchNodeList } from "../components/api/fetchNodeList";
+import { fetchNodeList as apiFetchNodeList, clearNodeListCache } from "../components/api/fetchNodeList";
 import { fetchNodeDetails as apiFetchNodeDetails } from "../components/api/fetchNodeDetails";
 
 interface LocationContextProps {
@@ -205,6 +205,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
             fetchNodeDetails(change.nodeId, undefined, true);
           }
           if (change.type === "list") {
+            clearNodeListCache();
             listCacheRef.current.clear();
             fetchNodeList();
           }
@@ -225,10 +226,15 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
         clearCacheRef(change.nodeId);
         fetchNodeDetails(change.nodeId, undefined, true);
       }
+      if (change?.type === "list") {
+        clearNodeListCache();
+        listCacheRef.current.clear();
+        fetchNodeList();
+      }
     };
     window.addEventListener("admin_data_changed", handleCustom as EventListener);
     return () => window.removeEventListener("admin_data_changed", handleCustom as EventListener);
-  }, [clearCacheRef, fetchNodeDetails]);
+  }, [clearCacheRef, fetchNodeDetails, fetchNodeList]);
 
   const value = {
     nodeList,

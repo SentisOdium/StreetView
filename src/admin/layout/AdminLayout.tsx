@@ -10,6 +10,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MapIcon from "@mui/icons-material/Map";
 import { useAuthStore } from "../store/authStore";
 import axios from "axios";
 import { BaseUrl } from "../../components/objects/baseUrl";
@@ -21,6 +22,7 @@ const navItems = [
   { to: "/admin/graph", label: "Navigation Graph", icon: AccountTreeIcon },
   { to: "/admin/rooms", label: "Rooms", icon: MeetingRoomIcon },
   { to: "/admin/route-testing", label: "Route Testing", icon: RouteIcon },
+  { to: "/admin/map-editor", label: "2D Map Editor", icon: MapIcon },
   { to: "/admin/audit-logs", label: "Audit Logs", icon: HistoryIcon },
   { to: "/admin/accounts", label: "Admin Accounts", icon: PersonAddIcon },
   { to: "/admin/settings", label: "Settings", icon: SettingsIcon },

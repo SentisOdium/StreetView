@@ -7,6 +7,7 @@ import SearchUI2 from "../components/ui/Side_Panel/child_Panel/searchUI2"
 import useAutoCompleteFetch from "../components/hooks/useAutocomplete"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
+import MapOverlay from "../components/ui/Map_Assets/MapOverlay"
 
 import { reducer, initialState } from "../components/utils/reducer"
 import type { MapNode } from "../components/api/types/types_api"
@@ -127,6 +128,30 @@ export default function HomePage() {
         if (nodeId == null || !fullList) return false;
         const node = fullList.find((n) => n.id === nodeId);
         return node?.type === "transitional";
+    };
+
+    const handleNavigate = (destinationId: number) => {
+        const resolvedNode = fullList?.find((n) => n.id === destinationId);
+        if (!resolvedNode) return;
+
+        if (stack.at(-1)?.type === "directions") {
+            dispatch({
+                type: "SET_ACTIVE_NODE",
+                payload: {
+                    id: resolvedNode.id,
+                    name: resolvedNode.node_name,
+                },
+            });
+        } else {
+            dispatch({
+                type: "NAVIGATE_NODE",
+                payload: {
+                    id: resolvedNode.id,
+                    name: resolvedNode.node_name,
+                    type: resolvedNode.type,
+                },
+            });
+        }
     };
 
     useEffect(() => {
@@ -330,32 +355,17 @@ export default function HomePage() {
                 {activeNodeId != null && (
                     <PanoramaViewer
                         nodeId={activeNodeId}
-                        onNavigate={(destinationId) => {
-                            const resolvedNode = fullList?.find((n) => n.id === destinationId);
-                            if (!resolvedNode) return;
-
-                            if (stack.at(-1)?.type === "directions") {
-                                dispatch({
-                                    type: "SET_ACTIVE_NODE",
-                                    payload: {
-                                        id: resolvedNode.id,
-                                        name: resolvedNode.node_name,
-                                    },
-                                });
-                            } else {
-                                dispatch({
-                                    type: "NAVIGATE_NODE",
-                                    payload: {
-                                        id: resolvedNode.id,
-                                        name: resolvedNode.node_name,
-                                        type: resolvedNode.type,
-                                    },
-                                });
-                            }
-                        }}
+                        onNavigate={handleNavigate}
                     />
                 )}
             </div>
+
+            <MapOverlay
+                activeNodeId={activeNodeId}
+                fullList={fullList || []}
+                onNavigate={handleNavigate}
+                directionsState={directionsState}
+            />
 
         </>
     )

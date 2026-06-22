@@ -146,6 +146,8 @@ export const adminApi = {
     return res.data.data;
   },
   getS3Objects: () => get<S3Object[]>("/s3-objects"),
+  updateCoordinates: (nodeId: number, coordinates: string, floor: string) =>
+    put<{ success: boolean }>("/coordinates", { nodeId, coordinates, floor }),
 };
 
 export function exportToJson(data: unknown, filename: string) {

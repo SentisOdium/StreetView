@@ -2,6 +2,8 @@ export type MapNode = {
     id: number;
     node_name: string;
     type: string;
+    coordinates?: string;
+    coordinate_floor?: string;
 }
 
 export type Hotspot = {

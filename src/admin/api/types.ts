@@ -9,6 +9,8 @@ export type AdminLocation = {
   rotation_offset?: number;
   rotation_offset_x?: number;
   rotation_offset_z?: number;
+  coordinates?: string;
+  coordinate_floor?: string;
 };
 
 export type AdminHotspot = {
