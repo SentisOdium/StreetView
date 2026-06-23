@@ -56,8 +56,15 @@ export type NodeListResponse = ApiResponse<MapNode[]>;
 
 export type NodeDetailsResponse = ApiResponse<NodeDetails>;
 
+export type RouteOption = {
+    label: string;
+    dist: number;
+    path: NodeRoute[];
+};
+
 export type NodeRouteResponse = ApiResponse<{
-    path: NodeRoute[]
+    path: NodeRoute[];
+    paths: RouteOption[];
 }>;
 
 export type RouteReq = {

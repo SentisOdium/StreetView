@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import useRouteDirection from "../../hooks/useRouteDirection";
 import type { MapNode } from "../../api/types/types_api";
-import MapIcon from "@mui/icons-material/Map";
-import CloseIcon from "@mui/icons-material/Close";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -14,7 +12,11 @@ interface MapOverlayProps {
   directionsState: {
     locationA: string;
     locationB: string;
+    activeRouteIndex?: number;
   };
+  isMinimized?: boolean;
+  onUpdateDirectionsState?: (data: Partial<MapOverlayProps["directionsState"]>) => void;
+  showRoute?: boolean;
 }
 
 // Absolute coordinate system mapped directly to 1536x1024 dimensions of 1st Floor.png
@@ -143,8 +145,7 @@ function getNodeCoords(node: MapNode): { x: number; y: number } | null {
   return null;
 }
 
-export default function MapOverlay({ activeNodeId, fullList, onNavigate, directionsState }: MapOverlayProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function MapOverlay({ activeNodeId, fullList, onNavigate, directionsState, isMinimized = false, onUpdateDirectionsState, showRoute = false }: MapOverlayProps) {
   const [selectedFloor, setSelectedFloor] = useState<"1" | "2" | "3">("1");
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -165,46 +166,64 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
   const resolvedLocB = directionsState.locationB === "Current Location" ? activeNodeName : directionsState.locationB;
 
   // Query route direction using existing hook
-  const hasRoute = !!resolvedLocA && !!resolvedLocB;
-  const { route } = useRouteDirection({
+  const hasRoute = showRoute && !!resolvedLocA && !!resolvedLocB;
+  const { routes } = useRouteDirection({
     src: hasRoute ? resolvedLocA : "",
     dest: hasRoute ? resolvedLocB : "",
   });
 
-  // Automatically reset map view when opening
+  // Automatically reset map view when minimized state changes
   useEffect(() => {
-    if (isOpen) {
+    if (isMinimized) {
+      setScale(0.85);
+      setPosition({ x: 0, y: 0 });
+    } else {
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
-  }, [isOpen]);
+  }, [isMinimized]);
 
   // Automatically switch floor on the user side to match the active node's floor
   useEffect(() => {
     if (activeNode) {
-      let floorId = "1";
       if (activeNode.coordinate_floor) {
-        floorId = activeNode.coordinate_floor;
+        setSelectedFloor(activeNode.coordinate_floor as "1" | "2" | "3");
       } else {
         const nodeFloor = activeNode.type?.toLowerCase() || "";
-        if (nodeFloor.includes("second") || nodeFloor.includes("2")) {
-          floorId = "2";
-        } else if (nodeFloor.includes("third") || nodeFloor.includes("3")) {
-          floorId = "3";
+        const nodeNameLower = activeNode.node_name?.toLowerCase() || "";
+        
+        let detectedFloor: "1" | "2" | "3" | null = null;
+        if (nodeFloor.includes("second") || nodeFloor.includes("2") || nodeNameLower.includes("flr2") || nodeNameLower.includes("floor 2") || nodeNameLower.includes("2nd")) {
+          detectedFloor = "2";
+        } else if (nodeFloor.includes("third") || nodeFloor.includes("3") || nodeNameLower.includes("flr3") || nodeNameLower.includes("floor 3") || nodeNameLower.includes("3rd")) {
+          detectedFloor = "3";
+        } else if (nodeFloor.includes("first") || nodeFloor.includes("1") || nodeFloor.includes("ground") || nodeNameLower.includes("flr1") || nodeNameLower.includes("floor 1") || nodeNameLower.includes("1st")) {
+          detectedFloor = "1";
+        }
+        
+        if (detectedFloor) {
+          setSelectedFloor(detectedFloor);
         }
       }
-      setSelectedFloor(floorId as "1" | "2" | "3");
     }
   }, [activeNode]);
 
-  // Handle Drag / Pan mechanics
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return; // Only left click
+  // Handle Drag / Pan mechanics (using PointerEvents for touch/mobile support)
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return; // Only left click for mouse
+    
+    // Check if click is on an interactive marker or control before starting drag
+    const target = e.target as Element;
+    if (target && typeof target.closest === "function" && target.closest(".pointer-events-auto")) {
+      return;
+    }
+
     setIsDragging(true);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
     setPosition({
       x: e.clientX - dragStart.x,
@@ -212,8 +231,14 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
     });
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
     setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      // Ignore if pointer capture already lost
+    }
   };
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -261,303 +286,360 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
     });
   }, [fullList, selectedFloor]);
 
-  // Extract path connections from the current active route on the selected floor
-  const routePoints = useMemo(() => {
-    if (!route || route.length === 0) return [];
-    return route.map(step => {
-      const matchingNode = fullList.find(n => n.id === step.id);
-      if (!matchingNode) return null;
-      const coords = getNodeCoords(matchingNode);
-      if (!coords) return null;
+  const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
 
-      // Filter route points to match the current floor, so we don't draw lines between floors
-      let floorId = "1";
-      if (matchingNode.coordinate_floor) {
-        floorId = matchingNode.coordinate_floor;
-      } else {
-        const nodeFloor = matchingNode.type?.toLowerCase() || "";
-        if (nodeFloor.includes("second") || nodeFloor.includes("2")) {
-          floorId = "2";
-        } else if (nodeFloor.includes("third") || nodeFloor.includes("3")) {
-          floorId = "3";
+  // Extract path connections from the current active routes on the selected floor
+  const allRoutesPoints = useMemo(() => {
+    if (!routes || routes.length === 0) return [];
+    return routes.map(routeOpt => {
+      return routeOpt.path.map(step => {
+        const matchingNode = fullList.find(n => n.id === step.id);
+        if (!matchingNode) return null;
+        const coords = getNodeCoords(matchingNode);
+        if (!coords) return null;
+
+        // Filter route points to match the current floor, so we don't draw lines between floors
+        let floorId = "1";
+        if (matchingNode.coordinate_floor) {
+          floorId = matchingNode.coordinate_floor;
+        } else {
+          const nodeFloor = matchingNode.type?.toLowerCase() || "";
+          if (nodeFloor.includes("second") || nodeFloor.includes("2")) {
+            floorId = "2";
+          } else if (nodeFloor.includes("third") || nodeFloor.includes("3")) {
+            floorId = "3";
+          }
         }
-      }
-      if (floorId !== selectedFloor) return null;
+        if (floorId !== selectedFloor) return null;
 
-      return { x: coords.x, y: coords.y };
-    }).filter((p): p is { x: number; y: number } => p !== null);
-  }, [route, fullList, selectedFloor]);
+        return { x: coords.x, y: coords.y };
+      }).filter((p): p is { x: number; y: number } => p !== null);
+    });
+  }, [routes, fullList, selectedFloor]);
+
+  const activeRoutePoints = allRoutesPoints[activeRouteIndex] || [];
 
   const showGridFallback = !!imageError[selectedFloor];
 
   return (
-    <>
-      {/* Floating Map Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-24 right-4 md:right-8 z-40 p-4 rounded-full bg-white dark:bg-slate-900 border border-slate-200/50 shadow-2xl hover:scale-105 active:scale-95 transition-all text-[#800000] dark:text-[#ffcc00] flex items-center justify-center gap-2 group cursor-pointer"
-        title="Open 2D Floor Plan"
-      >
-        <MapIcon className="w-6 h-6 animate-pulse" />
-        <span className="text-xs font-bold uppercase tracking-wider max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-out whitespace-nowrap">
-          2D Map
-        </span>
-      </button>
+    <div className="w-full h-full flex flex-col bg-white overflow-hidden relative">
 
-      {/* Map Drawer Panel */}
-      {isOpen && (
-        <div className="fixed inset-0 md:inset-auto md:bottom-24 md:right-8 w-full md:w-[600px] h-full md:h-[500px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md md:rounded-3xl shadow-2xl z-50 border border-slate-200/80 dark:border-slate-800/85 flex flex-col overflow-hidden animate-slideDown">
-          
-          {/* Header */}
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-900 flex items-center justify-between shrink-0">
-            <div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm md:text-base flex items-center gap-2">
-                <MapIcon className="text-[#800000] dark:text-[#ffcc00]" />
-                Interactive Floor Map
-              </h3>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">
-                Click nodes to teleport 3D Panorama
-              </p>
-            </div>
-            
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500 dark:text-slate-400 transition cursor-pointer"
-            >
-              <CloseIcon sx={{ fontSize: 20 }} />
-            </button>
-          </div>
 
-          {/* Floor Selection Tabs */}
-          <div className="flex border-b border-slate-100 dark:border-slate-900 shrink-0 bg-slate-50/50 dark:bg-slate-950/50">
-            <button
-              onClick={() => setSelectedFloor("1")}
-              className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 text-center cursor-pointer ${
-                selectedFloor === "1"
-                  ? "border-[#800000] dark:border-[#ffcc00] text-[#800000] dark:text-[#ffcc00]"
-                  : "border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-              }`}
-            >
-              Ground & Floor 1
-            </button>
-            <button
-              onClick={() => setSelectedFloor("2")}
-              className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 text-center cursor-pointer ${
-                selectedFloor === "2"
-                  ? "border-[#800000] dark:border-[#ffcc00] text-[#800000] dark:text-[#ffcc00]"
-                  : "border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-              }`}
-            >
-              Floor 2
-            </button>
-            <button
-              onClick={() => setSelectedFloor("3")}
-              className={`flex-1 py-2.5 text-xs font-bold transition-all border-b-2 text-center cursor-pointer ${
-                selectedFloor === "3"
-                  ? "border-[#800000] dark:border-[#ffcc00] text-[#800000] dark:text-[#ffcc00]"
-                  : "border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
-              }`}
-            >
-              Floor 3
-            </button>
-          </div>
-
-          {/* Map Viewer Sandbox */}
-          <div className="flex-1 relative bg-slate-900/5 dark:bg-black/20 overflow-hidden flex items-center justify-center">
-            <div
-              ref={containerRef}
-              className="w-full h-full relative cursor-grab active:cursor-grabbing select-none"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onWheel={handleWheel}
-            >
-              {/* Scaled/Translated Content Wrapper */}
-              <div
-                className="absolute origin-center transition-transform duration-100 ease-out flex items-center justify-center"
-                style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                {/* SVG Drawing Layer containing the image and overlays together */}
-                <svg
-                  viewBox="0 0 1536 1024"
-                  className="max-w-full max-h-full pointer-events-none select-none"
-                  style={{ zIndex: 10 }}
-                >
-                  {/* Floor Plan Image Layer inside the SVG */}
-                  {!showGridFallback ? (
-                    <image
-                      href={`/map/${selectedFloor === "1" ? "1st Floor Map" : selectedFloor === "2" ? "2nd Floor Map" : "3rd Floor Map"}.png`}
-                      x="0"
-                      y="0"
-                      width="1536"
-                      height="1024"
-                      className="pointer-events-none"
-                      onError={() => {
-                        setImageError(prev => ({ ...prev, [selectedFloor]: true }));
-                      }}
-                    />
-                  ) : (
-                    <>
-                      {/* Technical Blueprint Grid Fallback */}
-                      <defs>
-                        <pattern id="user-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(148, 163, 184, 0.08)" strokeWidth="1" />
-                        </pattern>
-                      </defs>
-                      <rect width="1536" height="1024" fill="#0f172a" />
-                      <rect width="1536" height="1024" fill="url(#user-grid)" />
-                      <text
-                        x="768"
-                        y="490"
-                        fill="rgba(255, 255, 255, 0.15)"
-                        fontFamily="sans-serif"
-                        fontSize="32"
-                        fontWeight="bold"
-                        textAnchor="middle"
-                      >
-                        FLOOR {selectedFloor} MAP
-                      </text>
-                      <text
-                        x="768"
-                        y="525"
-                        fill="rgba(255, 255, 255, 0.06)"
-                        fontFamily="sans-serif"
-                        fontSize="14"
-                        textAnchor="middle"
-                      >
-                        Floor plan layout image will load once uploaded in the admin panel
-                      </text>
-                    </>
-                  )}
-
-                  {/* Draw Route Directions Path */}
-                  {routePoints.length > 1 && (
-                    <>
-                      {/* Static Path Shadow */}
-                      <path
-                        d={`M ${routePoints.map(p => `${p.x} ${p.y}`).join(" L ")}`}
-                        fill="none"
-                        stroke="rgba(0,0,0,0.25)"
-                        strokeWidth="20"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      {/* Active Marching Route */}
-                      <path
-                        d={`M ${routePoints.map(p => `${p.x} ${p.y}`).join(" L ")}`}
-                        fill="none"
-                        stroke="#ffcc00"
-                        strokeWidth="12"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeDasharray="24, 24"
-                        className="animated-flow-line"
-                      />
-                    </>
-                  )}
-
-                  {/* Render Interactive Nodes */}
-                  {visibleNodes.map(node => {
-                    const isActive = node.id === activeNodeId;
-                    const isInRoute = route && route.some(step => step.id === node.id);
-                    const isHovered = hoveredNode === node.node_name;
-                    const hasActiveRoute = route && route.length > 0;
-
-                    let opacity = 1;
-                    if (hasActiveRoute) {
-                      opacity = isInRoute ? 1 : (isHovered ? 0.8 : 0.2);
-                    } else {
-                      opacity = isActive ? 1 : (isHovered ? 0.9 : 0.45);
-                    }
-                    
-                    return (
-                      <g
-                        key={node.id}
-                        className="pointer-events-auto cursor-pointer group"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onNavigate(node.id);
-                        }}
-                        onMouseEnter={() => setHoveredNode(node.node_name)}
-                        onMouseLeave={() => setHoveredNode(null)}
-                        style={{
-                          opacity,
-                          transition: "opacity 0.25s ease-in-out"
-                        }}
-                      >
-                        {/* Pulsing Active Ring */}
-                        {isActive && (
-                          <circle
-                            cx={node.x}
-                            cy={node.y}
-                            r="35"
-                            fill="#ffcc00"
-                            className="animate-ping opacity-60"
-                            style={{
-                              transformOrigin: "center",
-                              transformBox: "fill-box"
-                            }}
-                          />
-                        )}
-                        
-                        {/* Main node pin */}
-                        <circle
-                          cx={node.x}
-                          cy={node.y}
-                          r={isActive ? "18" : "11"}
-                          fill={isActive ? "#800000" : "#ffcc00"}
-                          stroke={isActive ? "#ffcc00" : "#800000"}
-                          strokeWidth="3.5"
-                          className="transition-colors duration-300"
-                        />
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-
-              {/* Floating Map Zoom Tooltip */}
-              {hoveredNode && (
-                <div className="absolute top-4 left-4 z-30 px-3 py-1.5 rounded-lg bg-slate-900/90 text-white text-xs border border-slate-800 shadow-md backdrop-blur pointer-events-none select-none">
-                  {hoveredNode}
-                </div>
-              )}
-            </div>
-
-            {/* Scale controls */}
-            <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 bg-white/80 dark:bg-slate-950/80 border border-slate-200/50 dark:border-slate-800/80 rounded-xl p-1 shadow-lg backdrop-blur">
-              <button
-                onClick={handleZoomIn}
-                className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer"
-                title="Zoom In"
-              >
-                <ZoomInIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleZoomOut}
-                className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer"
-                title="Zoom Out"
-              >
-                <ZoomOutIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleReset}
-                className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer"
-                title="Reset Map"
-              >
-                <RestartAltIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+      {/* Floor Selection Vertical Stack (Floating on top right) */}
+      {!isMinimized && (
+        <div className="absolute top-4 right-4 z-30 flex flex-col gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur">
+          <button
+            onClick={() => setSelectedFloor("3")}
+            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+              selectedFloor === "3"
+                ? "bg-[#800000] text-white shadow-sm"
+                : "text-[#800000] hover:bg-[#800000]/10"
+            }`}
+          >
+            3F
+          </button>
+          <button
+            onClick={() => setSelectedFloor("2")}
+            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+              selectedFloor === "2"
+                ? "bg-[#800000] text-white shadow-sm"
+                : "text-[#800000] hover:bg-[#800000]/10"
+            }`}
+          >
+            2F
+          </button>
+          <button
+            onClick={() => setSelectedFloor("1")}
+            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
+              selectedFloor === "1"
+                ? "bg-[#800000] text-white shadow-sm"
+                : "text-[#800000] hover:bg-[#800000]/10"
+            }`}
+          >
+            1F
+          </button>
         </div>
       )}
 
-      {/* Styled Marching line overlay script */}
+      {/* Map Viewer Sandbox */}
+      <div className="flex-1 relative bg-white overflow-hidden flex items-center justify-center">
+        <div
+          ref={containerRef}
+          className={`w-full h-full relative touch-none ${isMinimized ? "" : "cursor-grab active:cursor-grabbing select-none"}`}
+          onPointerDown={isMinimized ? undefined : handlePointerDown}
+          onPointerMove={isMinimized ? undefined : handlePointerMove}
+          onPointerUp={isMinimized ? undefined : handlePointerUp}
+          onPointerCancel={isMinimized ? undefined : handlePointerUp}
+          onWheel={isMinimized ? undefined : handleWheel}
+        >
+          {/* Scaled/Translated Content Wrapper */}
+          <div
+            className="absolute origin-center transition-transform duration-100 ease-out flex items-center justify-center"
+            style={{
+              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            {/* SVG Drawing Layer containing the image and overlays together */}
+            <svg
+              viewBox="0 0 1536 1024"
+              className="max-w-full max-h-full pointer-events-none select-none"
+              style={{ zIndex: 10 }}
+            >
+              <defs>
+                <linearGradient id="activePinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#b30000" />
+                  <stop offset="100%" stopColor="#800000" />
+                </linearGradient>
+                <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.25" />
+                </filter>
+              </defs>
+              {/* Floor Plan Image Layer inside the SVG */}
+              {!showGridFallback ? (
+                <image
+                  href={`/map/${selectedFloor === "1" ? "1st Floor Map" : selectedFloor === "2" ? "2nd Floor Map" : "3rd Floor Map"}.png`}
+                  x="0"
+                  y="0"
+                  width="1536"
+                  height="1024"
+                  className="pointer-events-none"
+                  onError={() => {
+                    setImageError(prev => ({ ...prev, [selectedFloor]: true }));
+                  }}
+                />
+              ) : (
+                <>
+                  {/* Technical Blueprint Grid Fallback */}
+                  <defs>
+                    <pattern id="user-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 0, 0, 0.05)" strokeWidth="1" />
+                    </pattern>
+                  </defs>
+                  <rect width="1536" height="1024" fill="#ffffff" />
+                  <rect width="1536" height="1024" fill="url(#user-grid)" />
+                  <text
+                    x="768"
+                    y="490"
+                    fill="rgba(128, 0, 0, 0.2)"
+                    fontFamily="sans-serif"
+                    fontSize="32"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                  >
+                    FLOOR {selectedFloor} MAP
+                  </text>
+                  <text
+                    x="768"
+                    y="525"
+                    fill="rgba(0, 0, 0, 0.3)"
+                    fontFamily="sans-serif"
+                    fontSize="14"
+                    textAnchor="middle"
+                  >
+                    Floor plan layout image will load once uploaded in the admin panel
+                  </text>
+                </>
+              )}
+
+              {/* Draw Alternative Route Directions Paths */}
+              {allRoutesPoints.map((pts, idx) => {
+                if (idx === activeRouteIndex || pts.length <= 1) return null;
+                const pathD = `M ${pts.map(p => `${p.x} ${p.y}`).join(" L ")}`;
+                return (
+                  <g key={`alt-route-${idx}`} className="pointer-events-auto cursor-pointer group" onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateDirectionsState?.({ activeRouteIndex: idx });
+                  }}>
+                    {/* Broad hit area for mobile/mouse */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="transparent"
+                      strokeWidth="28"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {/* Outer shadow border */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="rgba(148, 163, 184, 0.4)"
+                      strokeWidth="16"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-colors duration-200 group-hover:stroke-slate-500/60"
+                    />
+                    {/* Inner dash line */}
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="#cbd5e1"
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-colors duration-200 group-hover:stroke-slate-400"
+                    />
+                  </g>
+                );
+              })}
+
+              {/* Draw Active Route Directions Path */}
+              {activeRoutePoints.length > 1 && (
+                <g className="pointer-events-none">
+                  {/* Static Path Shadow */}
+                  <path
+                    d={`M ${activeRoutePoints.map(p => `${p.x} ${p.y}`).join(" L ")}`}
+                    fill="none"
+                    stroke="rgba(0,0,0,0.25)"
+                    strokeWidth="18"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Active Marching Route */}
+                  <path
+                    d={`M ${activeRoutePoints.map(p => `${p.x} ${p.y}`).join(" L ")}`}
+                    fill="none"
+                    stroke="#ffcc00"
+                    strokeWidth="11"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="24, 24"
+                    className="animated-flow-line"
+                  />
+                </g>
+              )}
+
+              {/* Render Interactive Nodes */}
+              {visibleNodes.map(node => {
+                const isActive = node.id === activeNodeId;
+                const activeRoute = routes?.[activeRouteIndex]?.path;
+                const isInRoute = activeRoute && activeRoute.some(step => step.id === node.id);
+                const isHovered = hoveredNode === node.node_name;
+                const hasActiveRoute = activeRoute && activeRoute.length > 0;
+
+                let opacity = 1;
+                if (hasActiveRoute) {
+                  opacity = isInRoute ? 1 : (isHovered ? 0.8 : 0.2);
+                } else {
+                  opacity = isActive ? 1 : (isHovered ? 0.9 : 0.45);
+                }
+                
+                return (
+                  <g
+                    key={node.id}
+                    className={`pointer-events-auto ${isMinimized ? "" : "cursor-pointer"} group`}
+                    onClick={isMinimized ? undefined : (e) => {
+                      e.stopPropagation();
+                      onNavigate(node.id);
+                    }}
+                    onMouseEnter={isMinimized ? undefined : () => setHoveredNode(node.node_name)}
+                    onMouseLeave={isMinimized ? undefined : () => setHoveredNode(null)}
+                    style={{
+                      opacity,
+                      transition: "opacity 0.25s ease-in-out"
+                    }}
+                    transform={`translate(${node.x}, ${node.y})`}
+                  >
+                    {isActive ? (
+                      <>
+                        {/* Pin Base Shadow */}
+                        <ellipse
+                          cx="0"
+                          cy="2"
+                          rx="8"
+                          ry="3"
+                          fill="rgba(0,0,0,0.2)"
+                        />
+                        {/* Location Pin Icon (Native path rendering to prevent SVG inheritance sizing bugs) */}
+                        <path
+                          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                          fill="#800000"
+                          transform="scale(1.6) translate(-12, -22)"
+                          filter="url(#shadowFilter)"
+                        />
+                      </>
+                    ) : isInRoute ? (
+                      <>
+                        {/* Base shadow */}
+                        <circle
+                          cx="0"
+                          cy="1"
+                          r="8.5"
+                          fill="rgba(0,0,0,0.2)"
+                        />
+                        {/* Main circle */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="7.5"
+                          fill="#800000"
+                          className="transition-transform duration-300 group-hover:scale-110"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {/* Base shadow */}
+                        <circle
+                          cx="0"
+                          cy="1"
+                          r="7"
+                          fill="rgba(0,0,0,0.15)"
+                        />
+                        {/* Solid circle marker */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="6.5"
+                          fill="#800000"
+                          className="transition-transform duration-300 group-hover:scale-125"
+                        />
+                      </>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {/* Floating Map Zoom Tooltip */}
+          {!isMinimized && hoveredNode && (
+            <div className="absolute top-4 left-4 z-30 px-3 py-1.5 rounded-lg bg-slate-900/90 text-white text-xs border border-slate-800 shadow-md backdrop-blur pointer-events-none select-none">
+              {hoveredNode}
+            </div>
+          )}
+        </div>
+
+        {/* Scale controls */}
+        {!isMinimized && (
+          <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur">
+            <button
+              onClick={handleZoomIn}
+              className="p-1.5 rounded-lg text-[#800000] hover:bg-[#800000]/10 cursor-pointer"
+              title="Zoom In"
+            >
+              <ZoomInIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleZoomOut}
+              className="p-1.5 rounded-lg text-[#800000] hover:bg-[#800000]/10 cursor-pointer"
+              title="Zoom Out"
+            >
+              <ZoomOutIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleReset}
+              className="p-1.5 rounded-lg text-[#800000] hover:bg-[#800000]/10 cursor-pointer"
+              title="Reset Map"
+            >
+              <RestartAltIcon className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Styled Marching line and marker animations */}
       <style>{`
         .animated-flow-line {
           animation: marchingAnts 0.8s linear infinite;
@@ -566,7 +648,22 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
           0% { stroke-dashoffset: 48; }
           to { stroke-dashoffset: 0; }
         }
+        .animate-marker-pulse {
+          animation: markerPulse 1.8s cubic-bezier(0.25, 0, 0, 1) infinite;
+          transform-origin: center;
+          transform-box: fill-box;
+        }
+        @keyframes markerPulse {
+          0% {
+            transform: scale(0.5);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(2.2);
+            opacity: 0;
+          }
+        }
       `}</style>
-    </>
+    </div>
   );
 }

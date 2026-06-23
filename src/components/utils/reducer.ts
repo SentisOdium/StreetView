@@ -15,6 +15,7 @@ type State = {
     locationA: string;
     locationB: string;
     route: NodeRoute[];
+    activeRouteIndex: number;
   };
 };
 
@@ -40,6 +41,7 @@ export const initialState: State = {
     locationA: "",
     locationB: "",
     route: [],
+    activeRouteIndex: 0,
   },
 };
 
@@ -112,6 +114,7 @@ export function reducer(state: State, action: Action): State {
           locationA: from,
           locationB: "",
           route: [],
+          activeRouteIndex: 0,
         },
       };
     }    case "GO_BACK": {
@@ -141,14 +144,17 @@ export function reducer(state: State, action: Action): State {
         lastMainNodeName,
       };
     }
-    case "UPDATE_DIRECTIONS_STATE":
+    case "UPDATE_DIRECTIONS_STATE": {
+      const resetRouteIndex = action.payload.locationA !== undefined || action.payload.locationB !== undefined;
       return {
         ...state,
         directionsState: {
           ...state.directionsState,
           ...action.payload,
+          activeRouteIndex: resetRouteIndex ? 0 : (action.payload.activeRouteIndex !== undefined ? action.payload.activeRouteIndex : state.directionsState.activeRouteIndex),
         },
       };
+    }
 
     case "RESET_TO_SEARCH":
       return {
@@ -158,6 +164,12 @@ export function reducer(state: State, action: Action): State {
         lastMainNodeId: null,
         lastMainNodeName: "",
         stack: [{ type: "search" }],
+        directionsState: {
+          locationA: "",
+          locationB: "",
+          route: [],
+          activeRouteIndex: 0,
+        },
       };
 
     case "SET_ACTIVE_NODE":

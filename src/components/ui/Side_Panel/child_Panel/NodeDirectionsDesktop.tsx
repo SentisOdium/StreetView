@@ -147,6 +147,8 @@ export default function NodeDirectionsDesktop({ list, fullList, activeNodeId, on
                             resolvedLocB={locationB === "Current Location" ? frozenActiveNodeName : locationB}
                             onSelectedRouteNode={onSelectedRouteNode}
                             onBack={onBack}
+                            directionsState={directionsState}
+                            onUpdate={onUpdate}
                         />
                     </div>
                 ) : (

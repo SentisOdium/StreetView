@@ -26,6 +26,7 @@ export type NodeDirectionsProps = {
     locationA: string;
     locationB: string;
     route?: NodeRoute[];
+    activeRouteIndex?: number;
   };
 
   onUpdate: (data: Partial<NodeDirectionsProps["directionsState"]>) => void;

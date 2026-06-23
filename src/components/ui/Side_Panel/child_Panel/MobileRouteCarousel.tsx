@@ -11,6 +11,13 @@ type MobileRouteCarouselProps = {
   resolvedLocB?: string;
   onSelectedRouteNode: (node: NodeRoute) => void;
   onEditRoute: () => void;
+  directionsState: {
+    locationA: string;
+    locationB: string;
+    route?: NodeRoute[];
+    activeRouteIndex?: number;
+  };
+  onUpdate: (data: Partial<MobileRouteCarouselProps["directionsState"]>) => void;
 };
 
 type DirectionStep = {
@@ -26,24 +33,42 @@ export default function MobileRouteCarousel({
   resolvedLocB,
   onSelectedRouteNode,
   onEditRoute,
+  directionsState,
+  onUpdate,
 }: MobileRouteCarouselProps) {
-  const { route, loading, error } = useRouteDirection({
+  const { routes, loading, error } = useRouteDirection({
     src: resolvedLocA || locA,
     dest: resolvedLocB || locB,
   });
 
-  const steps: DirectionStep[] = useMemo(() => {
-    if (!route || route.length === 0) return [];
+  const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
+  const currentRouteOpt = routes?.[activeRouteIndex];
+  const routeSteps = currentRouteOpt?.path || [];
 
-    return route.map((node, index) => ({
+  const steps: DirectionStep[] = useMemo(() => {
+    if (!routeSteps || routeSteps.length === 0) return [];
+
+    return routeSteps.map((node, index) => ({
       target: node,
       totalDist: node.dist || 0,
       isStart: index === 0,
     }));
-  }, [route]);
+  }, [routeSteps]);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const onSelectedRouteNodeRef = useRef(onSelectedRouteNode);
+  useEffect(() => {
+    onSelectedRouteNodeRef.current = onSelectedRouteNode;
+  }, [onSelectedRouteNode]);
+
+  // Scroll back to the first card when the active route changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  }, [activeRouteIndex]);
 
   useEffect(() => {
     if (!steps.length || !scrollContainerRef.current) return;
@@ -54,7 +79,7 @@ export default function MobileRouteCarousel({
           if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
             const index = Number(entry.target.getAttribute("data-index"));
             if (!isNaN(index) && steps[index]) {
-              onSelectedRouteNode(steps[index].target);
+              onSelectedRouteNodeRef.current(steps[index].target);
             }
           }
         });
@@ -70,25 +95,26 @@ export default function MobileRouteCarousel({
     });
 
     return () => observer.disconnect();
-  }, [steps, onSelectedRouteNode]);
+  }, [steps]);
 
+  const stepsHash = useMemo(() => steps.map(s => s.target.id).join(","), [steps]);
   useEffect(() => {
     if (steps.length > 0) {
-      onSelectedRouteNode(steps[0].target);
+      onSelectedRouteNodeRef.current(steps[0].target);
     }
-  }, [steps.length, onSelectedRouteNode]);
+  }, [stepsHash]);
 
   if (loading) {
     return (
       <div className="absolute bottom-4 left-0 w-full z-50 flex justify-center">
         <div className="bg-white rounded-[24px] shadow-lg px-6 py-4 flex flex-col items-center mx-4">
-          <Loading loading message="Calculating route..." />
+          <Loading loading message="Calculating routes..." />
         </div>
       </div>
     );
   }
 
-  if (error || !route?.length) {
+  if (error || !routes?.length) {
     return (
       <div className="absolute bottom-4 left-0 w-full z-50 flex justify-center pointer-events-auto">
         <div className="bg-white rounded-[24px] shadow-lg px-6 py-4 flex flex-col items-center mx-4 text-center">
@@ -106,8 +132,8 @@ export default function MobileRouteCarousel({
 
   return (
     <div className="absolute bottom-0 left-0 w-full z-[100] flex flex-col items-start pointer-events-none pb-4">
-      {/* Floating Edit Route "X" Button (Top Left of Carousel) */}
-      <div className="w-full px-4 mb-3 flex justify-start pointer-events-auto">
+      {/* Top action row containing exit button */}
+      <div className="w-full px-4 mb-2 flex justify-start pointer-events-auto">
         <button
           onClick={onEditRoute}
           className="flex items-center justify-center w-10 h-10 bg-white rounded-full shadow-lg border border-gray-100 text-gray-600 hover:bg-gray-50 active:scale-95 transition-transform"
@@ -118,6 +144,28 @@ export default function MobileRouteCarousel({
           </svg>
         </button>
       </div>
+
+      {/* Alternative Route Selector Pills */}
+      {routes && routes.length > 1 && (
+        <div className="w-full px-4 mb-3 flex gap-2 pointer-events-auto overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {routes.map((routeOpt, rIdx) => {
+            const isPillActive = rIdx === activeRouteIndex;
+            return (
+              <button
+                key={rIdx}
+                onClick={() => onUpdate({ activeRouteIndex: rIdx })}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-md border ${
+                  isPillActive
+                    ? "bg-[#800000] text-white border-[#800000]"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {routeOpt.label} ({routeOpt.dist}m)
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Horizontal Carousel */}
       <div
@@ -130,10 +178,10 @@ export default function MobileRouteCarousel({
 
           return (
             <div
-              key={step.target.id}
+              key={`${step.target.id}-${index}`}
               data-index={index}
               ref={(el) => { cardRefs.current[index] = el; }}
-              className="snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-[24px] p-5 shadow-lg flex items-center gap-4 relative"
+              className="snap-center shrink-0 w-[85vw] max-w-[340px] bg-white rounded-[24px] p-5 shadow-lg flex items-center gap-4 relative border border-slate-100"
             >
               {/* Waypoint/Direction Icon Container */}
               <div className={`h-12 w-12 rounded-full flex flex-col items-center justify-center shrink-0 shadow-sm

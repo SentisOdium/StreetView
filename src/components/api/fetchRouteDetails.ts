@@ -1,10 +1,10 @@
 import axios, { isAxiosError } from "axios";
-import type { NodeRoute, NodeRouteResponse, RouteReq } from "./types/types_api";
+import type { NodeRoute, NodeRouteResponse, RouteReq, RouteOption } from "./types/types_api";
 import { BaseUrl } from "../objects/baseUrl";
 
-const routeCache = new Map<string, NodeRoute[]>();
+const routeCache = new Map<string, { path: NodeRoute[], paths: RouteOption[] }>();
 
-export const fetchNodeRoute = async({src,  dest, signal}: RouteReq): Promise<NodeRoute[]> => {
+export const fetchNodeRoute = async({src,  dest, signal}: RouteReq): Promise<{ path: NodeRoute[], paths: RouteOption[] }> => {
     const cacheKey = `${src}->${dest}`
 
     if (routeCache.has(cacheKey)){
@@ -19,7 +19,7 @@ export const fetchNodeRoute = async({src,  dest, signal}: RouteReq): Promise<Nod
         if (!response.data.success) {
             throw new Error(response.data.message);
         }
-        const data = response.data.data.path;
+        const data = response.data.data;
         routeCache.set(cacheKey, data)
         return data;
 

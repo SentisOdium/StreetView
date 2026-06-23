@@ -160,6 +160,8 @@ export default function NodeDirectionsMobile({ list, fullList, activeNodeId, onB
                     resolvedLocB={locationB === "Current Location" ? frozenActiveNodeName : locationB}
                     onSelectedRouteNode={onSelectedRouteNode}
                     onEditRoute={() => setIsEditingRoute(true)}
+                    directionsState={directionsState}
+                    onUpdate={onUpdate}
                 />,
                 carouselPortalContainer
             )}

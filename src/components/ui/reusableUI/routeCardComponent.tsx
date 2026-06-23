@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import useRouteDirection from "../../hooks/useRouteDirection";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
 import { EmptySearchUi, Loading } from "./emptySearchUi";
@@ -16,6 +16,13 @@ type RouteCardProps = {
   resolvedLocB?: string;
   onSelectedRouteNode: (node: NodeRoute) => void;
   onBack?: () => void;
+  directionsState: {
+    locationA: string;
+    locationB: string;
+    route?: NodeRoute[];
+    activeRouteIndex?: number;
+  };
+  onUpdate: (data: Partial<RouteCardProps["directionsState"]>) => void;
 };
 
 type DirectionStep = {
@@ -230,6 +237,60 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
   );
 }
 
+function getStepsForRoute(route: NodeRoute[]): DirectionStep[] {
+  if (!route || route.length === 0) return [];
+
+  const result: DirectionStep[] = [];
+  let currentStep: DirectionStep | null = null;
+
+  for (let i = 0; i < route.length; i++) {
+    const node = route[i];
+    const isLastNode = i === route.length - 1;
+
+    if (i === 0) {
+      currentStep = {
+        target: node,
+        transitionalNodes: [],
+        totalDist: 0,
+        isStart: true,
+      };
+      result.push(currentStep);
+      
+      if (isLastNode) {
+        currentStep.totalDist = 0;
+      }
+    } else if (isLastNode) {
+      if (currentStep) {
+        currentStep.totalDist += node.dist;
+      }
+      result.push({
+        target: node,
+        transitionalNodes: [],
+        totalDist: 0,
+      });
+    } else {
+      if (node.type === "transitional") {
+        if (currentStep) {
+          currentStep.transitionalNodes.push(node);
+          currentStep.totalDist += node.dist;
+        }
+      } else {
+        if (currentStep) {
+          currentStep.totalDist += node.dist;
+        }
+        currentStep = {
+          target: node,
+          transitionalNodes: [],
+          totalDist: 0,
+        };
+        result.push(currentStep);
+      }
+    }
+  }
+
+  return result;
+}
+
 export default function RouteCardComponent({
   locA,
   locB,
@@ -237,84 +298,25 @@ export default function RouteCardComponent({
   resolvedLocB,
   onSelectedRouteNode,
   onBack,
+  directionsState,
+  onUpdate,
 }: RouteCardProps) {
-  const { route, loading, error } = useRouteDirection({
+  const { routes, loading, error } = useRouteDirection({
     src: resolvedLocA || locA,
     dest: resolvedLocB || locB,
   });
 
-  const steps: DirectionStep[] = useMemo(() => {
-    if (!route || route.length === 0) return [];
-
-    const result: DirectionStep[] = [];
-    let currentStep: DirectionStep | null = null;
-
-    for (let i = 0; i < route.length; i++) {
-      const node = route[i];
-      const isLastNode = i === route.length - 1;
-
-      if (i === 0) {
-        currentStep = {
-          target: node,
-          transitionalNodes: [],
-          totalDist: 0,
-          isStart: true,
-        };
-        result.push(currentStep);
-        
-        if (isLastNode) {
-          currentStep.totalDist = 0;
-        }
-      } else if (isLastNode) {
-        if (currentStep) {
-          currentStep.totalDist += node.dist;
-        }
-        result.push({
-          target: node,
-          transitionalNodes: [],
-          totalDist: 0,
-        });
-      } else {
-        if (node.type === "transitional") {
-          if (currentStep) {
-            currentStep.transitionalNodes.push(node);
-            currentStep.totalDist += node.dist;
-          }
-        } else {
-          if (currentStep) {
-            currentStep.totalDist += node.dist;
-          }
-          currentStep = {
-            target: node,
-            transitionalNodes: [],
-            totalDist: 0,
-          };
-          result.push(currentStep);
-        }
-      }
-    }
-
-    return result;
-  }, [route]);
+  const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
 
   if (loading) {
     return (
       <div className="py-12 flex flex-col items-center justify-center w-full">
-        <Loading loading message="Calculating route..." />
+        <Loading loading message="Calculating route options..." />
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="py-8 text-center text-sm text-gray-500">
-        <EmptySearchUi />
-        No Valid Route Found
-      </div>
-    );
-  }
-
-  if (!route?.length) {
+  if (error || !routes?.length) {
     return (
       <div className="py-8 text-center text-sm text-gray-500">
         <EmptySearchUi />
@@ -328,7 +330,7 @@ export default function RouteCardComponent({
       <div className="flex-1">
         <div className="flex items-center justify-between mb-4 px-1">
           <div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Route Directions</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Route Options</p>
             <h2 className="text-lg md:text-base font-bold text-slate-800 tracking-tight mt-0.5">
               {locA} → {locB}
             </h2>
@@ -345,15 +347,76 @@ export default function RouteCardComponent({
           )}
         </div>
 
-        <div className="relative space-y-4 border-l border-slate-200 pl-4 ml-2.5 mt-4">
-          {steps.map((step, index) => (
-            <RouteStepCard
-              key={step.target.id}
-              step={step}
-              index={index}
-              onSelectedRouteNode={onSelectedRouteNode}
-            />
-          ))}
+        <div className="space-y-3.5 mt-2">
+          {routes.map((routeOpt, rIdx) => {
+            const isActive = rIdx === activeRouteIndex;
+            const routeSteps = getStepsForRoute(routeOpt.path);
+            const waypointsCount = routeOpt.path.length;
+
+            return (
+              <div 
+                key={rIdx} 
+                className={`rounded-2xl border transition-all duration-200 overflow-hidden bg-white shadow-sm ${
+                  isActive 
+                    ? "border-[#800000]/40 ring-1 ring-[#800000]/10 shadow" 
+                    : "border-slate-100 hover:border-slate-200"
+                }`}
+              >
+                {/* Route Selector Tab */}
+                <div 
+                  onClick={() => onUpdate({ activeRouteIndex: rIdx })}
+                  className={`p-4 flex items-center justify-between gap-4 cursor-pointer select-none transition-colors ${
+                    isActive ? "bg-[#800000]/[0.015]" : "hover:bg-slate-50/50"
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                        rIdx === 0 
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100" 
+                          : "bg-slate-100 text-slate-600 border border-slate-200/50"
+                      }`}>
+                        {rIdx === 0 ? "Fastest" : `Alternative ${rIdx}`}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                        {waypointsCount} waypoints
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-sm font-semibold text-slate-800 mt-2 flex items-center gap-1.5">
+                      <span>{routeOpt.label}</span>
+                      <span className="text-xs text-slate-400 font-normal">•</span>
+                      <span className="text-[#800000] italic font-bold">{routeOpt.dist}m</span>
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className={`p-1.5 rounded-lg text-slate-400 transition-transform duration-200 ${
+                      isActive ? "rotate-180 text-[#800000]" : "group-hover:text-slate-600"
+                    }`}>
+                      <ExpandMoreIcon sx={{ fontSize: 20 }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dropdown details content */}
+                {isActive && (
+                  <div className="border-t border-slate-100 bg-[#fcfcfc] px-4 py-5 animate-slideDown">
+                    <div className="relative space-y-4 border-l border-slate-200 pl-4 ml-2.5">
+                      {routeSteps.map((step, index) => (
+                        <RouteStepCard
+                          key={step.target.id}
+                          step={step}
+                          index={index}
+                          onSelectedRouteNode={onSelectedRouteNode}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

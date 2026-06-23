@@ -257,7 +257,7 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
   return (
     <div className="relative h-full w-full bg-black panorama-pointer-container">
       <Canvas
-        style={{ width: "100vw", height: "100vh" }}
+        style={{ width: "100%", height: "100%" }}
         camera={{
           position: [0.3, 0, 0],
           fov: 75,

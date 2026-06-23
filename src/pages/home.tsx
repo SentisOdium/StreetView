@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, useRef } from "react"
+import { useReducer, useState, useEffect, useRef, useCallback } from "react"
 import { useLocation } from "react-router-dom"
 import NodeLocationDetails from "../components/ui/Side_Panel/child_Panel/nodeLocationDetails"
 import PanoramaViewer from "../components/ui/Panorama_Assests/PanoramaViewer"
@@ -21,6 +21,15 @@ export default function HomePage() {
     const { stack, activeNodeId, activeNodeName, lastMainNodeId, lastMainNodeName, directionsState } = state;
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [mobileHeight, setMobileHeight] = useState<'hidden' | 'mid' | 'expanded'>('mid');
+    const [viewMode, setViewMode] = useState<'streetview' | 'map'>('map');
+
+    useEffect(() => {
+        if (activeNodeId != null) {
+            setViewMode('streetview');
+        } else {
+            setViewMode('map');
+        }
+    }, [activeNodeId]);
 
     const [windowDimensions, setWindowDimensions] = useState({
         width: typeof window !== 'undefined' ? window.innerWidth : 768,
@@ -154,6 +163,23 @@ export default function HomePage() {
         }
     };
 
+    const handleSelectedRouteNode = useCallback((node: any) => {
+        dispatch({
+            type: "SET_ACTIVE_NODE",
+            payload: {
+                id: node.id,
+                name: node.name,
+            },
+        });
+    }, [dispatch]);
+
+    const handleUpdateDirections = useCallback((data: any) => {
+        dispatch({
+            type: "UPDATE_DIRECTIONS_STATE",
+            payload: data,
+        });
+    }, [dispatch]);
+
     useEffect(() => {
         if (location.state?.targetNode) {
             const targetNode = location.state.targetNode;
@@ -202,7 +228,173 @@ export default function HomePage() {
 
     if (!currentPanel) return null;
 
+    const isDirections = currentPanel.type === "directions";
+    const hasActivePano = activeNodeId != null;
+    const isMobile = windowDimensions.width < 768;
     const hasDirectionsPanel = stack.some(p => p.type === "directions");
+
+    // Determine the offset class for desktop when side panel is open
+    const desktopOffsetClass = isCollapsed ? "left-0 w-full" : "left-0 md:left-120 md:w-[calc(100vw-30rem)]";
+
+    const renderMainLayout = () => {
+        if (isDirections) {
+            if (hasActivePano) {
+                // Split Screen Layout
+                if (isMobile) {
+                    return (
+                        <div className="absolute inset-0 flex flex-col z-0">
+                            {/* Top Half: Street View */}
+                            <div className="w-full h-[60vh] relative bg-black">
+                                <PanoramaViewer
+                                    nodeId={activeNodeId!}
+                                    onNavigate={handleNavigate}
+                                />
+                            </div>
+                            {/* Bottom Half: 2D Map */}
+                            <div className="w-full h-[40vh] relative bg-slate-100">
+                                <MapOverlay
+                                    activeNodeId={activeNodeId}
+                                    fullList={fullList || []}
+                                    onNavigate={handleNavigate}
+                                    directionsState={directionsState}
+                                    isMinimized={false}
+                                    onUpdateDirectionsState={handleUpdateDirections}
+                                    showRoute={isDirections}
+                                />
+                            </div>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className={`absolute top-0 bottom-0 right-0 ${desktopOffsetClass} transition-all duration-300 flex flex-row z-0`}>
+                            {/* Left Half: Street View */}
+                            <div className="w-3/5 h-full relative bg-black border-r border-slate-200 dark:border-slate-800">
+                                <PanoramaViewer
+                                    nodeId={activeNodeId!}
+                                    onNavigate={handleNavigate}
+                                />
+                            </div>
+                            {/* Right Half: 2D Map */}
+                            <div className="w-2/5 h-full relative bg-slate-100">
+                                <MapOverlay
+                                    activeNodeId={activeNodeId}
+                                    fullList={fullList || []}
+                                    onNavigate={handleNavigate}
+                                    directionsState={directionsState}
+                                    isMinimized={false}
+                                    onUpdateDirectionsState={handleUpdateDirections}
+                                    showRoute={isDirections}
+                                />
+                            </div>
+                        </div>
+                    );
+                }
+            } else {
+                // Directions open but no active panorama node: show map fullscreen/offset
+                return (
+                    <div className={`absolute top-0 bottom-0 right-0 ${isMobile ? "inset-0" : desktopOffsetClass} transition-all duration-300 z-0`}>
+                        <MapOverlay
+                            activeNodeId={activeNodeId}
+                            fullList={fullList || []}
+                            onNavigate={handleNavigate}
+                            directionsState={directionsState}
+                            isMinimized={false}
+                            onUpdateDirectionsState={handleUpdateDirections}
+                            showRoute={isDirections}
+                        />
+                    </div>
+                );
+            }
+        } else {
+            // Non-Directions Layout (Google Maps Mode with Mini-box Swap)
+            if (!hasActivePano) {
+                // Just Map fullscreen
+                return (
+                    <div className="absolute inset-0 z-0">
+                        <MapOverlay
+                            activeNodeId={activeNodeId}
+                            fullList={fullList || []}
+                            onNavigate={handleNavigate}
+                            directionsState={directionsState}
+                            isMinimized={false}
+                            onUpdateDirectionsState={handleUpdateDirections}
+                            showRoute={isDirections}
+                        />
+                    </div>
+                );
+            }
+
+            // We have a panorama. Main view and small box are determined by viewMode
+            const isStreetviewMain = viewMode === "streetview";
+
+            return (
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    {/* Fullscreen Base Layer (Streetview or Map) */}
+                    <div className="absolute inset-0 z-0">
+                        {isStreetviewMain ? (
+                            <PanoramaViewer
+                                nodeId={activeNodeId!}
+                                onNavigate={handleNavigate}
+                            />
+                        ) : (
+                            <MapOverlay
+                                activeNodeId={activeNodeId}
+                                fullList={fullList || []}
+                                onNavigate={handleNavigate}
+                                directionsState={directionsState}
+                                isMinimized={false}
+                                onUpdateDirectionsState={handleUpdateDirections}
+                                showRoute={isDirections}
+                            />
+                        )}
+                    </div>
+
+                    {/* Bottom Right Small Box for Swapping */}
+                    {mobileHeight !== "expanded" && (
+                        <div
+                            onClick={() => setViewMode(isStreetviewMain ? "map" : "streetview")}
+                            className="fixed z-40 transition-all duration-300 cursor-pointer rounded-2xl shadow-2xl border-2 border-white hover:scale-105 hover:shadow-cyan-500/20 overflow-hidden group w-64 h-44 max-md:w-40 max-md:h-28"
+                            style={{
+                                bottom: isMobile
+                                    ? (mobileHeight === "mid"
+                                        ? "calc(45vh + 16px)"
+                                        : "24px")
+                                    : "24px",
+                                right: isMobile ? "16px" : "24px"
+                            }}
+                        >
+                            {/* Inner Component for Small Box */}
+                            <div className="w-full h-full relative pointer-events-none">
+                                {isStreetviewMain ? (
+                                    <MapOverlay
+                                        activeNodeId={activeNodeId}
+                                        fullList={fullList || []}
+                                        onNavigate={handleNavigate}
+                                        directionsState={directionsState}
+                                        isMinimized={true}
+                                        onUpdateDirectionsState={handleUpdateDirections}
+                                        showRoute={isDirections}
+                                    />
+                                ) : (
+                                    <PanoramaViewer
+                                        nodeId={activeNodeId!}
+                                        onNavigate={handleNavigate}
+                                    />
+                                )}
+                                {/* Transparent Click Interceptor */}
+                                <div className="absolute inset-0 z-20 bg-transparent" />
+                                {/* Label Hover Overlay */}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-white text-xs font-semibold select-none z-30">
+                                    {isStreetviewMain ? "Expand Map" : "Expand Street View"}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+    };
+
     return (
         <>
             <div id="mobile-directions-input-portal" className="absolute top-0 left-0 w-full z-10 md:hidden" />
@@ -305,15 +497,7 @@ export default function HomePage() {
                                     onBack={() =>
                                         dispatch({ type: "GO_BACK" })
                                     }
-                                    onSelectedRouteNode={(node) =>
-                                        dispatch({
-                                            type: "SET_ACTIVE_NODE",
-                                            payload: {
-                                                id: node.id,
-                                                name: node.name,
-                                            },
-                                        })
-                                    }
+                                    onSelectedRouteNode={handleSelectedRouteNode}
                                     onUpdate={(data) =>
                                         dispatch({
                                             type: "UPDATE_DIRECTIONS_STATE",
@@ -350,22 +534,7 @@ export default function HomePage() {
 
                 </div>
             )}
-
-            <div className="absolute inset-0 z-0">
-                {activeNodeId != null && (
-                    <PanoramaViewer
-                        nodeId={activeNodeId}
-                        onNavigate={handleNavigate}
-                    />
-                )}
-            </div>
-
-            <MapOverlay
-                activeNodeId={activeNodeId}
-                fullList={fullList || []}
-                onNavigate={handleNavigate}
-                directionsState={directionsState}
-            />
+            {renderMainLayout()}
 
         </>
     )

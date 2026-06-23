@@ -585,6 +585,15 @@ export default function MapEditorPage() {
                   className="w-full h-full"
                   onDoubleClick={handleMapDoubleClick}
                 >
+                  <defs>
+                    <linearGradient id="activePinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#b30000" />
+                      <stop offset="100%" stopColor="#800000" />
+                    </linearGradient>
+                    <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="3" stdDeviation="3" floodOpacity="0.25" />
+                    </filter>
+                  </defs>
                   {/* Background display */}
                   {!imageError[canvasFloor] ? (
                     <image
@@ -664,46 +673,66 @@ export default function MapEditorPage() {
                             setIsDraggingPin(true);
                           }
                         }}
+                        transform={`translate(${nodeX}, ${nodeY})`}
                       >
-                        {/* Selected Pulsing Glow Ring */}
-                        {isSelected && (
-                          <circle
-                            cx={nodeX}
-                            cy={nodeY}
-                            r="32"
-                            fill="#800000"
-                            className="animate-ping opacity-25"
-                            style={{
-                              transformOrigin: "center",
-                              transformBox: "fill-box"
-                            }}
-                          />
+                        {isSelected ? (
+                          <>
+                            {/* Selected Pulsing Glow Ring */}
+                            <circle
+                              cx="0"
+                              cy="0"
+                              r="30"
+                              fill="#800000"
+                              className="animate-marker-pulse"
+                              opacity="0.3"
+                            />
+
+                            {/* Pin Base Shadow */}
+                            <ellipse
+                              cx="0"
+                              cy="2"
+                              rx="8"
+                              ry="3"
+                              fill="rgba(0,0,0,0.2)"
+                            />
+
+                            {/* Location Pin Icon (Native path rendering to prevent SVG inheritance sizing bugs) */}
+                            <path
+                              d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                              fill="#800000"
+                              stroke="#ffffff"
+                              strokeWidth="1.2"
+                              transform="scale(1.6) translate(-12, -22)"
+                              filter="url(#shadowFilter)"
+                            />
+                          </>
+                        ) : (
+                          <>
+                            {/* Base shadow */}
+                            <circle
+                              cx="0"
+                              cy="1"
+                              r="7"
+                              fill="rgba(0,0,0,0.15)"
+                            />
+                            {/* Solid circle marker */}
+                            <circle
+                              cx="0"
+                              cy="0"
+                              r="6.5"
+                              fill="#800000"
+                              stroke="#ffffff"
+                              strokeWidth="1.5"
+                              className="transition-transform duration-300 group-hover:scale-125"
+                            />
+                          </>
                         )}
 
-                        {/* Interactive marker drop shadow */}
-                        <circle
-                          cx={nodeX}
-                          cy={nodeY + 1}
-                          r={isSelected ? "14" : "9"}
-                          fill="rgba(0,0,0,0.2)"
-                        />
-
-                        {/* Core pin circle */}
-                        <circle
-                          cx={nodeX}
-                          cy={nodeY}
-                          r={isSelected ? "12" : "8"}
-                          fill={isSelected ? "#800000" : "#ffcc00"}
-                          stroke={isSelected ? "#ffcc00" : "#800000"}
-                          strokeWidth={isSelected ? "3" : "2"}
-                          className="transition-colors duration-300"
-                        />
-
                         {/* Node Name Tag */}
-                        <g className="pointer-events-none select-none">
+                        <g className="pointer-events-none select-none" transform={`translate(0, ${isSelected ? -50 : -14})`}>
                           <rect
-                            x={nodeX - (loc.node_name.length * 3.2 + 6)}
-                            y={nodeY - (isSelected ? 28 : 22)}
+                            x={-(loc.node_name.length * 3.2 + 6)}
+                            y="-14"
                             width={loc.node_name.length * 6.4 + 12}
                             height="16"
                             rx="4"
@@ -711,8 +740,8 @@ export default function MapEditorPage() {
                             className="shadow-sm"
                           />
                           <text
-                            x={nodeX}
-                            y={nodeY - (isSelected ? 17 : 11)}
+                            x="0"
+                            y="-3"
                             fill="white"
                             fontSize="9"
                             fontWeight={isSelected ? "bold" : "normal"}
@@ -801,6 +830,23 @@ export default function MapEditorPage() {
                 <RestartAltIcon className="w-5 h-5" />
               </button>
             </div>
+            <style>{`
+              .animate-marker-pulse {
+                animation: markerPulse 1.8s cubic-bezier(0.25, 0, 0, 1) infinite;
+                transform-origin: center;
+                transform-box: fill-box;
+              }
+              @keyframes markerPulse {
+                0% {
+                  transform: scale(0.5);
+                  opacity: 0.8;
+                }
+                100% {
+                  transform: scale(2.2);
+                  opacity: 0;
+                }
+              }
+            `}</style>
           </div>
         </main>
       </div>

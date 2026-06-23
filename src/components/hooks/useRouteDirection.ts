@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import useLoadingError from "./useLoadingError";
 import { fetchNodeRoute } from "../api/fetchRouteDetails";
-import type { NodeRoute, RouteReq } from "../api/types/types_api";
+import type { NodeRoute, RouteReq, RouteOption } from "../api/types/types_api";
 import { debounce } from "../utils/debounce";
 
 export default function useRouteDirection({ src, dest }: RouteReq) {
     const { error, setError, loading, setLoading } = useLoadingError();
     const [route, setRoute] = useState<NodeRoute[] | null>(null);
+    const [routes, setRoutes] = useState<RouteOption[] | null>(null);
     const controllerRef = useRef<AbortController | null>(null);
 
     const [debouncedSrc, setDebouncedSrc] = useState(src);
@@ -35,7 +36,8 @@ export default function useRouteDirection({ src, dest }: RouteReq) {
 
         try {
             const data = await fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal: controller.signal })
-            setRoute(data)
+            setRoute(data.path);
+            setRoutes(data.paths);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 if (err.name === "AbortError" || err.message === "canceled") return;
@@ -65,5 +67,5 @@ export default function useRouteDirection({ src, dest }: RouteReq) {
         fetchData();
     }
 
-    return { route, loading, error, setRoute, refetch };
+    return { route, routes, loading, error, setRoute, setRoutes, refetch };
 }
