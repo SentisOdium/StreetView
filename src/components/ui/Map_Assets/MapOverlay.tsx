@@ -282,9 +282,17 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
           floorId = "3";
         }
       }
-      return floorId === selectedFloor;
+      if (floorId !== selectedFloor) return false;
+
+      // Smart transitional filtering:
+      // Hide transitional node markers unless they are the currently active node
+      if (n.type === "transitional") {
+        return n.id === activeNodeId;
+      }
+
+      return true;
     });
-  }, [fullList, selectedFloor]);
+  }, [fullList, selectedFloor, activeNodeId]);
 
   const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
 
