@@ -1,10 +1,10 @@
 import "./WayfinderLanding.css";
-import { Navbar } from "./WayfinderSections/Navbar";
-import { Hero } from "./WayfinderSections/Hero";
-import { VideoSection } from "./WayfinderSections/VideoSection";
-import { FeaturesSection } from "./WayfinderSections/Features";
-import { SearchSection } from "./WayfinderSections/SearchSection";
-import { Footer } from "./WayfinderSections/Footer";
+import { Navbar } from "./WayfinderSections/Navbar/Navbar";
+import { Hero } from "./WayfinderSections/Hero/Hero";
+import { VideoSection } from "./WayfinderSections/VideosSection/VideoSection";
+import { FeaturesSection } from "./WayfinderSections/Features/FeaturesSection";
+import { SearchSection } from "./WayfinderSections/SearchSection/SearchSection";
+import { Footer } from "./WayfinderSections/Footer/Footer";
 
 export default function WayfinderLanding() {
   return (

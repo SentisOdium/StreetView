@@ -1,5 +1,5 @@
 import './Hero.css';
-import { scrollTo } from "./utils";
+import { scrollTo } from "../utils";
 import { ParticleCanvas } from "./ParticleCanvas";
 import { useState, useEffect } from "react";
 

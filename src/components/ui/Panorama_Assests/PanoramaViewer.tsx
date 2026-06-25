@@ -237,7 +237,7 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
     return (
       <PanoramaStatus
         variant="error"
-        message="Panorama images are unavailable. Set VITE_CLOUDFRONT_URL and reload."
+        message="Virtual view Images are Unavaliable, try reloading the website"
       />
     );
   }
@@ -247,11 +247,11 @@ export default function PanoramaViewer({ nodeId, onNavigate }: PanoramaViewerPro
   }
 
   if (loading && !currentScene) {
-    return <PanoramaStatus message="Loading panorama..." />;
+    return <PanoramaStatus message="Loading virtual view..." />;
   }
 
   if (!currentScene) {
-    return <PanoramaStatus message="Loading panorama..." />;
+    return <PanoramaStatus message="Loading virtual view..." />;
   }
 
   return (

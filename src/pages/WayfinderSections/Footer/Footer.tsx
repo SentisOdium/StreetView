@@ -1,6 +1,6 @@
 import './Footer.css';
 import { useNavigate } from "react-router-dom";
-import { scrollTo, useReveal } from "./utils";
+import { scrollTo, useReveal } from "../utils";
 
 export function Footer() {
   const navigate = useNavigate();

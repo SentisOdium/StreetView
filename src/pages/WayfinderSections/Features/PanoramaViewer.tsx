@@ -123,7 +123,7 @@ export function PanoramaViewer() {
         </Suspense>
       </Canvas>
       <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4 bg-white/95 backdrop-blur-md text-slate-800 text-[10px] sm:text-xs px-2.5 py-1.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-200 shadow-md pointer-events-none leading-relaxed z-10 text-center sm:text-left">
-        <span className="font-semibold text-[#800000] mr-1.5 hidden sm:inline">Interactive Panorama:</span>
+        <span className="font-semibold text-[#800000] mr-1.5 hidden sm:inline">Interactive Virtual View:</span>
         <span className="hidden sm:inline">Drag screen to explore the campus in 360 degrees.</span>
         <span className="inline sm:hidden">Drag screen to explore 360°</span>
       </div>

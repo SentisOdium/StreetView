@@ -1,13 +1,13 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAutoCompleteFetch from "../../components/hooks/useAutocomplete";
-import Search from "../../components/ui/reusableUI/search";
-import type { MapNode } from "../../components/api/types/types_api";
+import useAutoCompleteFetch from "../../../components/hooks/useAutocomplete";
+import Search from "../../../components/ui/reusableUI/search";
+import type { MapNode } from "../../../components/api/types/types_api";
 import {
   SearchIcon,
   ClearIcon,
-} from "../../components/ui/reusableUI/logo.exports";
-import { useReveal } from "./utils";
+} from "../../../components/ui/reusableUI/logo.exports";
+import { useReveal } from "../utils";
 
 export function SearchSection() {
   const { list, loading, error } = useAutoCompleteFetch();

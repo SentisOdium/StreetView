@@ -1,6 +1,6 @@
 import './Navbar.css';
 import { useEffect, useState } from "react";
-import { scrollTo } from "./utils";
+import { scrollTo } from "../utils";
 
 export function Navbar() {
   const [navScrolled, setNavScrolled] = useState(false);

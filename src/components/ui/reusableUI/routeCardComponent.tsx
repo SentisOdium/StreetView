@@ -61,7 +61,7 @@ function CompactLocationCard({ nodeId, nodeName, onPreview }: CompactCardProps) 
         type="button"
         onClick={onPreview}
         className="p-1.5 rounded-lg text-slate-400 hover:text-[#800000] hover:bg-slate-50 transition active:scale-[0.95] shrink-0 cursor-pointer"
-        title="Preview in Panorama"
+        title="Preview in Virtual View"
       >
         <VrpanoIcon sx={{ fontSize: 16 }} />
       </button>
@@ -99,10 +99,10 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
-                aria-label={`Open panorama for ${step.target.name}`}
+                aria-label={`Open virtual view for ${step.target.name}`}
                 className="h-9 w-9 flex items-center justify-center rounded-xl bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 transition active:scale-[0.95] cursor-pointer"
                 onClick={() => onSelectedRouteNode(step.target)}
-                title="View in Panorama"
+                title="View in Virtual View"
               >
                 <VrpanoIcon sx={{ fontSize: 18 }} />
               </button>
@@ -157,10 +157,10 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              aria-label={`Open panorama for ${step.target.name}`}
+              aria-label={`Open virtual view for ${step.target.name}`}
               className="h-9 w-9 flex items-center justify-center rounded-xl bg-[#800000]/5 hover:bg-[#800000]/10 text-[#800000] transition active:scale-[0.95] cursor-pointer"
               onClick={() => onSelectedRouteNode(step.target)}
-              title="View in Panorama"
+              title="View in Virtual View"
             >
               <VrpanoIcon sx={{ fontSize: 18 }} />
             </button>
@@ -193,10 +193,10 @@ function RouteStepCard({ step, index, onSelectedRouteNode }: RouteStepProps) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              aria-label={`Open panorama for ${step.target.name}`}
+              aria-label={`Open virtual view for ${step.target.name}`}
               className="h-9 w-9 flex items-center justify-center rounded-xl bg-[#800000]/5 hover:bg-[#800000]/10 text-[#800000] transition active:scale-[0.95] cursor-pointer"
               onClick={() => onSelectedRouteNode(step.target)}
-              title="View in Panorama"
+              title="View in Virtual View"
             >
               <VrpanoIcon sx={{ fontSize: 18 }} />
             </button>

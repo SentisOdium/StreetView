@@ -22,7 +22,7 @@ export const features = {
     ),
     descriptions: [
       "Look around specific buildings and facilities before you physically arrive on campus. Rotate and navigate classrooms.",
-      "Our high-resolution 3D virtual panoramas offer a realistic walkthrough of floor layouts and student corridors."
+      "Our high-resolution 3D virtual views offer a realistic walkthrough of floor layouts and student corridors."
     ],
     icon: (
       <svg className="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24">

@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { MapNode, NodeDetails } from "../components/api/types/types_api";
-import { fetchNodeList as apiFetchNodeList, clearNodeListCache } from "../components/api/fetchNodeList";
+import { fetchNodeList as apiFetchNodeList } from "../components/api/fetchNodeList";
 import { fetchNodeDetails as apiFetchNodeDetails } from "../components/api/fetchNodeDetails";
+import { queryClient } from "../queryClient";
 
 interface LocationContextProps {
   nodeList: MapNode[];
@@ -29,7 +31,6 @@ export const useLocation = () => {
 
 /**
  * Hook to access cache clearing functions.
- * Use this to invalidate cached node details when external updates occur (e.g., admin panel edits).
  */
 export const useLocationCache = () => {
   const context = useContext(LocationContext);
@@ -46,55 +47,38 @@ interface LocationProviderProps {
 }
 
 export const LocationProvider = ({ children }: LocationProviderProps) => {
-  const [nodeList, setNodeList] = useState<MapNode[]>([]);
+  const listQuery = useQuery({
+    queryKey: ["nodeList"],
+    queryFn: () => apiFetchNodeList(),
+    staleTime: 1000 * 60 * 5, // 5 min
+  });
+
+  const nodeList = listQuery.data ?? [];
   const mainNodeList = useMemo(() => nodeList.filter((n) => n.type !== "transitional"), [nodeList]);
-  const [nodeListLoading, setNodeListLoading] = useState<boolean>(false);
-  const [nodeListError, setNodeListError] = useState<string | null>(null);
+  const nodeListLoading = listQuery.isPending;
+  const nodeListError = listQuery.error?.message ?? null;
 
   const [nodeDetails, setNodeDetails] = useState<Record<number, NodeDetails>>({});
   const [nodeDetailsLoading, setNodeDetailsLoading] = useState<Record<number, boolean>>({});
   const [nodeDetailsError, setNodeDetailsError] = useState<Record<number, string | null>>({});
-  const listCacheRef = useRef<Map<string, MapNode[]>>(new Map());
-  const detailsCacheRef = useRef<Map<number, NodeDetails>>(new Map());
-  const activeFetchesRef = useRef<Map<number, Promise<NodeDetails>>>(new Map());
   const preloadGenerationRef = useRef(0);
 
-
   const fetchNodeList = useCallback(async () => {
-    setNodeListLoading(true);
-    setNodeListError(null);
-    try {
-      const cacheKey = "node-list";
-      if (listCacheRef.current.has(cacheKey)) {
-        const cachedList = listCacheRef.current.get(cacheKey);
-        if (cachedList) {
-          setNodeList(cachedList);
-          setNodeListLoading(false);
-          return;
-        }
-      }
-      const data = await apiFetchNodeList(undefined);
-      listCacheRef.current.set(cacheKey, data);
-      setNodeList(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setNodeListError(err.message);
-      } else {
-        setNodeListError("Unknown error");
-      }
-    } finally {
-      setNodeListLoading(false);
-    }
+    await queryClient.invalidateQueries({ queryKey: ["nodeList"] });
   }, []);
 
   const fetchNodeDetails = useCallback(
     async (id: number, signal?: AbortSignal, forceRefresh = false): Promise<NodeDetails | null> => {
       if (!id) return null;
 
-      const cached = detailsCacheRef.current.get(id);
-      if (cached && !forceRefresh) {
-        setNodeDetails((prev) => ({ ...prev, [id]: cached }));
-        return cached;
+      if (forceRefresh) {
+        await queryClient.invalidateQueries({ queryKey: ["nodeDetails", id] });
+      }
+
+      const existing = queryClient.getQueryData<NodeDetails>(["nodeDetails", id]);
+      if (existing && !forceRefresh) {
+        setNodeDetails((prev) => ({ ...prev, [id]: existing }));
+        return existing;
       }
 
       setNodeDetailsLoading((prev) => ({ ...prev, [id]: true }));
@@ -103,33 +87,25 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
       try {
         let currentList = nodeList;
         if (currentList.length === 0) {
-          currentList = await apiFetchNodeList(undefined);
-          setNodeList(currentList);
+          currentList = await queryClient.fetchQuery({ queryKey: ["nodeList"], queryFn: () => apiFetchNodeList() });
         }
         const node = currentList.find((n) => n.id === id);
         if (!node) {
           throw new Error(`Node with ID ${id} not found in nodeList`);
         }
-        
-        let promise = activeFetchesRef.current.get(id);
-        if (!promise || forceRefresh) {
-          promise = apiFetchNodeDetails(id, signal, forceRefresh);
-          activeFetchesRef.current.set(id, promise);
-        }
 
-        const data = await promise;
-        detailsCacheRef.current.set(id, data);
+        const data = await queryClient.fetchQuery({
+          queryKey: ["nodeDetails", id],
+          queryFn: () => apiFetchNodeDetails(id, signal, forceRefresh),
+        });
+
         setNodeDetails((prev) => ({ ...prev, [id]: data }));
         return data;
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setNodeDetailsError((prev) => ({ ...prev, [id]: err.message }));
-        } else {
-          setNodeDetailsError((prev) => ({ ...prev, [id]: "Unknown error" }));
-        }
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        setNodeDetailsError((prev) => ({ ...prev, [id]: msg }));
         return null;
       } finally {
-        activeFetchesRef.current.delete(id);
         setNodeDetailsLoading((prev) => ({ ...prev, [id]: false }));
       }
     },
@@ -139,7 +115,6 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
   const preloadAdjacentNodes = useCallback(
     async (mainNodeId: number) => {
       const generation = ++preloadGenerationRef.current;
-
       const mainDetails = await fetchNodeDetails(mainNodeId);
       if (!mainDetails?.Hotspots?.length || generation !== preloadGenerationRef.current) {
         return;
@@ -147,13 +122,10 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
 
       await Promise.all(
         mainDetails.Hotspots.map((hotspot) => {
-          if (generation !== preloadGenerationRef.current) {
-            return Promise.resolve();
-          }
+          if (generation !== preloadGenerationRef.current) return Promise.resolve();
           const adjId = hotspot.destination_id;
-          if (detailsCacheRef.current.has(adjId)) {
-            return Promise.resolve();
-          }
+          const cached = queryClient.getQueryData(["nodeDetails", adjId]);
+          if (cached) return Promise.resolve();
           return fetchNodeDetails(adjId);
         })
       );
@@ -163,38 +135,20 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
 
   const clearCacheRef = useCallback((id?: number) => {
     if (id !== undefined) {
-      // Clear specific node
-      detailsCacheRef.current.delete(id);
-      setNodeDetails((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      setNodeDetailsLoading((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      setNodeDetailsError((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
+      queryClient.invalidateQueries({ queryKey: ["nodeDetails", id] });
+      setNodeDetails((prev) => { const next = { ...prev }; delete next[id]; return next; });
+      setNodeDetailsLoading((prev) => { const next = { ...prev }; delete next[id]; return next; });
+      setNodeDetailsError((prev) => { const next = { ...prev }; delete next[id]; return next; });
     } else {
-      // Clear all
-      detailsCacheRef.current.clear();
-      listCacheRef.current.clear();
+      queryClient.invalidateQueries({ queryKey: ["nodeDetails"] });
+      queryClient.invalidateQueries({ queryKey: ["nodeList"] });
       setNodeDetails({});
       setNodeDetailsLoading({});
       setNodeDetailsError({});
     }
   }, []);
 
-  useEffect(() => {
-    fetchNodeList();
-  }, [fetchNodeList]);
-
-  // Listen for admin panel changes via storage event (cross‑tab)
+  // Listen for admin panel changes via storage event (cross-tab)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "admin_data_changed" && e.newValue) {
@@ -205,8 +159,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
             fetchNodeDetails(change.nodeId, undefined, true);
           }
           if (change.type === "list") {
-            clearNodeListCache();
-            listCacheRef.current.clear();
+            clearCacheRef();
             fetchNodeList();
           }
         } catch (err) {
@@ -218,7 +171,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [clearCacheRef, fetchNodeDetails, fetchNodeList]);
 
-  // Same‑tab listener for CustomEvent broadcast
+  // Same-tab listener for CustomEvent broadcast
   useEffect(() => {
     const handleCustom = (e: CustomEvent) => {
       const change = e.detail;
@@ -227,8 +180,7 @@ export const LocationProvider = ({ children }: LocationProviderProps) => {
         fetchNodeDetails(change.nodeId, undefined, true);
       }
       if (change?.type === "list") {
-        clearNodeListCache();
-        listCacheRef.current.clear();
+        clearCacheRef();
         fetchNodeList();
       }
     };

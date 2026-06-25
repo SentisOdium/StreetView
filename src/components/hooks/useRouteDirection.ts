@@ -1,15 +1,10 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import useLoadingError from "./useLoadingError";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchNodeRoute } from "../api/fetchRouteDetails";
 import type { NodeRoute, RouteReq, RouteOption } from "../api/types/types_api";
 import { debounce } from "../utils/debounce";
 
 export default function useRouteDirection({ src, dest }: RouteReq) {
-    const { error, setError, loading, setLoading } = useLoadingError();
-    const [route, setRoute] = useState<NodeRoute[] | null>(null);
-    const [routes, setRoutes] = useState<RouteOption[] | null>(null);
-    const controllerRef = useRef<AbortController | null>(null);
-
     const [debouncedSrc, setDebouncedSrc] = useState(src);
     const [debouncedDest, setDebouncedDest] = useState(dest);
 
@@ -17,7 +12,7 @@ export default function useRouteDirection({ src, dest }: RouteReq) {
         () => debounce((s: string, d: string) => {
             setDebouncedSrc(s);
             setDebouncedDest(d);
-        }, 2000),
+        }, 300),
         []
     );
 
@@ -25,47 +20,28 @@ export default function useRouteDirection({ src, dest }: RouteReq) {
         updateDebounced(src, dest);
     }, [src, dest, updateDebounced]);
 
-    const fetchData = useCallback(async () => {
-        controllerRef.current?.abort();
+    const query = useQuery({
+        queryKey: ["route", debouncedSrc, debouncedDest],
+        queryFn: ({ signal }) => fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal }),
+        enabled: Boolean(debouncedSrc && debouncedDest),
+    });
 
-        const controller = new AbortController();
-        controllerRef.current = controller;
-
-        setLoading(true)
-        setError(null)
-
-        try {
-            const data = await fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal: controller.signal })
-            setRoute(data.path);
-            setRoutes(data.paths);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                if (err.name === "AbortError" || err.message === "canceled") return;
-                setError(err.message);
-            } else {
-                setError("Unknown Error Occurred");
-            }
-        } finally {
-            if (!controller.signal?.aborted) {
-                setLoading(false);
-            }
-        }
-    }, [debouncedSrc, debouncedDest, setError, setLoading])
+    const [overrideRoute, setOverrideRoute] = useState<NodeRoute[] | null>(null);
+    const [overrideRoutes, setOverrideRoutes] = useState<RouteOption[] | null>(null);
 
     useEffect(() => {
+        setOverrideRoute(null);
+        setOverrideRoutes(null);
+    }, [debouncedSrc, debouncedDest]);
 
-        if (debouncedSrc && debouncedDest) {
-            fetchData()
-        }
-        return () => {
-            controllerRef.current?.abort();
-        }
+    const route = overrideRoute ?? query.data?.path ?? null;
+    const routes = overrideRoutes ?? query.data?.paths ?? null;
+    const loading = query.isPending && Boolean(debouncedSrc && debouncedDest);
+    const error = query.error?.message ?? null;
 
-    }, [fetchData, debouncedSrc, debouncedDest])
-
-    const refetch = () => {
-        fetchData();
-    }
+    const setRoute = (r: NodeRoute[] | null) => setOverrideRoute(r);
+    const setRoutes = (rs: RouteOption[] | null) => setOverrideRoutes(rs);
+    const refetch = () => query.refetch();
 
     return { route, routes, loading, error, setRoute, setRoutes, refetch };
 }
