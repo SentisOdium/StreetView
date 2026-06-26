@@ -43,3 +43,24 @@ export const logUsabilityTask = async (sessionUuid: string, taskNumber: number, 
     return null;
   }
 };
+
+export const logUsabilityTasksBulk = async (sessionUuid: string, tasksProgress: TaskProgress[]) => {
+  try {
+    const payload = {
+      session_uuid: sessionUuid,
+      tasks: tasksProgress.map((progress) => ({
+        task_number: progress.taskId,
+        status: progress.status,
+        duration_ms: progress.durationMs,
+        interactions_count: progress.clickCount + progress.overlayOpenedCount,
+        used_search: progress.searchCount > 0,
+        used_minimap: progress.routeGenerationCount > 0
+      }))
+    };
+    const response = await axios.post(`${USABILITY_API}/tasks/bulk`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error logging bulk usability tasks:', error);
+    return null;
+  }
+};

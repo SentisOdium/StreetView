@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Task, UsabilityState, TaskProgress } from '../types/Task';
 import { versionA } from '../data/tasks/versionA';
 import { versionB } from '../data/tasks/versionB';
 import { versionC } from '../data/tasks/versionC';
-import { startUsabilitySession, logUsabilityTask } from '../utils/usabilityApi';
+import { startUsabilitySession, logUsabilityTasksBulk } from '../utils/usabilityApi';
 
 const STORAGE_KEY = 'pup_wayfinder_usability_state';
 
@@ -37,6 +37,8 @@ export const useTaskTesting = () => {
   const [searchParams] = useSearchParams();
   const taskParam = searchParams.get('task');
   const researcherParam = searchParams.get('researcher');
+  
+  const loggedSessionRef = useRef<string | null>(null);
 
   const [state, setState] = useState<UsabilityState>(() => {
     // Try to load from session storage
@@ -157,11 +159,6 @@ export const useTaskTesting = () => {
           finishTime: now,
           durationMs: now - startTime,
         };
-        
-        // Log task completion
-        if (prev.sessionUuid) {
-           logUsabilityTask(prev.sessionUuid, currentTask.id, newProgress[progressIndex]);
-        }
       }
 
       const isLastTask = prev.currentTaskIndex >= prev.tasks.length - 1;
@@ -207,12 +204,6 @@ export const useTaskTesting = () => {
         });
       }
       
-      // Log task skip
-      if (prev.sessionUuid) {
-        const loggedTask = progressIndex >= 0 ? newProgress[progressIndex] : newProgress[newProgress.length - 1];
-        logUsabilityTask(prev.sessionUuid, currentTask.id, loggedTask);
-      }
-
       const isLastTask = prev.currentTaskIndex >= prev.tasks.length - 1;
 
       return {
@@ -226,6 +217,14 @@ export const useTaskTesting = () => {
   }, []);
 
   // --- Metrics Event Listeners ---
+  
+  useEffect(() => {
+    if (state.isTestingComplete && state.sessionUuid && state.sessionUuid !== loggedSessionRef.current) {
+      logUsabilityTasksBulk(state.sessionUuid, state.progress);
+      loggedSessionRef.current = state.sessionUuid;
+    }
+  }, [state.isTestingComplete, state.sessionUuid, state.progress]);
+
   useEffect(() => {
     const handleGlobalClick = () => {
       setState(prev => {
