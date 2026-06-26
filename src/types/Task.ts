@@ -2,6 +2,8 @@ export interface Task {
   id: number;
   title: string;
   description: string;
+  allowedActions?: string[];
+  targetNodeNames?: string[];
 }
 
 export interface TaskProgress {
@@ -28,3 +30,11 @@ export interface UsabilityState {
   researcherMode: boolean;
   sessionUuid?: string;
 }
+
+export interface UsabilityActionLog {
+  task_number: number;
+  event_type: string;
+  event_target: string;
+  is_allowed: boolean;
+}
+

@@ -64,3 +64,20 @@ export const logUsabilityTasksBulk = async (sessionUuid: string, tasksProgress: 
     return null;
   }
 };
+
+import type { UsabilityActionLog } from '../types/Task';
+
+export const logUsabilityActionsBulk = async (sessionUuid: string, actions: UsabilityActionLog[]) => {
+  try {
+    const payload = {
+      session_uuid: sessionUuid,
+      actions
+    };
+    const response = await axios.post(`${USABILITY_API}/action-log/bulk`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error logging bulk usability actions:', error);
+    return null;
+  }
+};
+

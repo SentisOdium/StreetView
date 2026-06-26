@@ -1,6 +1,7 @@
 import { SwapVertIcon } from "../../reusableUI/logo.exports"
 import Search from "../../reusableUI/search"
 import type { MapNode } from "../../../api/types/types_api"
+import { useTaskTesting } from "../../../../hooks/useTaskTesting"
 
 interface NodeDirectionsInputProps {
   locationA: string;
@@ -33,6 +34,10 @@ export default function NodeDirectionsInput({
   locationSwap,
   mobileHeight,
 }: NodeDirectionsInputProps) {
+  const { currentTask, state: taskState, checkAction } = useTaskTesting();
+  const isDirectionsTaskActive = currentTask?.allowedActions?.includes('directions') && 
+                                 taskState.progress.find(p => p.taskId === currentTask.id)?.status === 'pending';
+
   return (
     <div
       className={`sticky top-0 z-30 bg-[#fafafa] pt-4 pb-2 px-4 md:p-0 md:bg-white shrink-0 ${
@@ -56,9 +61,11 @@ export default function NodeDirectionsInput({
             onClick={() => setActiveField("A")}
             className={`flex items-center bg-slate-50 hover:bg-slate-100/70 border rounded-xl px-4 py-1.5 transition-all duration-200 cursor-pointer min-h-[46px] relative
               ${
-                activeField === "A"
-                  ? "border-[#800000] bg-white hover:bg-white ring-4 ring-[#800000]/10 shadow-sm"
-                  : "border-slate-200"
+                isDirectionsTaskActive
+                  ? "ring-2 ring-amber-500 border-amber-500 shadow-[0_0_15px_rgba(218,165,32,0.4)] bg-white"
+                  : activeField === "A"
+                    ? "border-[#800000] bg-white hover:bg-white ring-4 ring-[#800000]/10 shadow-sm"
+                    : "border-slate-200"
               }`}
           >
             <div className="w-full">
@@ -68,7 +75,18 @@ export default function NodeDirectionsInput({
               <Search
                 inputRef={inputARef}
                 value={locationA}
-                onChange={(val: string) => onUpdate({ locationA: val })}
+                onChange={(val: string) => {
+                  onUpdate({ locationA: val });
+                  if (isDirectionsTaskActive && val.trim().length >= 3) {
+                    const isPartiallyCorrect = currentTask?.targetNodeNames?.some(name => 
+                      name.toLowerCase().includes(val.toLowerCase()) || 
+                      val.toLowerCase().includes(name.toLowerCase())
+                    );
+                    if (!isPartiallyCorrect) {
+                      checkAction('directions', val);
+                    }
+                  }
+                }}
                 placeholder="Select a starting location"
                 items={startingItems || []}
                 getLabel={(node: any) => node?.node_name ?? ""}
@@ -86,9 +104,11 @@ export default function NodeDirectionsInput({
             onClick={() => setActiveField("B")}
             className={`flex items-center bg-slate-50 hover:bg-slate-100/70 border rounded-xl px-4 py-1.5 transition-all duration-200 cursor-pointer min-h-[46px] relative
               ${
-                activeField === "B"
-                  ? "border-[#800000] bg-white hover:bg-white ring-4 ring-[#800000]/10 shadow-sm"
-                  : "border-slate-200"
+                isDirectionsTaskActive
+                  ? "ring-2 ring-amber-500 border-amber-500 shadow-[0_0_15px_rgba(218,165,32,0.4)] bg-white"
+                  : activeField === "B"
+                    ? "border-[#800000] bg-white hover:bg-white ring-4 ring-[#800000]/10 shadow-sm"
+                    : "border-slate-200"
               }`}
           >
             <div className="w-full">
@@ -98,7 +118,18 @@ export default function NodeDirectionsInput({
               <Search
                 inputRef={inputBRef}
                 value={locationB}
-                onChange={(val: string) => onUpdate({ locationB: val })}
+                onChange={(val: string) => {
+                  onUpdate({ locationB: val });
+                  if (isDirectionsTaskActive && val.trim().length >= 3) {
+                    const isPartiallyCorrect = currentTask?.targetNodeNames?.some(name => 
+                      name.toLowerCase().includes(val.toLowerCase()) || 
+                      val.toLowerCase().includes(name.toLowerCase())
+                    );
+                    if (!isPartiallyCorrect) {
+                      checkAction('directions', val);
+                    }
+                  }
+                }}
                 placeholder="Select destination"
                 items={destinationItems || []}
                 getLabel={(node: any) => node?.node_name ?? ""}

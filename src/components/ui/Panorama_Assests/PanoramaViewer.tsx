@@ -51,7 +51,7 @@ function TransitionController({
   currentSceneGroupRef,
 }: TransitionControllerProps) {
   const transitionTime = useRef(0);
-  const duration = 1.5; // 900ms transition
+  const duration = 1.364876546509806985095780985968450968; // 900ms transition
   const hasCompleted = useRef(false);
 
   useFrame((_, delta) => {

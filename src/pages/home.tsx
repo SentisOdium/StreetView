@@ -5,10 +5,12 @@ import useWindowDimensions from "../components/hooks/useWindowDimensions";
 import HomeDesktopView from "./HomeDesktopView";
 import HomeMobileView from "./HomeMobileView";
 import { reducer, initialState } from "../components/utils/reducer";
+import { useTaskTesting } from "../hooks/useTaskTesting";
 
 export default function HomePage() {
     const { list, fullList, loading, error } = useAutoCompleteFetch();
     const location = useLocation();
+    const { checkAction } = useTaskTesting();
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { stack, activeNodeId } = state;
@@ -17,6 +19,31 @@ export default function HomePage() {
     const [viewMode, setViewMode] = useState<'streetview' | 'map'>('map');
 
     const windowDimensions = useWindowDimensions(150);
+
+    const wrappedDispatch = useCallback((action: any) => {
+        if (action.type === "SELECT_NODE") {
+            const currentPanelType = stack.at(-1)?.type;
+            let actionType = "marker_click";
+            if (currentPanelType === "search") {
+                actionType = "search";
+            } else if (currentPanelType === "directions") {
+                actionType = "directions";
+            }
+            if (!checkAction(actionType, action.payload.name)) {
+                return;
+            }
+        } else if (action.type === "SHOW_DIRECTIONS") {
+            if (!checkAction("directions")) {
+                return;
+            }
+        } else if (action.type === "UPDATE_DIRECTIONS_STATE") {
+            const target = action.payload.locationB || action.payload.locationA || "";
+            if (target && !checkAction("directions", target)) {
+                return;
+            }
+        }
+        dispatch(action);
+    }, [dispatch, checkAction, stack]);
 
     useEffect(() => {
         if (activeNodeId != null) {
@@ -36,8 +63,12 @@ export default function HomePage() {
         const resolvedNode = fullList?.find((n) => n.id === destinationId);
         if (!resolvedNode) return;
 
+        if (!checkAction("navigation", resolvedNode.node_name)) {
+            return;
+        }
+
         if (stack.at(-1)?.type === "directions") {
-            dispatch({
+            wrappedDispatch({
                 type: "SET_ACTIVE_NODE",
                 payload: {
                     id: resolvedNode.id,
@@ -45,7 +76,7 @@ export default function HomePage() {
                 },
             });
         } else {
-            dispatch({
+            wrappedDispatch({
                 type: "NAVIGATE_NODE",
                 payload: {
                     id: resolvedNode.id,
@@ -54,29 +85,36 @@ export default function HomePage() {
                 },
             });
         }
-    }, [fullList, stack]);
+    }, [fullList, stack, checkAction, wrappedDispatch]);
 
     const handleSelectedRouteNode = useCallback((node: any) => {
-        dispatch({
+        if (!checkAction("directions", node.name)) {
+            return;
+        }
+        wrappedDispatch({
             type: "SET_ACTIVE_NODE",
             payload: {
                 id: node.id,
                 name: node.name,
             },
         });
-    }, [dispatch]);
+    }, [wrappedDispatch, checkAction]);
 
     const handleUpdateDirections = useCallback((data: any) => {
-        dispatch({
+        const target = data.locationB || data.locationA || "";
+        if (target && !checkAction("directions", target)) {
+            return;
+        }
+        wrappedDispatch({
             type: "UPDATE_DIRECTIONS_STATE",
             payload: data,
         });
-    }, [dispatch]);
+    }, [wrappedDispatch, checkAction]);
 
     useEffect(() => {
         if (location.state?.targetNode) {
             const targetNode = location.state.targetNode;
-            dispatch({
+            wrappedDispatch({
                 type: "SELECT_NODE",
                 payload: {
                     id: targetNode.id,
@@ -86,7 +124,7 @@ export default function HomePage() {
             });
             window.history.replaceState({}, document.title);
         }
-    }, [location.state]);
+    }, [location.state, wrappedDispatch]);
 
     useEffect(() => {
         if (fullList && fullList.length > 0) {
@@ -95,7 +133,7 @@ export default function HomePage() {
             if (nodeIdParam) {
                 const node = fullList.find((item) => String(item.id) === nodeIdParam);
                 if (node) {
-                    dispatch({
+                    wrappedDispatch({
                         type: "SELECT_NODE",
                         payload: {
                             id: node.id,
@@ -108,7 +146,7 @@ export default function HomePage() {
                 window.history.replaceState({}, document.title, newUrl);
             }
         }
-    }, [fullList]);
+    }, [fullList, wrappedDispatch]);
 
     const currentPanel = stack.at(-1);
 
@@ -121,7 +159,7 @@ export default function HomePage() {
 
     const viewProps = {
         state,
-        dispatch,
+        dispatch: wrappedDispatch,
         list: list || [],
         fullList: fullList || [],
         loading,

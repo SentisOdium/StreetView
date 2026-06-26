@@ -3,11 +3,17 @@ import Search from "../../reusableUI/search";
 import type { SearchUiProps } from "../types/sidePanelProps";
 import type { MapNode } from "../../../api/types/types_api";
 import { SearchIcon, DirectionsIcon, ClearIcon } from "../../reusableUI/logo.exports";
+import { useTaskTesting } from "../../../../hooks/useTaskTesting";
 
 export default function SearchUI2(props: SearchUiProps) {
   const [search, setSearch] = useState(props.activeNodeName || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const { currentTask, state: taskState, checkAction } = useTaskTesting();
+  
+  const isSearchTaskActive = currentTask?.allowedActions?.includes('search') && 
+                             taskState.progress.find(p => p.taskId === currentTask.id)?.status === 'pending';
 
   useEffect(() => {
     if (props.activeNodeName) {
@@ -28,17 +34,30 @@ export default function SearchUI2(props: SearchUiProps) {
     <div className="">
       <div
         className={`z-20 mx-4 md:mx-8 mt-6 md:mt-4 flex h-12 w-[calc(100%-32px)] md:w-[calc(100%-64px)] items-center justify-between bg-white px-4 pt-1 pb-1 transition-all duration-300 ${
-          isDropdownOpen
-            ? "rounded-t-2xl rounded-b-none shadow-xl"
-            : search.length > 0
-              ? "rounded-2xl"
-              : "rounded-2xl shadow-xl"
+          isSearchTaskActive
+            ? "ring-2 ring-amber-500 border-amber-500 shadow-[0_0_15px_rgba(218,165,32,0.4)] rounded-2xl"
+            : isDropdownOpen
+              ? "rounded-t-2xl rounded-b-none shadow-xl"
+              : search.length > 0
+                ? "rounded-2xl"
+                : "rounded-2xl shadow-xl"
         }`}
       >
         <Search
           inputRef={inputRef}
           value={search}
-          onChange={setSearch}
+          onChange={(val: string) => {
+            setSearch(val);
+            if (isSearchTaskActive && val.trim().length >= 3) {
+              const isPartiallyCorrect = currentTask?.targetNodeNames?.some(name => 
+                name.toLowerCase().includes(val.toLowerCase()) || 
+                val.toLowerCase().includes(name.toLowerCase())
+              );
+              if (!isPartiallyCorrect) {
+                checkAction('search', val);
+              }
+            }
+          }}
           placeholder="Enter your Destination"
           items={props.list || []}
           loading={props.loading}

@@ -97,8 +97,24 @@ export function reducer(state: State, action: Action): State {
 
     case "SHOW_DIRECTIONS": {
       const current = state.stack[state.stack.length - 1];
-      const isTransitional = current.type === "location" && current.nodeType === "transitional";
-      const from = current.type === "location" ? (isTransitional ? "Current Location" : current.nodeName) : "";
+      
+      let locationA = "";
+      let locationB = "";
+
+      if (current.type === "location") {
+        // If looking at a location different from active node, route from active node to looked-at location
+        if (state.activeNodeId !== null && current.nodeId !== state.activeNodeId) {
+          locationA = "Current Location";
+          locationB = current.nodeName;
+        } else {
+          const isTransitional = current.nodeType === "transitional";
+          locationA = isTransitional ? "Current Location" : current.nodeName;
+          locationB = "";
+        }
+      } else {
+        locationA = state.activeNodeId !== null ? "Current Location" : "";
+        locationB = "";
+      }
 
       return {
         ...state,
@@ -106,13 +122,13 @@ export function reducer(state: State, action: Action): State {
           ...state.stack,
           {
             type: "directions",
-            from: from || null,
+            from: locationA || null,
           },
         ],
         directionsState: {
           ...state.directionsState,
-          locationA: from,
-          locationB: "",
+          locationA,
+          locationB,
           route: [],
           activeRouteIndex: 0,
         },

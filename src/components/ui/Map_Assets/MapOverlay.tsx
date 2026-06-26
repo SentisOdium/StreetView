@@ -147,6 +147,20 @@ function getNodeCoords(node: MapNode): { x: number; y: number } | null {
   return null;
 }
 
+function getFloorOfNode(node: MapNode): string {
+  if (node.coordinate_floor) return node.coordinate_floor;
+  const nodeFloor = node.type?.toLowerCase() || "";
+  const nameLower = (node.node_name || "").toLowerCase();
+  if (nodeFloor.includes("second") || nodeFloor.includes("2") || nameLower.includes("flr2") || nameLower.includes("floor 2") || nameLower.includes("2nd")) {
+    return "2";
+  }
+  if (nodeFloor.includes("third") || nodeFloor.includes("3") || nameLower.includes("flr3") || nameLower.includes("floor 3") || nameLower.includes("3rd")) {
+    return "3";
+  }
+  return "1";
+}
+
+
 export default function MapOverlay({ activeNodeId, fullList, onNavigate, directionsState, isMinimized = false, onUpdateDirectionsState, showRoute = false, topOffset, bottomOffset }: MapOverlayProps) {
   const [selectedFloor, setSelectedFloor] = useState<"1" | "2" | "3">("1");
   const [scale, setScale] = useState(1);
@@ -173,6 +187,8 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
     src: hasRoute ? resolvedLocA : "",
     dest: hasRoute ? resolvedLocB : "",
   });
+
+  const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
 
   // Automatically reset map view when minimized state changes
   useEffect(() => {
@@ -321,30 +337,20 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
       };
     }).filter((n): n is MapNode & { x: number; y: number } => {
       if (n === null) return false;
-      let floorId = "1";
-      if (n.coordinate_floor) {
-        floorId = n.coordinate_floor;
-      } else {
-        const nodeFloor = n.type?.toLowerCase() || "";
-        if (nodeFloor.includes("second") || nodeFloor.includes("2")) {
-          floorId = "2";
-        } else if (nodeFloor.includes("third") || nodeFloor.includes("3")) {
-          floorId = "3";
-        }
-      }
+      const floorId = getFloorOfNode(n);
       if (floorId !== selectedFloor) return false;
 
       // Smart transitional filtering:
-      // Hide transitional node markers unless they are the currently active node
+      // Hide transitional node markers unless they are the currently active node or in the active route
       if (n.type === "transitional") {
-        return n.id === activeNodeId;
+        const activeRoute = routes?.[activeRouteIndex]?.path;
+        const isInRoute = activeRoute && activeRoute.some(step => step.id === n.id);
+        return n.id === activeNodeId || !!isInRoute;
       }
 
       return true;
     });
-  }, [fullList, selectedFloor, activeNodeId]);
-
-  const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
+  }, [fullList, selectedFloor, activeNodeId, routes, activeRouteIndex]);
 
   // Extract path connections from the current active routes on the selected floor
   const allRoutesPoints = useMemo(() => {
@@ -580,6 +586,31 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
                 const isHovered = hoveredNode === node.node_name;
                 const hasActiveRoute = activeRoute && activeRoute.length > 0;
 
+                const nameLower = (node.node_name || "").toLowerCase();
+                const typeLower = (node.type || "").toLowerCase();
+                const isStairsNode = nameLower.includes("stairs") || nameLower.includes("staircase") || typeLower.includes("stairs");
+                const isRestroomNode = nameLower.includes("restroom") || nameLower.includes("cr") || nameLower.includes("toilet") || nameLower.includes("washroom") || nameLower.includes("male restroom") || nameLower.includes("female restroom") || typeLower.includes("restroom") || typeLower.includes("toilet");
+
+                // Check if this node transitions floors in the active route
+                let transitionInfo: { type: "up" | "down"; targetFloor: string } | null = null;
+                if (activeRoute) {
+                  const nodeIndexInRoute = activeRoute.findIndex(step => step.id === node.id);
+                  if (nodeIndexInRoute !== -1 && nodeIndexInRoute < activeRoute.length - 1) {
+                    const nextStep = activeRoute[nodeIndexInRoute + 1];
+                    const nextNode = fullList.find(n => n.id === nextStep.id);
+                    if (nextNode) {
+                      const currentFloor = selectedFloor;
+                      const nextFloor = getFloorOfNode(nextNode);
+                      if (nextFloor !== currentFloor) {
+                        transitionInfo = {
+                          type: Number(nextFloor) > Number(currentFloor) ? "up" : "down",
+                          targetFloor: nextFloor
+                        };
+                      }
+                    }
+                  }
+                }
+
                 let opacity = 1;
                 if (hasActiveRoute) {
                   opacity = isInRoute ? 1 : (isHovered ? 0.8 : 0.2);
@@ -605,6 +636,16 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
                   >
                     {isActive ? (
                       <>
+                        {/* Pulsing ring for active user location */}
+                        <circle
+                          cx="0"
+                          cy="-10"
+                          r="16"
+                          fill="none"
+                          stroke="#800000"
+                          strokeWidth="2.5"
+                          className="animate-marker-pulse"
+                        />
                         {/* Pin Base Shadow */}
                         <ellipse
                           cx="0"
@@ -620,6 +661,135 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
                           transform="scale(1.6) translate(-12, -22)"
                           filter="url(#shadowFilter)"
                         />
+                        {/* "You are here" / floor transition text label bubble */}
+                        <g transform="translate(0, -38)">
+                          <rect
+                            x="-45"
+                            y="-18"
+                            width="90"
+                            height="20"
+                            rx="5"
+                            fill="#800000"
+                            filter="url(#shadowFilter)"
+                          />
+                          <polygon
+                            points="-5,2 5,2 0,7"
+                            fill="#800000"
+                          />
+                          <text
+                            x="0"
+                            y="-5"
+                            fill="#ffffff"
+                            fontSize="8.5"
+                            fontWeight="bold"
+                            textAnchor="middle"
+                          >
+                            {transitionInfo ? `Go ${transitionInfo.type} to ${transitionInfo.targetFloor}F` : "You are here"}
+                          </text>
+                        </g>
+                      </>
+                    ) : isStairsNode || isRestroomNode ? (
+                      <>
+                        {/* Base shadow */}
+                        <circle
+                          cx="0"
+                          cy="1"
+                          r="10.5"
+                          fill="rgba(0,0,0,0.2)"
+                        />
+                        {/* Icon Background Circle */}
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="9.5"
+                          fill={isInRoute ? "#800000" : "#ffffff"}
+                          stroke="#800000"
+                          strokeWidth="1.5"
+                          className="transition-transform duration-300 group-hover:scale-110"
+                        />
+                        {/* Combined Stairs & Restroom Icon */}
+                        {isStairsNode && isRestroomNode ? (
+                          <g>
+                            {/* Staircase lines */}
+                            <path
+                              d="M-5,1 L-2,1 L-2,-2 L1,-2 L1,-5"
+                              fill="none"
+                              stroke={isInRoute ? "#ffffff" : "#800000"}
+                              strokeWidth="1.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            {/* "WC" text below/next to it */}
+                            <text
+                              x="3"
+                              y="5"
+                              fontSize="5.5"
+                              fontWeight="black"
+                              textAnchor="middle"
+                              fill={isInRoute ? "#ffffff" : "#800000"}
+                            >
+                              WC
+                            </text>
+                          </g>
+                        ) : isStairsNode ? (
+                          /* Staircase Icon */
+                          <path
+                            d="M-5,4 L-2,4 L-2,1 L1,1 L1,-2 L4,-2 L4,-5"
+                            fill="none"
+                            stroke={isInRoute ? "#ffffff" : "#800000"}
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        ) : (
+                          /* WC Icon */
+                          <text
+                            x="0"
+                            y="2.5"
+                            fontSize="8"
+                            fontWeight="black"
+                            textAnchor="middle"
+                            fill={isInRoute ? "#ffffff" : "#800000"}
+                          >
+                            WC
+                          </text>
+                        )}
+                        {/* Floor transition badge for route stairs */}
+                        {transitionInfo && (
+                          <g transform="translate(0, -22)" className="pointer-events-none">
+                            <rect
+                              x="-38"
+                              y="-16"
+                              width="76"
+                              height="16"
+                              rx="8"
+                              fill="#ffcc00"
+                              stroke="#800000"
+                              strokeWidth="1"
+                              filter="url(#shadowFilter)"
+                            />
+                            <polygon
+                              points="-4,0 4,0 0,4"
+                              fill="#ffcc00"
+                              stroke="#800000"
+                              strokeWidth="1"
+                            />
+                            <polygon
+                              points="-3.5,-0.5 3.5,-0.5 0,3"
+                              fill="#ffcc00"
+                            />
+                            <text
+                              x="0"
+                              y="-5"
+                              fill="#800000"
+                              fontSize="7.5"
+                              fontWeight="black"
+                              textAnchor="middle"
+                            >
+                              {transitionInfo.type === "up" ? "GO UP TO " : "GO DOWN TO "}{transitionInfo.targetFloor}F
+                            </text>
+                          </g>
+                        )}
                       </>
                     ) : isInRoute ? (
                       <>
