@@ -33,6 +33,18 @@ const getVersionName = (version: string): string => {
   }
 }
 
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments where crypto.randomUUID is not available (like non-HTTPS)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 export const useTaskTesting = () => {
   const [searchParams] = useSearchParams();
   const taskParam = searchParams.get('task');
@@ -49,7 +61,7 @@ export const useTaskTesting = () => {
         // We only restore if the URL parameter matches or if there's no URL param but we have state
         if (!taskParam || taskParam === parsed.version) {
           if (!parsed.sessionUuid) {
-            parsed.sessionUuid = crypto.randomUUID();
+            parsed.sessionUuid = generateUUID();
           }
           return parsed;
         }
@@ -69,7 +81,7 @@ export const useTaskTesting = () => {
       isOverlayOpen: !!version,
       isTestingComplete: false,
       researcherMode: researcherParam === 'true',
-      sessionUuid: crypto.randomUUID(),
+      sessionUuid: generateUUID(),
     };
   });
 
@@ -99,7 +111,7 @@ export const useTaskTesting = () => {
         isOverlayOpen: true,
         isTestingComplete: false,
         researcherMode: researcherParam === 'true',
-        sessionUuid: state.sessionUuid || crypto.randomUUID(),
+        sessionUuid: state.sessionUuid || generateUUID(),
       });
       
       // Notify backend of session start
