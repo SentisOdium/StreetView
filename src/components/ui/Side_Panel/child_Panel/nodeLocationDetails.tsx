@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useNodeDetailsFetch from "../../../hooks/useNodeDetailsFetch";
 import { Loading, Error } from "../../reusableUI/emptySearchUi";
 import { WayfinderLogo1, DirectionsIcon, ShareIcon, AccessTimeFilledIcon, ContactPhoneIcon } from "../../reusableUI/logo.exports";
@@ -15,6 +15,12 @@ export default function NodeLocationDetails({
 }: NodeLocationDetailsProps) {
   const { details, loading, error } = useNodeDetailsFetch(selectedNodeId);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (selectedNodeId != null) {
+      window.dispatchEvent(new CustomEvent('usability_metric', { detail: 'detailsViewed' }));
+    }
+  }, [selectedNodeId]);
 
   const handleShare = () => {
     if (!details?.Current) return;

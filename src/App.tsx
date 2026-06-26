@@ -2,10 +2,15 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home";
 import WayfinderLanding from "./pages/WayfinderLanding";
 import AdminRoutes from "./admin/AdminRoutes";
+import { TaskOverlay } from "./components/usability/TaskOverlay";
+import { TaskOverlayErrorBoundary } from "./components/usability/TaskOverlayErrorBoundary";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <TaskOverlayErrorBoundary>
+        <TaskOverlay />
+      </TaskOverlayErrorBoundary>
       <Routes>
         <Route path="/" element={<WayfinderLanding />} />
         <Route

@@ -22,7 +22,10 @@ export default function useRouteDirection({ src, dest }: RouteReq) {
 
     const query = useQuery({
         queryKey: ["route", debouncedSrc, debouncedDest],
-        queryFn: ({ signal }) => fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal }),
+        queryFn: ({ signal }) => {
+            window.dispatchEvent(new CustomEvent('usability_metric', { detail: 'routeGeneration' }));
+            return fetchNodeRoute({ src: debouncedSrc, dest: debouncedDest, signal });
+        },
         enabled: Boolean(debouncedSrc && debouncedDest),
     });
 

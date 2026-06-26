@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useRouteDirection from "../../hooks/useRouteDirection";
 import useNodeDetailsFetch from "../../hooks/useNodeDetailsFetch";
 import { EmptySearchUi, Loading } from "./emptySearchUi";
@@ -307,6 +307,12 @@ export default function RouteCardComponent({
   });
 
   const activeRouteIndex = directionsState.activeRouteIndex ?? 0;
+
+  useEffect(() => {
+    if (routes && routes.length > 0) {
+      window.dispatchEvent(new CustomEvent('usability_metric', { detail: 'routeInfoViewed' }));
+    }
+  }, [routes?.length, activeRouteIndex]);
 
   if (loading) {
     return (

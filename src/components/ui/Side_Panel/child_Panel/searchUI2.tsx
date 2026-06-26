@@ -48,6 +48,7 @@ export default function SearchUI2(props: SearchUiProps) {
           onSelect={(node: MapNode) => {
             props.onSelect(node);
             setSearch(node.node_name);
+            window.dispatchEvent(new CustomEvent('usability_metric', { detail: 'search' }));
           }}
           onDropdownVisibilityChange={setIsDropdownOpen}
           modalDesign="mt-[64.6px] ml-4 mr-4 md:ml-8 md:mr-8 w-[calc(100%-32px)] md:w-[calc(100%-64px)] max-h-[300px] overflow-y-auto bg-white shadow-xl rounded-b-2xl animate-slideDown [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"

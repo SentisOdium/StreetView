@@ -40,6 +40,16 @@ export default function HomeMobileView({
   const hasActivePano = activeNodeId != null;
   const hasDirectionsPanel = stack.some((p: any) => p.type === "directions");
 
+  const isCarouselMinimized = directionsState.isCarouselMinimized ?? false;
+  const mapTopOffset = "80px";
+  
+  let mapBottomOffset = "160px";
+  if (isDirections && directionsState.locationA && directionsState.locationB) {
+    mapBottomOffset = isCarouselMinimized ? "80px" : "280px";
+  } else if (mobileHeight === "mid") {
+    mapBottomOffset = "calc(45vh + 16px)";
+  }
+
   const getTargetTranslation = (st: 'hidden' | 'mid' | 'expanded', height: number) => {
     const maxHeight = height;
     const midHeight = height * 0.45;
@@ -128,6 +138,8 @@ export default function HomeMobileView({
                 isMinimized={false}
                 onUpdateDirectionsState={handleUpdateDirections}
                 showRoute={isDirections}
+                topOffset={mapTopOffset}
+                bottomOffset={mapBottomOffset}
               />
             </div>
           </div>
@@ -143,6 +155,8 @@ export default function HomeMobileView({
               isMinimized={false}
               onUpdateDirectionsState={handleUpdateDirections}
               showRoute={isDirections}
+              topOffset={mapTopOffset}
+              bottomOffset={mapBottomOffset}
             />
           </div>
         );
@@ -159,6 +173,8 @@ export default function HomeMobileView({
               isMinimized={false}
               onUpdateDirectionsState={handleUpdateDirections}
               showRoute={isDirections}
+              topOffset={mapTopOffset}
+              bottomOffset={mapBottomOffset}
             />
           </div>
         );
@@ -180,6 +196,8 @@ export default function HomeMobileView({
                 isMinimized={false}
                 onUpdateDirectionsState={handleUpdateDirections}
                 showRoute={isDirections}
+                topOffset={mapTopOffset}
+                bottomOffset={mapBottomOffset}
               />
             )}
           </div>
@@ -203,6 +221,8 @@ export default function HomeMobileView({
                     isMinimized={true}
                     onUpdateDirectionsState={handleUpdateDirections}
                     showRoute={isDirections}
+                    topOffset={mapTopOffset}
+                    bottomOffset={mapBottomOffset}
                   />
                 ) : (
                   <PanoramaViewer nodeId={activeNodeId!} onNavigate={handleNavigate} />

@@ -17,6 +17,8 @@ interface MapOverlayProps {
   isMinimized?: boolean;
   onUpdateDirectionsState?: (data: Partial<MapOverlayProps["directionsState"]>) => void;
   showRoute?: boolean;
+  topOffset?: string | number;
+  bottomOffset?: string | number;
 }
 
 // Absolute coordinate system mapped directly to 1536x1024 dimensions of 1st Floor.png
@@ -145,7 +147,7 @@ function getNodeCoords(node: MapNode): { x: number; y: number } | null {
   return null;
 }
 
-export default function MapOverlay({ activeNodeId, fullList, onNavigate, directionsState, isMinimized = false, onUpdateDirectionsState, showRoute = false }: MapOverlayProps) {
+export default function MapOverlay({ activeNodeId, fullList, onNavigate, directionsState, isMinimized = false, onUpdateDirectionsState, showRoute = false, topOffset, bottomOffset }: MapOverlayProps) {
   const [selectedFloor, setSelectedFloor] = useState<"1" | "2" | "3">("1");
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -208,7 +210,10 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
     }
   }, [activeNode]);
 
-  // Handle Drag / Pan mechanics (using PointerEvents for touch/mobile support)
+  const pointerCache = useRef<{ id: number; x: number; y: number }[]>([]);
+  const prevDiff = useRef<number>(-1);
+
+  // Handle Drag / Pan / Zoom mechanics (using PointerEvents for touch/mobile support)
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return; // Only left click for mouse
     
@@ -218,13 +223,42 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
       return;
     }
 
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    pointerCache.current.push({ id: e.pointerId, x: e.clientX, y: e.clientY });
+
+    if (pointerCache.current.length === 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
+    // Update pointer in cache
+    const index = pointerCache.current.findIndex(p => p.id === e.pointerId);
+    if (index !== -1) {
+      pointerCache.current[index] = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    }
+
+    // Pinch-to-zoom logic
+    if (pointerCache.current.length === 2) {
+      const p1 = pointerCache.current[0];
+      const p2 = pointerCache.current[1];
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      const curDiff = Math.sqrt(dx * dx + dy * dy);
+
+      if (prevDiff.current > 0) {
+        const zoomDelta = curDiff - prevDiff.current;
+        const zoomFactor = 1 + (zoomDelta * 0.005);
+        setScale(prev => Math.min(Math.max(prev * zoomFactor, 0.8), 4));
+      }
+      prevDiff.current = curDiff;
+      return; // Skip panning while zooming
+    }
+
+    // Single touch drag
+    if (!isDragging || pointerCache.current.length > 1) return;
     setPosition({
       x: e.clientX - dragStart.x,
       y: e.clientY - dragStart.y
@@ -232,8 +266,24 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    setIsDragging(false);
+    const index = pointerCache.current.findIndex(p => p.id === e.pointerId);
+    if (index !== -1) {
+      pointerCache.current.splice(index, 1);
+    }
+    
+    if (pointerCache.current.length < 2) {
+      prevDiff.current = -1;
+    }
+    
+    if (pointerCache.current.length === 1) {
+       // Reset drag start for the remaining pointer to avoid jumps
+       const p = pointerCache.current[0];
+       setDragStart({ x: p.x - position.x, y: p.y - position.y });
+       setIsDragging(true);
+    } else if (pointerCache.current.length === 0) {
+       setIsDragging(false);
+    }
+
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch (err) {
@@ -335,7 +385,10 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
 
       {/* Floor Selection Vertical Stack (Floating on top right) */}
       {!isMinimized && (
-        <div className="absolute top-4 right-4 z-30 flex flex-col gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur">
+        <div 
+          className="absolute right-4 z-30 flex flex-col gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur transition-all duration-300"
+          style={{ top: topOffset ?? '1rem' }}
+        >
           <button
             onClick={() => setSelectedFloor("3")}
             className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center cursor-pointer ${
@@ -621,7 +674,10 @@ export default function MapOverlay({ activeNodeId, fullList, onNavigate, directi
 
         {/* Scale controls */}
         {!isMinimized && (
-          <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur">
+          <div 
+            className="absolute right-4 z-30 flex items-center gap-1.5 bg-white/95 border border-slate-200/80 rounded-xl p-1 shadow-lg backdrop-blur transition-all duration-300"
+            style={{ bottom: bottomOffset ?? '1rem' }}
+          >
             <button
               onClick={handleZoomIn}
               className="p-1.5 rounded-lg text-[#800000] hover:bg-[#800000]/10 cursor-pointer"
