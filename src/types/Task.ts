@@ -26,4 +26,5 @@ export interface UsabilityState {
   isOverlayOpen: boolean;
   isTestingComplete: boolean;
   researcherMode: boolean;
+  sessionUuid?: string;
 }

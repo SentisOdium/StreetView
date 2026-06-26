@@ -120,8 +120,18 @@ export function reducer(state: State, action: Action): State {
     }    case "GO_BACK": {
       if (state.stack.length === 1) return state;
 
-      const nextStack = state.stack.slice(0, -1);
-      const top = nextStack[nextStack.length - 1];
+      const poppingPanel = state.stack[state.stack.length - 1];
+      let nextStack = state.stack.slice(0, -1);
+      let top = nextStack[nextStack.length - 1];
+
+      if (poppingPanel.type === "directions" && state.activeNodeId !== null && top?.type === "location") {
+        top = {
+          ...top,
+          nodeId: state.activeNodeId,
+          nodeName: state.activeNodeName,
+        };
+        nextStack = [...nextStack.slice(0, -1), top];
+      }
 
       let lastMainNodeId: number | null = null;
       let lastMainNodeName = "";

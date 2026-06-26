@@ -4,6 +4,7 @@ import type { Task, UsabilityState, TaskProgress } from '../types/Task';
 import { versionA } from '../data/tasks/versionA';
 import { versionB } from '../data/tasks/versionB';
 import { versionC } from '../data/tasks/versionC';
+import { startUsabilitySession, logUsabilityTask } from '../utils/usabilityApi';
 
 const STORAGE_KEY = 'pup_wayfinder_usability_state';
 
@@ -45,6 +46,9 @@ export const useTaskTesting = () => {
         const parsed = JSON.parse(savedState);
         // We only restore if the URL parameter matches or if there's no URL param but we have state
         if (!taskParam || taskParam === parsed.version) {
+          if (!parsed.sessionUuid) {
+            parsed.sessionUuid = crypto.randomUUID();
+          }
           return parsed;
         }
       } catch (e) {
@@ -63,6 +67,7 @@ export const useTaskTesting = () => {
       isOverlayOpen: !!version,
       isTestingComplete: false,
       researcherMode: researcherParam === 'true',
+      sessionUuid: crypto.randomUUID(),
     };
   });
 
@@ -72,6 +77,13 @@ export const useTaskTesting = () => {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
   }, [state]);
+
+  // Ensure session is registered with backend on initial load/reload
+  useEffect(() => {
+    if (state.sessionUuid && state.version) {
+      startUsabilitySession(state.sessionUuid, state.version);
+    }
+  }, []);
 
   // Sync state if URL changes dynamically
   useEffect(() => {
@@ -85,9 +97,15 @@ export const useTaskTesting = () => {
         isOverlayOpen: true,
         isTestingComplete: false,
         researcherMode: researcherParam === 'true',
+        sessionUuid: state.sessionUuid || crypto.randomUUID(),
       });
+      
+      // Notify backend of session start
+      if (state.sessionUuid) {
+        startUsabilitySession(state.sessionUuid, taskParam);
+      }
     }
-  }, [taskParam, researcherParam, state.version]);
+  }, [taskParam, researcherParam, state.version, state.sessionUuid]);
 
   const startTask = useCallback(() => {
     setState((prev) => {
@@ -139,6 +157,11 @@ export const useTaskTesting = () => {
           finishTime: now,
           durationMs: now - startTime,
         };
+        
+        // Log task completion
+        if (prev.sessionUuid) {
+           logUsabilityTask(prev.sessionUuid, currentTask.id, newProgress[progressIndex]);
+        }
       }
 
       const isLastTask = prev.currentTaskIndex >= prev.tasks.length - 1;
@@ -183,6 +206,12 @@ export const useTaskTesting = () => {
           overlayOpenedCount: 0,
         });
       }
+      
+      // Log task skip
+      if (prev.sessionUuid) {
+        const loggedTask = progressIndex >= 0 ? newProgress[progressIndex] : newProgress[newProgress.length - 1];
+        logUsabilityTask(prev.sessionUuid, currentTask.id, loggedTask);
+      }
 
       const isLastTask = prev.currentTaskIndex >= prev.tasks.length - 1;
 
@@ -198,7 +227,7 @@ export const useTaskTesting = () => {
 
   // --- Metrics Event Listeners ---
   useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent) => {
+    const handleGlobalClick = () => {
       setState(prev => {
         if (prev.isOverlayOpen || prev.isTestingComplete || prev.tasks.length === 0) return prev;
         const currentTask = prev.tasks[prev.currentTaskIndex];
