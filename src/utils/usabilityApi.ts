@@ -1,8 +1,8 @@
 import axios from 'axios';
 import type { TaskProgress } from '../types/Task';
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-const USABILITY_API = `${API_BASE}/api/usability`;
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const USABILITY_API = `${API_BASE}/usability`;
 
 const mapVersionToEnum = (version: string) => {
   const v = version.toLowerCase();
