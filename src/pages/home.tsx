@@ -1,16 +1,15 @@
 import { useReducer, useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAutoCompleteFetch from "../components/hooks/useAutocomplete";
 import useWindowDimensions from "../components/hooks/useWindowDimensions";
 import HomeDesktopView from "./HomeDesktopView";
 import HomeMobileView from "./HomeMobileView";
 import { reducer, initialState } from "../components/utils/reducer";
-import { useTaskTesting } from "../hooks/useTaskTesting";
 
 export default function HomePage() {
     const { list, fullList, loading, error } = useAutoCompleteFetch();
     const location = useLocation();
-    const { checkAction } = useTaskTesting();
+    const navigate = useNavigate();
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { stack, activeNodeId } = state;
@@ -20,30 +19,7 @@ export default function HomePage() {
 
     const windowDimensions = useWindowDimensions(150);
 
-    const wrappedDispatch = useCallback((action: any) => {
-        if (action.type === "SELECT_NODE") {
-            const currentPanelType = stack.at(-1)?.type;
-            let actionType = "marker_click";
-            if (currentPanelType === "search") {
-                actionType = "search";
-            } else if (currentPanelType === "directions") {
-                actionType = "directions";
-            }
-            if (!checkAction(actionType, action.payload.name)) {
-                return;
-            }
-        } else if (action.type === "SHOW_DIRECTIONS") {
-            if (!checkAction("directions")) {
-                return;
-            }
-        } else if (action.type === "UPDATE_DIRECTIONS_STATE") {
-            const target = action.payload.locationB || action.payload.locationA || "";
-            if (target && !checkAction("directions", target)) {
-                return;
-            }
-        }
-        dispatch(action);
-    }, [dispatch, checkAction, stack]);
+
 
     useEffect(() => {
         if (activeNodeId != null) {
@@ -63,12 +39,8 @@ export default function HomePage() {
         const resolvedNode = fullList?.find((n) => n.id === destinationId);
         if (!resolvedNode) return;
 
-        if (!checkAction("navigation", resolvedNode.node_name)) {
-            return;
-        }
-
         if (stack.at(-1)?.type === "directions") {
-            wrappedDispatch({
+            dispatch({
                 type: "SET_ACTIVE_NODE",
                 payload: {
                     id: resolvedNode.id,
@@ -76,7 +48,7 @@ export default function HomePage() {
                 },
             });
         } else {
-            wrappedDispatch({
+            dispatch({
                 type: "NAVIGATE_NODE",
                 payload: {
                     id: resolvedNode.id,
@@ -85,36 +57,29 @@ export default function HomePage() {
                 },
             });
         }
-    }, [fullList, stack, checkAction, wrappedDispatch]);
+    }, [fullList, stack, dispatch]);
 
     const handleSelectedRouteNode = useCallback((node: any) => {
-        if (!checkAction("navigation", node.name)) {
-            return;
-        }
-        wrappedDispatch({
+        dispatch({
             type: "SET_ACTIVE_NODE",
             payload: {
                 id: node.id,
                 name: node.name,
             },
         });
-    }, [wrappedDispatch, checkAction]);
+    }, [dispatch]);
 
     const handleUpdateDirections = useCallback((data: any) => {
-        const target = data.locationB || data.locationA || "";
-        if (target && !checkAction("directions", target)) {
-            return;
-        }
-        wrappedDispatch({
+        dispatch({
             type: "UPDATE_DIRECTIONS_STATE",
             payload: data,
         });
-    }, [wrappedDispatch, checkAction]);
+    }, [dispatch]);
 
     useEffect(() => {
         if (location.state?.targetNode) {
             const targetNode = location.state.targetNode;
-            wrappedDispatch({
+            dispatch({
                 type: "SELECT_NODE",
                 payload: {
                     id: targetNode.id,
@@ -122,9 +87,9 @@ export default function HomePage() {
                     type: targetNode.type,
                 },
             });
-            window.history.replaceState({}, document.title);
+            navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location.state, wrappedDispatch]);
+    }, [location.state, location.pathname, dispatch, navigate]);
 
     useEffect(() => {
         if (fullList && fullList.length > 0) {
@@ -133,7 +98,7 @@ export default function HomePage() {
             if (nodeIdParam) {
                 const node = fullList.find((item) => String(item.id) === nodeIdParam);
                 if (node) {
-                    wrappedDispatch({
+                    dispatch({
                         type: "SELECT_NODE",
                         payload: {
                             id: node.id,
@@ -142,11 +107,10 @@ export default function HomePage() {
                         },
                     });
                 }
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
+                navigate(location.pathname, { replace: true });
             }
         }
-    }, [fullList, wrappedDispatch]);
+    }, [fullList, location.pathname, dispatch, navigate]);
 
     const currentPanel = stack.at(-1);
 
@@ -159,7 +123,7 @@ export default function HomePage() {
 
     const viewProps = {
         state,
-        dispatch: wrappedDispatch,
+        dispatch,
         list: list || [],
         fullList: fullList || [],
         loading,
