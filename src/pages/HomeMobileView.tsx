@@ -238,7 +238,7 @@ export default function HomeMobileView({
 
   return (
     <>
-      <div id="mobile-directions-input-portal" className="absolute top-0 left-0 w-full z-10" />
+      <div id="mobile-directions-input-portal" className="absolute top-0 left-0 w-full z-50" />
 
       {currentPanel.type !== "directions" && (
         <div className={`absolute top-0 left-0 z-20 w-full transition-transform duration-500 ease-in-out ${isCollapsed ? "-translate-x-full" : "translate-x-0"}`}>
