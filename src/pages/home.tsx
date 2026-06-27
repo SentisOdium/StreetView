@@ -88,7 +88,7 @@ export default function HomePage() {
     }, [fullList, stack, checkAction, wrappedDispatch]);
 
     const handleSelectedRouteNode = useCallback((node: any) => {
-        if (!checkAction("directions", node.name)) {
+        if (!checkAction("navigation", node.name)) {
             return;
         }
         wrappedDispatch({

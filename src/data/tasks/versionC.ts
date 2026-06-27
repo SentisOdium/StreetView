@@ -19,20 +19,20 @@ export const versionC: Task[] = [
     title: 'Route Navigation',
     description: "Using the system, find the route from the **OMIT Chairperson's Office** to the **ADFA Office**.",
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ["OMIT Chairperson's Office", 'ADFA Office']
+    targetNodeNames: ["Chairperson", 'ADFA']
   },
   {
     id: 4,
     title: 'Emergency Navigation',
     description: 'After reaching the **ADFA Office**, locate the nearest **Emergency Exit**.',
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ['ADFA Office', 'Emergency Exit']
+    targetNodeNames: ['ADFA', 'Emergency']
   },
   {
     id: 5,
     title: 'Office Navigation',
     description: 'Using the system, locate the **Faculty Office (Room 308, 3rd Floor)** from the **ADFA Office**.',
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ['Faculty Office (Room 308, 3rd Floor)', 'ADFA Office']
+    targetNodeNames: ['308', 'ADFA']
   }
 ];

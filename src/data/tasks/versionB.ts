@@ -19,20 +19,20 @@ export const versionB: Task[] = [
     title: 'Route Navigation',
     description: 'Using the system, find the route from the **Mechanical Laboratory** to **Room 305**.',
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ['Mechanical Laboratory', 'Room 305']
+    targetNodeNames: ['Mechanical', '305']
   },
   {
     id: 4,
     title: 'Emergency Navigation',
     description: 'After reaching **Room 305**, locate the nearest **Emergency Exit**.',
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ['Room 305', 'Emergency Exit']
+    targetNodeNames: ['305', 'Exit']
   },
   {
     id: 5,
     title: 'Office Navigation',
     description: "Using the system, locate the **Dean's Office** from the **Medical Clinic**.",
     allowedActions: ['directions', 'search', 'navigation', 'marker_click'],
-    targetNodeNames: ["Dean's Office", 'Medical Clinic']
+    targetNodeNames: ["Dean", 'Clinic']
   }
 ];
